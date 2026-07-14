@@ -1,0 +1,2 @@
+renovation_package_id,U_wall_renovated,U_roof_renovated,U_floor_renovated,U_window_renovated,v50_renovated,ventilation_after_renovation,hrv_eta,summer_bypass,renovation_package_source
+TABULA_low_energy,0.25,0.15,0.25,1.6,2.5,mechanical_ventilation_heat_recovery_eta_0.8_with_bypass,0.8,true,"Belgian TABULA/VITO Scientific Report, Low Energy upgrade scenario"

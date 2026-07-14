@@ -1,0 +1,274 @@
+metadata_version: 1.0
+observation_year: 2024
+target_year: 2050
+scope: stock-only modular heating, cooling, and PV assignment layer
+out_of_scope:
+  - heating efficiency
+  - heat-pump COP
+  - cooling SEER
+  - useful or final energy demand
+  - PV generation
+  - grid demand
+classification_vocabulary:
+  observed: value transcribed or queried directly from a named source
+  derived: deterministic transformation of observed or already-modeled values
+  proxy: source-informed substitute where the ideal regional observation is unavailable
+  model_assumption: fixed representation needed to define a technology package or mapping
+  scenario_assumption: value that deliberately changes between modeled futures or cases
+
+heating_share_normalization:
+  Walloon Region:
+    published_values:
+      electricity: 0.060
+      gas: 0.424
+      oil: 0.375
+      other: 0.138
+    published_total: 0.997
+    modeling_treatment: divide every published share by 0.997
+    normalized_total: 1.0
+
+source_registry:
+  SCP_BE_SILC_2022:
+    title: Belgian Social Climate Plan delivery report
+    url: https://klimaat.be/doc/be-dlv2-final-report-clean-1.pdf
+    locator: Table 3-2, regional main heating-energy shares based on BE-SILC 2022
+  STATBEL_HBS_2024:
+    title: Statbel Household Budget Survey 2024 cooling result
+    url: https://statbel.fgov.be/fr/nouvelles/le-logement-premier-poste-de-depenses-des-belges
+  EC_EPBD_45C_GUIDANCE:
+    title: European Commission guidance on zero-emission buildings
+    url: https://eur-lex.europa.eu/legal-content/en/ALL/?uri=CELEX%3A52025XC06438
+    locator: low-temperature heat emitters at or below 45 degrees Celsius
+  VEKA_FLUVIUS_PV_2024:
+    title: VEKA/Fluvius PV installations and capacity workbook
+    url: https://www.vlaanderen.be/veka/energie-en-klimaatbeleid-in-cijfers/toelichting-energiekaart-veka
+  VEKA_ROOFTOP_POTENTIAL:
+    title: VEKA official rooftop-potential workbook sheet
+    url: https://www.vlaanderen.be/veka/energie-en-klimaatbeleid-in-cijfers/toelichting-energiekaart-veka
+  BRUGEL_POWERBI_SNAPSHOT:
+    title: BRUGEL renewable-energy open-data statistics
+    url: https://www.brugel.brussels/documents/statistics/rechercher
+    note: Exact nominal-power filter at or below 10 kW; snapshot last refreshed 2024-09-04.
+  SIBELGA_PV_2024:
+    title: Sibelga 2024 statistics report
+    url: https://www.sibelga.be/asset/file/97dcf744-dffc-4210-9ab3-c5614d37afe0
+  ORES_PV_2024:
+    title: ORES 2024 annual report
+    url: https://media.ores.be/ores-cms/bqbahojr/rapport-ores-sc-2024-fr.pdf
+    note: The <=10 kVA decentralized-production chart is used as a PV proxy and regionally scaled.
+  WALLONIA_PV_CAPACITY_2024:
+    title: Published Walloon PV capacity series through 2024
+    url: https://www.iea-pvps.org/wp-content/uploads/2025/12/IEA-PVPS-Task-1-NSR-Belgium-2024.pdf
+  CWAPE_2024:
+    title: CWaPE 2024 annual report publication record
+    url: https://www.cwape.be/publications/document/6559
+  SPW_SMALL_PV_SHARE:
+    title: Service public de Wallonie photovoltaic technology overview
+    url: https://energie.wallonie.be/home/energies-vertes/solaire-photovoltaique/technologie.html
+  STATBEL_BUILDING_STOCK_2025:
+    title: Statbel cadastral building stock open data 2025
+    local_file: ../../raw/statbel/building_stock_open_data_2025.xlsx
+  BRUSSELS_ENV_ROOFTOP:
+    title: Brussels Environment renewable-energy and rooftop-potential indicator
+    url: https://environnement.brussels/citoyen/documentation-et-outils/etat-des-lieux-de-lenvironnement/energie-dorigine-renouvelable
+  SPW_ROOFTOP_METHOD:
+    title: SPW renewable-potential estimation methodology
+    url: https://energie.wallonie.be/files/%C3%89conomies%20au%20quotidien/Commune/Pollec/20170907_M%C3%A9thodo_potentiel_ER.pdf
+  REGIONAL_PV_TARGETS_2030:
+    title: Official regional 2030 photovoltaic production trajectories
+    urls:
+      - https://www.iea-pvps.org/wp-content/uploads/2025/12/IEA-PVPS-Task-1-NSR-Belgium-2024.pdf
+      - https://environnement.brussels/citoyen/documentation-et-outils/etat-des-lieux-de-lenvironnement/energie-dorigine-renouvelable
+  REGIONAL_PV_YIELD:
+    title: Official regional reference yields used only for target-to-capacity conversion
+    note: Flanders is derived from its paired official energy and capacity targets; Wallonia and Brussels use published reference yields.
+
+tables:
+  data/raw/technology/technology_source_snapshot_2024.csv:
+    fields:
+      source_id: {classification: derived, note: stable provenance key}
+      topic: {classification: derived}
+      region: {classification: observed}
+      reference_year: {classification: observed}
+      metric: {classification: derived}
+      value: {classification: observed, note: rows explicitly marked as derived in notes remain source-derived proxies}
+      unit: {classification: observed}
+      threshold: {classification: observed}
+      source_url: {classification: observed}
+      source_locator: {classification: observed}
+      accessed_on: {classification: observed}
+      notes: {classification: derived}
+
+  data/assumptions/technology/regional_heating_carrier_shares.csv:
+    fields:
+      region: {classification: observed}
+      heating_variant_id: {classification: model_assumption}
+      energy_carrier: {classification: observed}
+      raw_share: {classification: observed}
+      normalization_factor: {classification: derived}
+      variant_share: {classification: derived}
+      source_id: {classification: derived}
+      assumption_id: {classification: derived}
+
+  data/assumptions/technology/technical_system_packages.csv:
+    fields:
+      package_id: {classification: model_assumption}
+      applicable_renovation_state: {classification: model_assumption}
+      energy_carrier: {classification: model_assumption}
+      space_heating_system: {classification: model_assumption}
+      dhw_system: {classification: model_assumption}
+      heat_emitter: {classification: model_assumption}
+      supply_temperature_c: {classification: model_assumption}
+      ventilation_system: {classification: model_assumption}
+      hrv_eta: {classification: model_assumption}
+      summer_bypass: {classification: model_assumption}
+      reversible_cooling_capable: {classification: model_assumption}
+      source_id: {classification: derived}
+      assumption_id: {classification: derived}
+
+  data/assumptions/technology/regional_cooling_adoption.csv:
+    fields:
+      cooling_case: {classification: scenario_assumption}
+      region: {classification: observed}
+      active_cooling_share: {classification: scenario_assumption, note: current_regional is an observed ownership proxy; other cases are explicit scenarios}
+      source_id: {classification: derived}
+      assumption_id: {classification: derived}
+
+  data/assumptions/technology/regional_pv_projection_inputs.csv:
+    fields:
+      region: {classification: observed}
+      observation_year: {classification: observed}
+      small_system_threshold_kw: {classification: model_assumption}
+      small_installations_2024: {classification: proxy, note: Flanders is observed; Brussels and Wallonia are documented source-derived proxies}
+      small_capacity_mw_2024: {classification: proxy, note: Flanders is observed; Brussels and Wallonia are documented source-derived proxies}
+      total_capacity_mw_2024: {classification: proxy, note: Flanders and Brussels are observed; Wallonia is derived from a published regional series}
+      target_energy_gwh_2030: {classification: scenario_assumption, note: official regional policy trajectory}
+      baseline_yield_kwh_per_kwp: {classification: proxy}
+      rooftop_potential_mw: {classification: proxy, note: official estimates with differing regional methods}
+      modeled_house_dwellings: {classification: derived}
+      modeled_apartment_dwellings: {classification: derived}
+      apartment_buildings_2025: {classification: observed}
+      apartment_participation_ratio_to_house_2050: {classification: scenario_assumption}
+      threshold_supported: {classification: derived}
+      source_id: {classification: derived}
+      assumption_id: {classification: derived}
+      pv_extract_method: {classification: derived}
+
+  data/assumptions/technology/regional_pv_assignment.csv:
+    fields:
+      region: {classification: observed}
+      pv_basis_year: {classification: scenario_assumption}
+      dwelling_group: {classification: derived}
+      participation_rate: {classification: derived}
+      capacity_kwp_per_participating_dwelling: {classification: derived}
+      regional_basis_capacity_mw: {classification: derived}
+      target_capacity_mw_2030: {classification: derived}
+      raw_linear_capacity_mw_2050: {classification: derived}
+      rooftop_potential_mw: {classification: proxy}
+      eligible_stock_capacity_mw: {classification: derived}
+      capacity_cap_reason: {classification: derived}
+      source_id: {classification: derived}
+      assumption_id: {classification: derived}
+
+  data/scenarios/technology/archetype_heating_system_layer_2050.csv:
+    fields:
+      scenario: {classification: scenario_assumption}
+      target_year: {classification: scenario_assumption}
+      region: {classification: observed}
+      archetype_id: {classification: derived}
+      dwelling_type: {classification: derived}
+      construction_period: {classification: derived}
+      renovation_state: {classification: scenario_assumption}
+      state_dwellings: {classification: derived}
+      regional_modelled_stock_dwellings: {classification: derived}
+      heating_variant_id: {classification: model_assumption}
+      variant_share: {classification: derived}
+      variant_dwellings: {classification: derived}
+      energy_carrier: {classification: model_assumption}
+      space_heating_system: {classification: model_assumption}
+      dhw_system: {classification: model_assumption}
+      heat_emitter: {classification: model_assumption}
+      supply_temperature_c: {classification: model_assumption}
+      ventilation_system: {classification: model_assumption}
+      hrv_eta: {classification: model_assumption}
+      summer_bypass: {classification: model_assumption}
+      reversible_cooling_capable: {classification: model_assumption}
+      source_id: {classification: derived}
+      assumption_id: {classification: derived}
+
+  data/scenarios/technology/archetype_cooling_adoption_layer_2050.csv:
+    fields:
+      scenario: {classification: scenario_assumption}
+      target_year: {classification: scenario_assumption}
+      region: {classification: observed}
+      archetype_id: {classification: derived}
+      dwelling_type: {classification: derived}
+      construction_period: {classification: derived}
+      renovation_state: {classification: scenario_assumption}
+      state_dwellings: {classification: derived}
+      regional_modelled_stock_dwellings: {classification: derived}
+      cooling_case: {classification: scenario_assumption}
+      cooling_variant_id: {classification: model_assumption}
+      active_cooling: {classification: scenario_assumption}
+      cooling_system: {classification: model_assumption}
+      heating_system_reversible_cooling_capable: {classification: model_assumption}
+      variant_share: {classification: derived}
+      variant_dwellings: {classification: derived}
+      source_id: {classification: derived}
+      assumption_id: {classification: derived}
+
+  data/scenarios/technology/archetype_pv_assignment_layer_2050.csv:
+    fields:
+      scenario: {classification: scenario_assumption}
+      target_year: {classification: scenario_assumption}
+      region: {classification: observed}
+      archetype_id: {classification: derived}
+      dwelling_type: {classification: derived}
+      construction_period: {classification: derived}
+      renovation_state: {classification: scenario_assumption}
+      state_dwellings: {classification: derived}
+      regional_modelled_stock_dwellings: {classification: derived}
+      pv_basis_year: {classification: scenario_assumption}
+      dwelling_group: {classification: derived}
+      pv_variant_id: {classification: model_assumption}
+      pv_installed: {classification: scenario_assumption}
+      house_participation_rate: {classification: derived}
+      apartment_participation_rate: {classification: derived}
+      variant_share: {classification: derived}
+      variant_dwellings: {classification: derived}
+      assigned_capacity_kwp_per_participating_dwelling: {classification: derived}
+      allocated_capacity_mw: {classification: derived}
+      regional_basis_capacity_mw: {classification: derived}
+      raw_linear_capacity_mw_2050: {classification: derived}
+      rooftop_potential_mw: {classification: proxy}
+      eligible_stock_capacity_mw: {classification: derived}
+      capacity_cap_reason: {classification: derived}
+      source_id: {classification: derived}
+      assumption_id: {classification: derived}
+
+join_contract:
+  base_state_key:
+    - scenario
+    - region
+    - archetype_id
+    - renovation_state
+  heating_variant_key:
+    - scenario
+    - region
+    - archetype_id
+    - renovation_state
+    - heating_variant_id
+  cooling_variant_key:
+    - scenario
+    - region
+    - archetype_id
+    - renovation_state
+    - cooling_case
+    - cooling_variant_id
+  pv_variant_key:
+    - scenario
+    - region
+    - archetype_id
+    - renovation_state
+    - pv_variant_id
+  warning: Do not join the three variant tables without explicitly accepting a heating x cooling x PV Cartesian product.
