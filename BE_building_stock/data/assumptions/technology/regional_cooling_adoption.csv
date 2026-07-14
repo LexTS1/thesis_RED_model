@@ -1,0 +1,10 @@
+cooling_case,region,active_cooling_share,source_id,assumption_id
+no_active_cooling,Flemish Region,0,STATBEL_HBS_2024,COOLING_CASES_V1
+no_active_cooling,Walloon Region,0,STATBEL_HBS_2024,COOLING_CASES_V1
+no_active_cooling,Brussels-Capital Region,0,STATBEL_HBS_2024,COOLING_CASES_V1
+current_regional,Flemish Region,0.13,STATBEL_HBS_2024,COOLING_CASES_V1
+current_regional,Walloon Region,0.07,STATBEL_HBS_2024,COOLING_CASES_V1
+current_regional,Brussels-Capital Region,0.04,STATBEL_HBS_2024,COOLING_CASES_V1
+higher_uptake,Flemish Region,0.26,STATBEL_HBS_2024,COOLING_CASES_V1
+higher_uptake,Walloon Region,0.14,STATBEL_HBS_2024,COOLING_CASES_V1
+higher_uptake,Brussels-Capital Region,0.08,STATBEL_HBS_2024,COOLING_CASES_V1

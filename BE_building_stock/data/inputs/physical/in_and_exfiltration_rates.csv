@@ -1,0 +1,6 @@
+construction_period,tabula_v50_age_class,detached_house_v50_m3_h_m2,semi_detached_house_v50_m3_h_m2,terraced_house_v50_m3_h_m2,apartment_enclosed_v50_m3_h_m2,apartment_exposed_v50_m3_h_m2,source_table,source_url
+pre-1946,Before '71,18.0,18.0,14.9,14.9,14.9,"Belgian TABULA/VITO report, Chapter 4, Table 9: In/exfiltration rates at 50 Pa",https://episcope.eu/fileadmin/tabula/public/docs/scientific/BE_TABULA_ScientificReport_VITO.pdf
+1946-1970,Before '71,18.0,18.0,14.9,14.9,14.9,"Belgian TABULA/VITO report, Chapter 4, Table 9: In/exfiltration rates at 50 Pa",https://episcope.eu/fileadmin/tabula/public/docs/scientific/BE_TABULA_ScientificReport_VITO.pdf
+1971-1990,71-'90,17.1,16.3,14.1,14.1,14.1,"Belgian TABULA/VITO report, Chapter 4, Table 9: In/exfiltration rates at 50 Pa",https://episcope.eu/fileadmin/tabula/public/docs/scientific/BE_TABULA_ScientificReport_VITO.pdf
+1991-2005,91-'05,12.0,12.0,10.0,10.0,10.0,"Belgian TABULA/VITO report, Chapter 4, Table 9: In/exfiltration rates at 50 Pa",https://episcope.eu/fileadmin/tabula/public/docs/scientific/BE_TABULA_ScientificReport_VITO.pdf
+post-2005,After '05,6.1,6.3,6.0,6.0,6.0,"Belgian TABULA/VITO report, Chapter 4, Table 9: In/exfiltration rates at 50 Pa",https://episcope.eu/fileadmin/tabula/public/docs/scientific/BE_TABULA_ScientificReport_VITO.pdf

@@ -1,0 +1,6 @@
+construction_period,renovation_priority,priority_weight,reason
+pre-1946,very high,4,"old envelope, weak original insulation"
+1946-1970,very high,4,"post-war stock, mostly before strong insulation practice"
+1971-1990,high,3,transitional insulation period
+1991-2005,medium,2,"better envelope, but not necessarily 2050-compatible"
+post-2005,low,1,closest to modern standards
