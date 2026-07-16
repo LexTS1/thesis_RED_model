@@ -84,8 +84,9 @@ MODEL_ASSUMPTIONS = [
     "enclosed and exposed apartment archetypes because the input has no subtype split.",
     "The 2001-2010 construction-period count is split equally between 2001-2005 "
     "and 2006-2010 because the aggregated input crosses the TABULA boundary.",
-    "R5/R6 dwellings are distributed pro rata by normalising the modeled R1-R4 "
-    "type shares to 1 before applying the Statbel all-type dwelling total.",
+    "The residential-archetype scope is R1-R4. R5 commerce houses and R6 other "
+    "buildings are reported as excluded residual dwellings rather than assigned "
+    "to a TABULA archetype without evidence.",
     "Dwellings with unknown construction period are distributed pro rata by "
     "normalising the known-period counts to 1.",
     "regional_share is empty because regional dwelling-type marginals are not "
@@ -494,7 +495,7 @@ def create_base_matrix(
 
 def load_type_shares(
     type_stock: pd.DataFrame,
-) -> tuple[dict[str, float], int]:
+) -> tuple[dict[str, float], int, int]:
     require_columns(
         type_stock,
         {"Building type containing the dwelling", "Code", "Dwellings"},
@@ -509,14 +510,14 @@ def load_type_shares(
         raise ValueError(
             "dwellings_by_building_type.csv must contain exactly one Total row"
         )
-    total_dwellings = int(total_rows.iloc[0]["Dwellings"])
+    all_type_dwellings = int(total_rows.iloc[0]["Dwellings"])
 
     component_rows = type_stock[~type_stock.index.isin(total_rows.index)]
     component_total = int(component_rows["Dwellings"].sum())
-    if component_total != total_dwellings:
+    if component_total != all_type_dwellings:
         raise ValueError(
             "Building-type component counts do not sum to the Statbel total: "
-            f"components={component_total}, total={total_dwellings}"
+            f"components={component_total}, total={all_type_dwellings}"
         )
 
     by_code = component_rows.set_index("Code")["Dwellings"]
@@ -537,7 +538,8 @@ def load_type_shares(
     modeled_total = sum(modeled_counts.values())
     return (
         {dwelling_type: count / modeled_total for dwelling_type, count in modeled_counts.items()},
-        total_dwellings,
+        int(modeled_total),
+        all_type_dwellings,
     )
 
 
@@ -585,8 +587,8 @@ def create_stock_weighted_matrix(
     base: pd.DataFrame,
     type_stock: pd.DataFrame,
     period_stock: pd.DataFrame,
-) -> tuple[pd.DataFrame, int]:
-    type_shares, total_dwellings = load_type_shares(type_stock)
+) -> tuple[pd.DataFrame, int, int]:
+    type_shares, modeled_dwellings, all_type_dwellings = load_type_shares(type_stock)
     period_shares = load_period_shares(period_stock)
 
     missing_types = set(base["dwelling_type"]) - set(type_shares)
@@ -604,12 +606,24 @@ def create_stock_weighted_matrix(
         * period_shares[row["construction_period"]],
         axis=1,
     )
-    result["number_of_dwellings"] = total_dwellings * result["national_share"]
+    excluded_dwellings = all_type_dwellings - modeled_dwellings
+    result["number_of_dwellings"] = modeled_dwellings * result["national_share"]
+    result["modelled_stock_dwellings_R1_R4"] = modeled_dwellings
+    result["excluded_residual_R5_R6_dwellings"] = excluded_dwellings
+    result["excluded_residual_R5_R6_share"] = excluded_dwellings / all_type_dwellings
+    result["stock_scope"] = (
+        "R1-R4 residential archetype scope; R5 commerce houses and R6 other "
+        "buildings excluded"
+    )
     result["regional_share"] = pd.Series(pd.NA, index=result.index, dtype="Float64")
     result["weighting_method"] = WEIGHTING_METHOD
 
     stock_fields = [
         "number_of_dwellings",
+        "modelled_stock_dwellings_R1_R4",
+        "excluded_residual_R5_R6_dwellings",
+        "excluded_residual_R5_R6_share",
+        "stock_scope",
         "national_share",
         "regional_share",
         "weighting_method",
@@ -628,16 +642,16 @@ def create_stock_weighted_matrix(
         )
     if not math.isclose(
         result["number_of_dwellings"].sum(),
-        total_dwellings,
+        modeled_dwellings,
         rel_tol=0.0,
         abs_tol=1e-6,
     ):
         raise ValueError(
             "Archetype dwelling counts do not sum to the Statbel total: "
             f"archetypes={result['number_of_dwellings'].sum()}, "
-            f"Statbel={total_dwellings}"
+            f"modeled R1-R4={modeled_dwellings}"
         )
-    return result, total_dwellings
+    return result, modeled_dwellings, all_type_dwellings
 
 
 def parse_args() -> argparse.Namespace:
@@ -683,7 +697,7 @@ def main() -> None:
     type_stock = pd.read_csv(args.type_stock)
 
     base, _, _ = create_base_matrix(geometry, airtightness, u_values)
-    stock_weighted, total_dwellings = create_stock_weighted_matrix(
+    stock_weighted, modeled_dwellings, all_type_dwellings = create_stock_weighted_matrix(
         base, type_stock, period_stock
     )
 
@@ -704,7 +718,12 @@ def main() -> None:
     print(
         "- sum of number_of_dwellings: "
         f"{stock_weighted['number_of_dwellings'].sum():.6f} "
-        f"(Statbel total: {total_dwellings})"
+        f"(modeled Statbel R1-R4 total: {modeled_dwellings})"
+    )
+    print(
+        "- excluded R5/R6 residual: "
+        f"{all_type_dwellings - modeled_dwellings} "
+        f"of {all_type_dwellings} all-type dwellings"
     )
     print("- TABULA verification: Tables 9, 10, and 19 match the physical CSVs")
     print("- assumptions:")

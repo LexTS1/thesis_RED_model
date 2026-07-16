@@ -1,7 +1,6 @@
 import crypto from "node:crypto";
 import fs from "node:fs/promises";
 import path from "node:path";
-import { createRequire } from "node:module";
 import { fileURLToPath } from "node:url";
 
 
@@ -214,26 +213,6 @@ const CSV_NUMBER_FORMATTER = new Intl.NumberFormat("en-US", {
 });
 
 
-function loadArtifactTool() {
-  const runtimeNodeModules = process.env.CODEX_NODE_MODULES;
-  const requireFrom = runtimeNodeModules
-    ? path.join(runtimeNodeModules, "_codex_runtime_entry.cjs")
-    : import.meta.url;
-  try {
-    const require = createRequire(requireFrom);
-    return require("@oai/artifact-tool");
-  } catch (error) {
-    throw new Error(
-      "@oai/artifact-tool is required. Set CODEX_NODE_MODULES to the bundled runtime node_modules path.",
-      { cause: error },
-    );
-  }
-}
-
-
-const { Workbook } = loadArtifactTool();
-
-
 function assert(condition, message) {
   if (!condition) throw new Error(message);
 }
@@ -297,11 +276,51 @@ function dwellingGroup(row) {
 }
 
 
-async function readCsv(filePath, sheetName) {
+function parseCsv(text, filePath) {
+  const source = text.replace(/^\uFEFF/, "").replace(/\r\n/g, "\n").replace(/\r/g, "\n");
+  const values = [];
+  let row = [];
+  let cell = "";
+  let quoted = false;
+
+  for (let index = 0; index < source.length; index += 1) {
+    const character = source[index];
+    if (quoted) {
+      if (character === '"' && source[index + 1] === '"') {
+        cell += '"';
+        index += 1;
+      } else if (character === '"') {
+        quoted = false;
+      } else {
+        cell += character;
+      }
+    } else if (character === '"') {
+      assert(cell === "", `${filePath} has an unexpected quote inside an unquoted field`);
+      quoted = true;
+    } else if (character === ",") {
+      row.push(cell);
+      cell = "";
+    } else if (character === "\n") {
+      row.push(cell);
+      values.push(row);
+      row = [];
+      cell = "";
+    } else {
+      cell += character;
+    }
+  }
+  assert(!quoted, `${filePath} has an unterminated quoted field`);
+  if (cell !== "" || row.length > 0) {
+    row.push(cell);
+    values.push(row);
+  }
+  return values.filter((valuesRow) => valuesRow.some((value) => value !== ""));
+}
+
+
+async function readCsv(filePath) {
   const text = await fs.readFile(filePath, "utf8");
-  const workbook = await Workbook.fromCSV(text, { sheetName });
-  const sheet = workbook.worksheets.getItem(sheetName);
-  const values = sheet.getUsedRange(true).values;
+  const values = parseCsv(text, filePath);
   assert(values.length >= 1, `${filePath} is empty`);
   const headers = values[0].map((value) => String(value ?? "").trim());
   assert(headers.every(Boolean), `${filePath} has a blank header`);

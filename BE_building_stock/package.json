@@ -1,0 +1,12 @@
+{
+  "name": "belgian-residential-building-stock",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "renovation": "node scripts/renovation_scenarios_2050.mjs",
+    "technology": "node scripts/technology_layer_2050.mjs"
+  }
+}
