@@ -1,0 +1,86 @@
+% Requires in preamble: \usepackage{booktabs, amsmath, cleveref}
+\section{Residential Heating \& Cooling}\label{sec:heating_cooling}
+Belgium's residential stock remains heavily fossil-based for space heating, but a
+gradual electrification is under way through heat pumps, photovoltaics and, to a
+lesser extent, active cooling. These technologies are key boundary conditions for
+residential demand modelling, as they reshape both the annual energy balance and
+the timing of electricity demand. This section characterises the carriers,
+emitters and appliances that the technology layer of the building-stock model
+assigns to the archetypes of \Cref{sec:size_compo}. It should be noted, however,
+that recent Belgian heating-technology data are difficult to obtain: they are
+often only available at regional level, are partly non-public, and are not always
+nationally consistent \cite{rap_belgium_2024}.
+
+\subsection{Heating Technology}
+Space heating in Belgium is dominated by natural gas, followed by heating oil,
+with electricity and other carriers (mainly biomass and district heat) making up
+the remainder. The regional distribution of the main heating carrier is
+summarised in \Cref{tab:heating_carrier_shares}, based on the Belgian Social
+Climate Plan preparation report (EU-SILC 2022) \cite{socialclimateplan_be_2023}.
+The regional contrast is pronounced: gas reaches 86\% of dwellings in the dense,
+urban Brussels-Capital Region and 71\% in Flanders, but only 42\% in the more
+rural Walloon Region, where heating oil remains prevalent (38\%) against 15\% in
+Flanders and under 8\% in Brussels. A national cross-check confirms the
+pattern, with fossil gas used by about 66\% of households for space heating and
+59\% for domestic hot water, and heating oil the second most common space-heating
+carrier \cite{rap_belgium_2024}.
+
+\begin{table}[ht]
+  \centering
+  \caption{Regional distribution of the main residential heating carrier (\% of
+           dwellings), EU-SILC 2022 \cite{socialclimateplan_be_2023}. The Walloon
+           row sums to 99.7\% as published.}
+  \label{tab:heating_carrier_shares}
+  \begin{tabular}{lrrrrr}
+    \toprule
+    Region & Electricity & Natural gas & Heating oil & Other & Sum \\
+    \midrule
+    Flanders & 7.5  & 71.2 & 14.7 & 6.6  & 100.0 \\
+    Brussels & 6.0  & 86.0 & 7.5  & 0.5  & 100.0 \\
+    Wallonia & 6.0  & 42.4 & 37.5 & 13.8 & 99.7  \\
+    \midrule
+    Belgium  & 6.9  & 63.7 & 21.1 & 8.3  & 100.0 \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+On the emission side, the existing stock relies overwhelmingly on high-temperature
+hydronic radiators fed by gas or oil boilers. This is a central constraint for
+electrification, since heat pumps operate efficiently only at low supply
+temperatures. In the model, the as-is stock is therefore represented by these
+lumped boiler-plus-radiator systems, whereas every renovated dwelling is assigned
+a low-temperature package with 45\,\textdegree C radiators, consistent with the
+EPBD classification of low-temperature emitters \cite{epbd_2024}.
+
+\subsection{Heat Pumps}
+Electrified heating is gaining ground. Heat pumps are now the second most common
+technology in new heating-appliance sales, behind gas boilers, and the most
+common type for space heating is air-to-water \cite{rap_belgium_2024}. The Joint
+Research Centre reports that, in 2022, Belgium had an installed stock of roughly
+209{,}000 heat pumps against about 2.8 million households using gas boilers, with
+some 60{,}000 units sold that year ($+$118\% year-on-year); heat pumps
+nonetheless represented only 11.8\% of combined heat-pump and boiler sales
+\cite{JRC2022HeatPumpBelgium}. This electrification is reinforced by a rapidly
+growing rooftop-solar base: cumulative PV capacity reached 11.7\,GW at the end of
+2024, generating 8.32\,TWh and covering at least 10\% of national electricity
+consumption, still dominated by sub-10\,kW residential systems
+\cite{vermang2024_pvps_belgium}. Reflecting these trends, the model assigns every
+renovated dwelling a package built around an air-to-water heat pump with
+heat-pump domestic hot water and balanced heat-recovery ventilation, while as-is
+dwellings retain their regional fossil-carrier mix.
+
+\subsection{Cooling \& Reversible Heat Pumps}
+Active cooling is still limited in the Belgian residential stock. In 2020, 88\% of
+households had neither fixed nor mobile air-conditioning
+\cite{fps_economy_household_energy_2020}, although ownership is rising: integrated
+air-conditioning grew from 3\% of households in 2018 to 10\% in 2024, with
+regional 2024 shares of 13\% in Flanders, 7\% in Wallonia and 4\% in Brussels
+\cite{statbel_hbs_2024}. A structural driver of future cooling demand is the
+diffusion of reversible heat pumps: the air-to-water units assigned to renovated
+dwellings are technically capable of providing cooling, even though this
+capability does not imply that cooling is actually operated. The model captures
+this distinction explicitly, separating a heat pump's reversible-cooling
+capability from active-cooling adoption, and explores the latter through scenarios
+anchored on the current regional ownership shares. Under a warming climate, this
+latent cooling capacity is a key uncertainty for both peak electricity demand and
+the annual energy balance.

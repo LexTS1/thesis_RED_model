@@ -1,4 +1,4 @@
-region,terraced_dwellings_R1,semi_detached_dwellings_R2,detached_dwellings_R3,apartment_dwellings_R4,commercial_other_dwellings_R5_R6,total_dwellings,share_R1,share_R2,share_R3,share_R4,share_R5_R6
-Flemish Region,699047,623453,921020,1000614,162267,3406401,0.205215710071,0.183023959892,0.270379206676,0.293745216726,0.047635906636
-Walloon Region,457796,393702,531885,343826,85063,1812272,0.252608879903,0.217242224125,0.293490712211,0.189720969038,0.046937214723
-Brussels-Capital Region,177028,17227,6208,365579,43108,609150,0.290614791102,0.028280390708,0.010191250103,0.600146105229,0.070767462858
+region,terraced_dwellings_R1,semi_detached_dwellings_R2,detached_dwellings_R3,apartment_dwellings_R4,commercial_other_dwellings_R5_R6,modelled_residential_dwellings_R1_R4,total_dwellings_R1_R6,share_R1_within_R1_R4,share_R2_within_R1_R4,share_R3_within_R1_R4,share_R4_within_R1_R4,excluded_R5_R6_share_of_R1_R6,scope
+Flemish Region,699047,623453,921020,1000614,162267,3244134,3406401,0.21548031,0.192178559825,0.283903192655,0.30843793752,0.0476359066358,R1-R4 only; R5 commerce houses and R6 other buildings are reported but excluded because no defensible TABULA mapping exists
+Walloon Region,457796,393702,531885,343826,85063,1727209,1812272,0.265049568408,0.227941146671,0.307944782594,0.199064502327,0.0469372147227,R1-R4 only; R5 commerce houses and R6 other buildings are reported but excluded because no defensible TABULA mapping exists
+Brussels-Capital Region,177028,17227,6208,365579,43108,566042,609150,0.312747110638,0.0304341373962,0.0109673840457,0.64585136792,0.0707674628581,R1-R4 only; R5 commerce houses and R6 other buildings are reported but excluded because no defensible TABULA mapping exists

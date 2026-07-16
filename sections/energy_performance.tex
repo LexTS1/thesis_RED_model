@@ -1,0 +1,77 @@
+% Requires in preamble: \usepackage{booktabs, amsmath, cleveref}
+\subsection{Energy Performance}
+The Energy Performance Certificate (EPC) is an official document that assesses a
+building's energy consumption. It is mandatory for every sale or rental in
+Belgium and assigns a label ranging from A (very efficient) to G (very
+inefficient). The score indicates the theoretical amount of primary energy used
+by the building for space heating and domestic hot water over one year, expressed
+in kWh/m$^2$, and depends on the insulation of the walls, roof, floors, windows
+and doors, on the heating installations, on the presence of solar panels, and on
+characteristics such as the type of building (detached, semi-detached, terraced
+or apartment) \cite{nbb_epc_houseprices_2025}. While the energy score is
+calculated using very similar methodologies in all three Belgian regions, the
+grouping of scores into energy labels differs markedly between regions and yields
+different scales, as shown in \Cref{tab:epc_regional_scales}
+\cite{nbb_epc_houseprices_2025}. The EPC therefore summarises, in a single
+indicator, the envelope quality and technical systems that the archetypes of
+\Cref{sec:size_compo} represent through their U-values, airtightness and
+construction period.
+
+\begin{table}[ht]
+  \centering
+  \caption{Grouping of EPC scores (kWh/m$^2$) into energy labels by region
+           \cite{nbb_epc_houseprices_2025}. The Flemish scale does not define a
+           class~G.}
+  \label{tab:epc_regional_scales}
+  \begin{tabular}{lccc}
+    \toprule
+    Label & Flemish Region & Walloon Region & Brussels-Capital Region \\
+    \midrule
+    A & $\leq 100$   & $\leq 85$   & $\leq 45$   \\
+    B & 101--200     & 86--170     & 46--95      \\
+    C & 201--300     & 171--255    & 96--150     \\
+    D & 301--400     & 256--340    & 151--210    \\
+    E & 401--500     & 341--425    & 211--275    \\
+    F & $> 500$      & 426--510    & 276--345    \\
+    G & ---          & $> 510$     & $> 345$     \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\subsubsection*{Regional EPC distribution}
+The Belgian residential stock is dominated by average to low-performing energy
+labels, but the distribution varies by region because of differences in building
+age, dwelling type and urban density. A useful indicator is the average energy
+score of dwellings sold on the secondary market, which the National Bank of
+Belgium reports for the first quarter of 2024 as 363, 390 and 364~kWh/m$^2$ for
+houses, and 198, 230 and 245~kWh/m$^2$ for apartments, in the Flemish, Walloon
+and Brussels-Capital Regions respectively \cite{nbb_epc_houseprices_2025}. These
+figures describe \emph{sold} dwellings, whose energy performance is somewhat
+worse than that of the full stock because new builds are excluded and sold homes
+tend to be older; they nonetheless remain far from the 2050 targets of
+100~kWh/m$^2$ (Flanders and Brussels) and 85~kWh/m$^2$ (Wallonia)
+\cite{nbb_epc_houseprices_2025}.
+
+\paragraph{Brussels-Capital Region.} Brussels combines a dense stock of older,
+historic apartment buildings with the strictest label scale in the country (a
+class~G already above 345~kWh/m$^2$; see \Cref{tab:epc_regional_scales}), so its
+stock is concentrated in the lower classes. In a sample of 2{,}631 residential
+certificates issued by a single Brussels certifier between 2011 and 2026, labels
+F and G together account for about 54\% of dwellings, with class~G alone at
+roughly 36\%; because this is a single-certifier sample rather than a
+stock-representative one, these shares should be read as indicative
+\cite{certibru_epc_stats}.
+
+\paragraph{Flemish Region.} Flanders shows a comparatively more balanced
+distribution, with higher shares of A, B and C labels driven by stricter
+new-construction standards and a renovation obligation for the least efficient
+homes. A substantial share of older single-family houses nonetheless remains in
+the E and F classes: about 35\% of houses sold in the Flemish Region between 2023
+and the first quarter of 2024 carried a class~E or~F label
+\cite{nbb_epc_houseprices_2025}.
+
+\paragraph{Walloon Region.} Wallonia has a large share of older, rural and
+industrial-era single-family homes, which gives it the highest average energy
+score of the three regions: sold Walloon houses averaged 390~kWh/m$^2$ in the
+first quarter of 2024, corresponding to a class~E label on the Walloon scale
+\cite{nbb_epc_houseprices_2025}.

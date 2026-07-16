@@ -1,0 +1,2 @@
+source,source_url,accessed_on,source_sha256,verified_tables,verification_script,result
+Belgian TABULA/VITO Scientific Report,https://episcope.eu/fileadmin/tabula/public/docs/scientific/BE_TABULA_ScientificReport_VITO.pdf,2026-07-16,01b83a30941a6a1a000710c2bd6f27b101d5aecf0da674537e8d72ca1d35b88e,"Table 9 airtightness; Table 10 U-values; Table 19 geometry",scripts/archetype_matrix.py,passed

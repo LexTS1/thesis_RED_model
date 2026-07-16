@@ -1,7 +1,6 @@
 import crypto from "node:crypto";
 import fs from "node:fs/promises";
 import path from "node:path";
-import { createRequire } from "node:module";
 import { fileURLToPath } from "node:url";
 
 
@@ -123,6 +122,7 @@ const REQUIRED_COLUMNS = {
     "annual_renovation_rate_low",
     "annual_renovation_rate_central",
     "annual_renovation_rate_high",
+    "renovation_share_2025",
     "allocation_share_within_region",
     "target_label_2050",
     "target_energy_score_2050_kWh_m2_year",
@@ -145,8 +145,8 @@ const REQUIRED_COLUMNS = {
 };
 
 const CURRENT_INPUT_HASHES = {
-  matrix: "54c9be2ab3808fac5565d0afec25dd0e47d42b9da07ee3f01960f9684ec03e3c",
-  layer: "f2c839f6f4cb1a47cfa0ea8edf014f6258e573e0db54f70610490a485a1c0fdf",
+  matrix: "a417d2c2656bc3a73f1f598ec5b842033540fad80e379f14d963d657fa8b9bdb",
+  layer: "9bbf4c3c77f241260bee1c11ba0b1c8e3ceff28f79d5e58d352d9e52c5333b72",
   policy: "4abb24e959e2a42df53e05f749440a0020309514bae1ba043cdc7d1b4455ffdd",
   priority: "3fc4771ce594a68705d6f46f32b44cae2c41457242feda8a9031c358a7b3bf0a",
 };
@@ -167,27 +167,6 @@ const CSV_NUMBER_FORMATTER = new Intl.NumberFormat("en-US", {
   minimumFractionDigits: 0,
   maximumFractionDigits: 12,
 });
-
-
-function loadArtifactTool() {
-  const runtimeNodeModules = process.env.CODEX_NODE_MODULES;
-  const requireFrom = runtimeNodeModules
-    ? path.join(runtimeNodeModules, "_codex_runtime_entry.cjs")
-    : import.meta.url;
-  try {
-    const require = createRequire(requireFrom);
-    return require("@oai/artifact-tool");
-  } catch (error) {
-    throw new Error(
-      "@oai/artifact-tool is required. Install it locally or set " +
-        "CODEX_NODE_MODULES to the bundled runtime node_modules path.",
-      { cause: error },
-    );
-  }
-}
-
-
-const { Workbook } = loadArtifactTool();
 
 
 function assert(condition, message) {
@@ -288,11 +267,51 @@ async function inputHashes() {
 }
 
 
-async function readCsv(filePath, sheetName) {
+function parseCsv(text, filePath) {
+  const source = text.replace(/^\uFEFF/, "").replace(/\r\n/g, "\n").replace(/\r/g, "\n");
+  const values = [];
+  let row = [];
+  let cell = "";
+  let quoted = false;
+
+  for (let index = 0; index < source.length; index += 1) {
+    const character = source[index];
+    if (quoted) {
+      if (character === '"' && source[index + 1] === '"') {
+        cell += '"';
+        index += 1;
+      } else if (character === '"') {
+        quoted = false;
+      } else {
+        cell += character;
+      }
+    } else if (character === '"') {
+      assert(cell === "", `${filePath} has an unexpected quote inside an unquoted field`);
+      quoted = true;
+    } else if (character === ",") {
+      row.push(cell);
+      cell = "";
+    } else if (character === "\n") {
+      row.push(cell);
+      values.push(row);
+      row = [];
+      cell = "";
+    } else {
+      cell += character;
+    }
+  }
+  assert(!quoted, `${filePath} has an unterminated quoted field`);
+  if (cell !== "" || row.length > 0) {
+    row.push(cell);
+    values.push(row);
+  }
+  return values.filter((valuesRow) => valuesRow.some((value) => value !== ""));
+}
+
+
+async function readCsv(filePath) {
   const text = await fs.readFile(filePath, "utf8");
-  const workbook = await Workbook.fromCSV(text, { sheetName });
-  const sheet = workbook.worksheets.getItem(sheetName);
-  const values = sheet.getUsedRange(true).values;
+  const values = parseCsv(text, filePath);
   assert(values.length >= 1, `${filePath} is empty`);
   const headers = values[0].map((value) => String(value ?? "").trim());
   assert(headers.every((header) => header !== ""), `${filePath} has a blank header`);
@@ -364,6 +383,15 @@ function validateInputs(tables) {
     numberValue(row.allocation_share_within_region, `${keyFor(row)} allocation share`, { min: 0 });
     numberValue(row.target_energy_score_2050_kWh_m2_year, `${keyFor(row)} target score`, { min: 0 });
     numberValue(row.regional_number_of_dwellings, `${keyFor(row)} layer stock`, { strictlyPositive: true });
+    const baselineRenovatedShare = numberValue(
+      row.renovation_share_2025,
+      `${keyFor(row)} renovation_share_2025`,
+      { min: 0 },
+    );
+    assert(
+      baselineRenovatedShare <= 1,
+      `${keyFor(row)} renovation_share_2025 must not exceed 1`,
+    );
     for (const scenario of SCENARIOS) {
       numberValue(row[`annual_renovation_rate_${scenario}`], `${keyFor(row)} ${scenario} rate`, { min: 0 });
     }
@@ -467,9 +495,10 @@ function buildScenarioRows(matrixRows, layerByKey, regions, regionalStock) {
       const stock = Number(matrixRow.regional_number_of_dwellings);
       const allocation = Number(layerRow.allocation_share_within_region);
       const allocatedRenovated = regionalFlows.get(region) * allocation;
-      const renovated = Math.min(allocatedRenovated, stock);
+      const baselineRenovated = stock * Number(layerRow.renovation_share_2025);
+      const renovated = Math.min(baselineRenovated + allocatedRenovated, stock);
       const capKey = groupKey(region, scenario);
-      if (allocatedRenovated > stock + VALUE_TOLERANCE) {
+      if (baselineRenovated + allocatedRenovated > stock + VALUE_TOLERANCE) {
         capsByGroup.set(capKey, capsByGroup.get(capKey) + 1);
       }
       const asIs = stock - renovated;
@@ -873,7 +902,7 @@ function printSummary(packageRows, scenarioRows, crosscheckRows, regressionAppli
     `Current-input high-scenario regression checks: ${regressionApplied ? "APPLIED AND PASSED" : "SKIPPED (input fingerprints changed)"}`,
   );
   console.log("\nAssumptions used:");
-  console.log("  - Existing renovated stock is not added separately.");
+  console.log("  - Existing renovated stock is read from renovation_share_2025; the current input is zero for every archetype.");
   console.log(`  - Annual renovation rates are applied over ${YEARS_ELAPSED} years (${BASE_YEAR}-${TARGET_YEAR}).`);
   console.log("  - renovated_fraction is the archetype-level renovated fraction and is repeated on both state rows.");
   console.log("  - Capped excess is not redistributed; this is a conservative simplification and can leave a nominal 100% flow below full-stock renovation.");
