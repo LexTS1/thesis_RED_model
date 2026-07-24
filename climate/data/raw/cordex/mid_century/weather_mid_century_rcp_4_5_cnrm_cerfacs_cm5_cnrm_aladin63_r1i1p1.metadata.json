@@ -1,0 +1,71 @@
+{
+  "created_utc": "2026-05-06T01:22:06.295595+00:00",
+  "csv_schema": [
+    "timestamp",
+    "T_out_C",
+    "I_solar_W_m2",
+    "scenario",
+    "window",
+    "gcm_model",
+    "rcm_model",
+    "ensemble_member",
+    "source_files"
+  ],
+  "dataset": "projections-cordex-domains-single-levels",
+  "model_chain": {
+    "ensemble_member": "r1i1p1",
+    "gcm_model": "cnrm_cerfacs_cm5",
+    "rcm_model": "cnrm_aladin63"
+  },
+  "netcdf_files": [
+    "inputs/climate/raw/_extracted/mid_century/rcp_4_5/cordex_mid_century_rcp_4_5_cnrm_cerfacs_cm5_cnrm_aladin63_r1i1p1_2046_2050/rsds_EUR-11_CNRM-CERFACS-CNRM-CM5_rcp45_r1i1p1_CNRM-ALADIN63_v2_day_20460101-20501231.nc",
+    "inputs/climate/raw/_extracted/mid_century/rcp_4_5/cordex_mid_century_rcp_4_5_cnrm_cerfacs_cm5_cnrm_aladin63_r1i1p1_2046_2050/tas_EUR-11_CNRM-CERFACS-CNRM-CM5_rcp45_r1i1p1_CNRM-ALADIN63_v2_day_20460101-20501231.nc",
+    "inputs/climate/raw/_extracted/mid_century/rcp_4_5/cordex_mid_century_rcp_4_5_cnrm_cerfacs_cm5_cnrm_aladin63_r1i1p1_2051_2055/rsds_EUR-11_CNRM-CERFACS-CNRM-CM5_rcp45_r1i1p1_CNRM-ALADIN63_v2_day_20510101-20551231.nc",
+    "inputs/climate/raw/_extracted/mid_century/rcp_4_5/cordex_mid_century_rcp_4_5_cnrm_cerfacs_cm5_cnrm_aladin63_r1i1p1_2051_2055/tas_EUR-11_CNRM-CERFACS-CNRM-CM5_rcp45_r1i1p1_CNRM-ALADIN63_v2_day_20510101-20551231.nc",
+    "inputs/climate/raw/_extracted/mid_century/rcp_4_5/cordex_mid_century_rcp_4_5_cnrm_cerfacs_cm5_cnrm_aladin63_r1i1p1_2056_2060/rsds_EUR-11_CNRM-CERFACS-CNRM-CM5_rcp45_r1i1p1_CNRM-ALADIN63_v2_day_20560101-20601231.nc",
+    "inputs/climate/raw/_extracted/mid_century/rcp_4_5/cordex_mid_century_rcp_4_5_cnrm_cerfacs_cm5_cnrm_aladin63_r1i1p1_2056_2060/tas_EUR-11_CNRM-CERFACS-CNRM-CM5_rcp45_r1i1p1_CNRM-ALADIN63_v2_day_20560101-20601231.nc",
+    "inputs/climate/raw/_extracted/mid_century/rcp_4_5/cordex_mid_century_rcp_4_5_cnrm_cerfacs_cm5_cnrm_aladin63_r1i1p1_2061_2065/rsds_EUR-11_CNRM-CERFACS-CNRM-CM5_rcp45_r1i1p1_CNRM-ALADIN63_v2_day_20610101-20651231.nc",
+    "inputs/climate/raw/_extracted/mid_century/rcp_4_5/cordex_mid_century_rcp_4_5_cnrm_cerfacs_cm5_cnrm_aladin63_r1i1p1_2061_2065/tas_EUR-11_CNRM-CERFACS-CNRM-CM5_rcp45_r1i1p1_CNRM-ALADIN63_v2_day_20610101-20651231.nc",
+    "inputs/climate/raw/_extracted/mid_century/rcp_4_5/cordex_mid_century_rcp_4_5_cnrm_cerfacs_cm5_cnrm_aladin63_r1i1p1_2066_2070/rsds_EUR-11_CNRM-CERFACS-CNRM-CM5_rcp45_r1i1p1_CNRM-ALADIN63_v2_day_20660101-20701231.nc",
+    "inputs/climate/raw/_extracted/mid_century/rcp_4_5/cordex_mid_century_rcp_4_5_cnrm_cerfacs_cm5_cnrm_aladin63_r1i1p1_2066_2070/tas_EUR-11_CNRM-CERFACS-CNRM-CM5_rcp45_r1i1p1_CNRM-ALADIN63_v2_day_20660101-20701231.nc"
+  ],
+  "radiation": {
+    "conversion": "kept_w_m2",
+    "input_units": "W m-2",
+    "output_units": "W m-2",
+    "variable": "rsds"
+  },
+  "row_count": 7670,
+  "scenario": "rcp_4_5",
+  "source_files": [
+    "inputs/climate/raw/mid_century/rcp_4_5/cordex_mid_century_rcp_4_5_cnrm_cerfacs_cm5_cnrm_aladin63_r1i1p1_2046_2050.zip",
+    "inputs/climate/raw/mid_century/rcp_4_5/cordex_mid_century_rcp_4_5_cnrm_cerfacs_cm5_cnrm_aladin63_r1i1p1_2051_2055.zip",
+    "inputs/climate/raw/mid_century/rcp_4_5/cordex_mid_century_rcp_4_5_cnrm_cerfacs_cm5_cnrm_aladin63_r1i1p1_2056_2060.zip",
+    "inputs/climate/raw/mid_century/rcp_4_5/cordex_mid_century_rcp_4_5_cnrm_cerfacs_cm5_cnrm_aladin63_r1i1p1_2061_2065.zip",
+    "inputs/climate/raw/mid_century/rcp_4_5/cordex_mid_century_rcp_4_5_cnrm_cerfacs_cm5_cnrm_aladin63_r1i1p1_2066_2070.zip"
+  ],
+  "spatial_extraction": {
+    "lat_name": "lat",
+    "lon_name": "lon",
+    "method": "nearest_point",
+    "preselected_before_combine": true,
+    "selected_indices": {
+      "x": 191,
+      "y": 239
+    },
+    "selected_lat": 50.79848111186651,
+    "selected_lon": 4.269705300227394,
+    "target_lat": 50.85,
+    "target_lon": 4.35
+  },
+  "temperature": {
+    "conversion": "kelvin_to_celsius",
+    "input_units": "K",
+    "output_units": "degC",
+    "variable": "tas"
+  },
+  "time_calendar": "gregorian",
+  "time_end": "2070-12-31T12:00:00",
+  "time_start": "2050-01-01T12:00:00",
+  "window": "mid_century"
+}

@@ -1,0 +1,23 @@
+{
+  "api_response_updated": "2026-05-08T11:00:00+0200",
+  "csv": {
+    "path": "data/raw/reference/eurostat_be100_degree_days_2005_2023.csv",
+    "row_count": 19,
+    "sha256": "e74152de14f81bc0a1163020a54a4abd85ec05663692b448692efb4103eac1b2"
+  },
+  "dataset_code": "nrg_chddr2_a",
+  "dataset_doi": "10.2908/NRG_CHDDR2_A",
+  "geo_code": "BE100",
+  "geo_label": "Arr. de Bruxelles-Capitale/Arr. Brussel-Hoofdstad",
+  "indicators": [
+    "HDD",
+    "CDD"
+  ],
+  "period_end": 2023,
+  "period_start": 2005,
+  "provider": "Eurostat",
+  "retrieved_on": "2026-07-23",
+  "schema_version": 1,
+  "source_url": "https://ec.europa.eu/eurostat/api/dissemination/statistics/1.0/data/nrg_chddr2_a?geo=BE100&lang=en",
+  "unit": "degree day"
+}

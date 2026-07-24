@@ -1,0 +1,50 @@
+{
+  "inputs": {
+    "member_summary_sha256": "8bb36bc9b0ea38d34d624ec109ac0bfd39f41b678b8c6534277397234ec7289a",
+    "monthly_deltas_sha256": "b3aea5b5bbe96e7fb2faf240f267391b80bdfbbf45c9c3689aac7c12ca2f0f7b",
+    "monthly_invariants_sha256": "9d2de78547f9590932a1727c2aeccfb5d938c5625fd78dc78000a1ced85fd261",
+    "validation_report": {
+      "path": "data/processed/validation/climate_validation_report.json",
+      "sha256": "f9eb2141db4477bce22f18e03f58b927b0a56113671d5c7a80d90ac1e741d9c4",
+      "status": "pass"
+    }
+  },
+  "method": {
+    "monthly_parameters": "Twelve monthly delta_T_C and alpha_solar_applied values per RCP.",
+    "morph_residuals": "All 57 x 12 recovered-minus-expected temperature and GHI ratios.",
+    "temperature_duration": "Median annual duration curve with 5th-95th percentile envelope across 19 observed weather years; x-axis is hours exceeded."
+  },
+  "outputs": {
+    "monthly_parameters": {
+      "pdf": {
+        "path": "data/processed/validation/figures/monthly_climate_change_parameters.pdf",
+        "sha256": "fef13b2b0b8336a8e15a337f3df516ccfb1322624a0c2f4a37a32bc62264bb48"
+      },
+      "png": {
+        "path": "data/processed/validation/figures/monthly_climate_change_parameters.png",
+        "sha256": "55e07b71b7f2768e10d3dd1dd615061bef7558ad7aeaf48c9d930a6496c6e5d4"
+      }
+    },
+    "morph_residuals": {
+      "pdf": {
+        "path": "data/processed/validation/figures/morph_invariant_residual_heatmaps.pdf",
+        "sha256": "cdf4d6012e9d7c34c3f8c802c5651da3e5d1269754dc06f0d22a4e88d65af981"
+      },
+      "png": {
+        "path": "data/processed/validation/figures/morph_invariant_residual_heatmaps.png",
+        "sha256": "3b097ec188da742b24624b9949a9df9e7442be31baaf707ac97f4f28652bf4bd"
+      }
+    },
+    "temperature_duration": {
+      "pdf": {
+        "path": "data/processed/validation/figures/temperature_duration_curves.pdf",
+        "sha256": "f74a165cdf30697ca3b80f640d430fa4824a84049bbf6ce8295948337b066999"
+      },
+      "png": {
+        "path": "data/processed/validation/figures/temperature_duration_curves.png",
+        "sha256": "33a04362f24e2676934a27b2d1892f1daee53b00ffca24605055d941f40aab63"
+      }
+    }
+  },
+  "schema_version": 1
+}

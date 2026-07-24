@@ -1,0 +1,189 @@
+{
+  "caveats": {
+    "observed_anchor": "Applying the full 1981-2005 to 2050-2070 delta to PVGIS 2005-2023 weather would slightly double-count warming since the historical CORDEX reference period.",
+    "single_model_chain": "Climate-model uncertainty is not sampled because all scenarios use one GCM-RCM-member chain."
+  },
+  "counts": {
+    "cordex_annual_degree_day_rows": 88,
+    "ensemble_member_hours": 499608,
+    "ensemble_members": 57,
+    "monthly_morph_checks": 684,
+    "observed_rows": 166536,
+    "observed_years": 19,
+    "official_reference_years": 19
+  },
+  "diagnostic_ranges": {
+    "direct_CORDEX_vs_morph_change": {
+      "rcp_2_6": {
+        "cordex_change_CDD_C_days": 17.398733840215776,
+        "cordex_change_HDD_C_days": -327.4595040457589,
+        "morphed_paired_change_CDD_C_days": 18.241380156489473,
+        "morphed_paired_change_HDD_C_days": -300.3770067363544
+      },
+      "rcp_4_5": {
+        "cordex_change_CDD_C_days": 39.88212210518973,
+        "cordex_change_HDD_C_days": -503.08791620163674,
+        "morphed_paired_change_CDD_C_days": 30.030986413594736,
+        "morphed_paired_change_HDD_C_days": -452.8474428457561
+      },
+      "rcp_8_5": {
+        "cordex_change_CDD_C_days": 48.1000103469122,
+        "cordex_change_HDD_C_days": -624.5217453729538,
+        "morphed_paired_change_CDD_C_days": 38.92241235598596,
+        "morphed_paired_change_HDD_C_days": -572.8301937662859
+      }
+    },
+    "ensemble_GHI_W_m2": {
+      "maximum": 1037.1964418523,
+      "minimum": 0.0
+    },
+    "ensemble_temperature_C": {
+      "maximum": 39.8611552783,
+      "minimum": -12.8788990439
+    },
+    "morphed_annual_solar_kWh_m2": {
+      "maximum": 1317.0392967247453,
+      "minimum": 1105.4469844516314
+    },
+    "observed_annual_solar_kWh_m2": {
+      "maximum": 1231.26255,
+      "minimum": 1040.5789900000002
+    },
+    "official_BE100_comparison": {
+      "CDD": {
+        "mean_absolute_error_C_days": 5.224495614035088,
+        "mean_bias_C_days": -3.7365131578947364,
+        "pearson_correlation": 0.9377052222010364
+      },
+      "HDD": {
+        "mean_absolute_error_C_days": 154.98177631578946,
+        "mean_bias_C_days": 154.98177631578946,
+        "pearson_correlation": 0.98692879566176
+      }
+    },
+    "paired_CDD_change_C_days": {
+      "maximum": 83.50293320360001,
+      "minimum": 0.0
+    },
+    "paired_HDD_ratio": {
+      "maximum": 0.904865849347368,
+      "minimum": 0.7341154613822523
+    },
+    "paired_annual_solar_ratio": {
+      "maximum": 1.0738745859952972,
+      "minimum": 1.0611372082598005
+    }
+  },
+  "hard_error_count": 0,
+  "inputs": {
+    "clean_observed": {
+      "metadata_path": "data/processed/observed/pvgis_sarah3_horizontal_hourly_2005_2023.metadata.json",
+      "metadata_sha256": "ab5c4dd59fd590de6e94658297d2c99b6c9f9906e555a56b0734c64c3a307885",
+      "path": "data/processed/observed/pvgis_sarah3_horizontal_hourly_2005_2023.csv",
+      "recorded_row_count": 166536,
+      "sha256": "03466dee5883c019802a304566fb02aa3746253ffdd3ca218b234d9a7f9a1678"
+    },
+    "config": {
+      "path": "config.yaml",
+      "sha256": "7dc880aea1512bfba4aa06d8fd4e93b93473e235c669bf85dcccc1eaee982e75"
+    },
+    "ensemble_manifest_csv": {
+      "path": "data/processed/ensemble_2050/ensemble_2050_manifest.csv",
+      "sha256": "0ac2426bd97c7edbad6293ef2963edc15e9ff20a57054dddb3c89b8e3b22b936"
+    },
+    "ensemble_manifest_json": {
+      "method_tag": "monthly_delta_morph_v1",
+      "path": "data/processed/ensemble_2050/ensemble_2050_manifest.json",
+      "sha256": "626f325b4d586573f180ae6bb5cc79c9bdcbf3fe23fecdb6a6242425acbe7cbb"
+    },
+    "monthly_deltas": {
+      "path": "data/processed/deltas/monthly_deltas_2050.csv",
+      "provenance_path": "data/processed/deltas/climate_deltas_2050.provenance.json",
+      "provenance_sha256": "f6a0ab0d842107ac85810e884ebf4d439cdddf39eff5f2c6ff7a370b70ed7032",
+      "sha256": "b3aea5b5bbe96e7fb2faf240f267391b80bdfbbf45c9c3689aac7c12ca2f0f7b"
+    },
+    "official_BE100_degree_days": {
+      "api_response_updated": "2026-05-08T11:00:00+0200",
+      "dataset_code": "nrg_chddr2_a",
+      "geo_code": "BE100",
+      "metadata_path": "data/raw/reference/eurostat_be100_degree_days_2005_2023.metadata.json",
+      "metadata_sha256": "5a2ff02751d1ecda491dd6e140f790586c06146ed60b996abcd1792ca0482d07",
+      "path": "data/raw/reference/eurostat_be100_degree_days_2005_2023.csv",
+      "provider": "Eurostat",
+      "sha256": "e74152de14f81bc0a1163020a54a4abd85ec05663692b448692efb4103eac1b2",
+      "source_url": "https://ec.europa.eu/eurostat/api/dissemination/statistics/1.0/data/nrg_chddr2_a?geo=BE100&lang=en"
+    }
+  },
+  "method": {
+    "CDD_C_days": "sum(UTC daily mean temperature - 21) for days with daily mean temperature >= 24 degC; zero otherwise",
+    "HDD_C_days": "sum(18 - UTC daily mean temperature) for days with daily mean temperature <= 15 degC; zero otherwise",
+    "annual_solar_kWh_m2": "sum(hourly GHI W/m2) / 1000",
+    "plausibility_comparison": "Each member is paired with its matching observed PVGIS year.",
+    "solar_invariant": "sum(I_morph, month) / sum(I_observed, month) = alpha_solar_applied(month) for beam, diffuse, and GHI",
+    "temperature_invariant": "mean(T_morph - T_observed, month) = delta_T_C(month); the CORDEX absolute future mean is not the target"
+  },
+  "outputs": {
+    "cordex_annual_degree_days": {
+      "path": "data/processed/validation/cordex_annual_degree_days.csv",
+      "row_count": 88,
+      "sha256": "f8816fdce4f15e0beacfe055e211ca4b8377da81e2d21ce9a6406f148df583a3"
+    },
+    "cordex_morph_comparison": {
+      "path": "data/processed/validation/cordex_morph_degree_day_comparison.csv",
+      "row_count": 3,
+      "sha256": "7285be01c8bff707423279acf60a0c2b9ebb3d2cc31b9cf21fa9c175a57c7512"
+    },
+    "member_summary": {
+      "path": "data/processed/validation/ensemble_validation_members.csv",
+      "row_count": 57,
+      "sha256": "8bb36bc9b0ea38d34d624ec109ac0bfd39f41b678b8c6534277397234ec7289a"
+    },
+    "monthly_invariants": {
+      "path": "data/processed/validation/ensemble_validation_monthly_invariants.csv",
+      "row_count": 684,
+      "sha256": "9d2de78547f9590932a1727c2aeccfb5d938c5625fd78dc78000a1ced85fd261"
+    },
+    "observed_reference_comparison": {
+      "path": "data/processed/validation/observed_be100_degree_day_comparison.csv",
+      "row_count": 19,
+      "sha256": "e254c20d7e54f03dcaf53807c85b22b27024a1aa1f33c3b16e03afa3f825ec57"
+    },
+    "report_markdown": {
+      "path": "data/processed/validation/climate_validation_report.md",
+      "sha256": "a6d774f69ce337fee40e4d1cdb070ca7b7f81e9eb0439072820baab34735be0d"
+    }
+  },
+  "physical_ranges": {
+    "solar_W_m2": [
+      0.0,
+      1500.0
+    ],
+    "temperature_C": [
+      -35.0,
+      50.0
+    ]
+  },
+  "plausibility_bands": {
+    "annual_solar_ratio_vs_observed": [
+      0.95,
+      1.15
+    ],
+    "cdd_change_C_days": [
+      0.0,
+      150.0
+    ],
+    "hdd_ratio_vs_observed": [
+      0.65,
+      1.0
+    ]
+  },
+  "plausibility_warning_count": 0,
+  "schema_version": 1,
+  "status": "pass",
+  "tolerances": {
+    "ghi_component_W_m2": 2e-10,
+    "monthly_solar_factor": 1e-08,
+    "monthly_temperature_C": 1e-08
+  },
+  "warnings": []
+}

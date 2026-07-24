@@ -1,0 +1,165 @@
+{
+  "caveats": {
+    "observed_anchor": "Applying the full 1981-2005 to 2050-2070 delta to PVGIS 2005-2023 weather would slightly double-count warming since the historical CORDEX reference period.",
+    "single_model_chain": "Climate-model uncertainty is not sampled because all scenarios use one GCM-RCM-member chain.",
+    "weather_axis": "One member for each complete observed PVGIS year 2005-2023."
+  },
+  "climate_target": "2050-2070",
+  "columns": [
+    "timestamp_utc",
+    "T_out_C",
+    "I_beam_horizontal_W_m2",
+    "I_diffuse_horizontal_W_m2",
+    "I_solar_W_m2",
+    "wind_speed_10m_m_s",
+    "sun_height_deg",
+    "pvgis_reconstructed"
+  ],
+  "facade_forcing": "Not materialized in this member; use climate.src.transpose_facades with the aligned PVGIS facade templates.",
+  "is_leap_year": false,
+  "member_id": "weather_2050_rcp_2_6_pvgis_2022",
+  "method": {
+    "beam": "beam_morph = beam_observed * alpha_solar_applied(month)",
+    "diffuse": "diffuse_morph = diffuse_observed * alpha_solar_applied(month)",
+    "ghi": "I_solar_W_m2 = morphed beam + morphed diffuse",
+    "tag": "monthly_delta_morph_v1",
+    "temperature": "T_morph = T_observed + delta_T_C(month)",
+    "unchanged": [
+      "timestamp_utc",
+      "wind_speed_10m_m_s",
+      "sun_height_deg",
+      "pvgis_reconstructed"
+    ]
+  },
+  "monthly_parameters": [
+    {
+      "alpha_solar_applied": 1.0359360482,
+      "alpha_solar_raw": 1.0359360482,
+      "alpha_was_clipped": false,
+      "delta_T_C": 0.5417112739,
+      "month": 1
+    },
+    {
+      "alpha_solar_applied": 1.0784558199,
+      "alpha_solar_raw": 1.0784558199,
+      "alpha_was_clipped": false,
+      "delta_T_C": 0.2333238037,
+      "month": 2
+    },
+    {
+      "alpha_solar_applied": 1.0154828821,
+      "alpha_solar_raw": 1.0154828821,
+      "alpha_was_clipped": false,
+      "delta_T_C": 0.4911009561,
+      "month": 3
+    },
+    {
+      "alpha_solar_applied": 1.0644820715,
+      "alpha_solar_raw": 1.0644820715,
+      "alpha_was_clipped": false,
+      "delta_T_C": 1.056868788,
+      "month": 4
+    },
+    {
+      "alpha_solar_applied": 1.081259591,
+      "alpha_solar_raw": 1.081259591,
+      "alpha_was_clipped": false,
+      "delta_T_C": 1.4418723786,
+      "month": 5
+    },
+    {
+      "alpha_solar_applied": 1.0760491532,
+      "alpha_solar_raw": 1.0760491532,
+      "alpha_was_clipped": false,
+      "delta_T_C": 1.6049862467,
+      "month": 6
+    },
+    {
+      "alpha_solar_applied": 1.0647645347,
+      "alpha_solar_raw": 1.0647645347,
+      "alpha_was_clipped": false,
+      "delta_T_C": 1.1574405381,
+      "month": 7
+    },
+    {
+      "alpha_solar_applied": 1.0724658563,
+      "alpha_solar_raw": 1.0724658563,
+      "alpha_was_clipped": false,
+      "delta_T_C": 1.2494632656,
+      "month": 8
+    },
+    {
+      "alpha_solar_applied": 1.0507630901,
+      "alpha_solar_raw": 1.0507630901,
+      "alpha_was_clipped": false,
+      "delta_T_C": 1.3855072273,
+      "month": 9
+    },
+    {
+      "alpha_solar_applied": 1.0408385321,
+      "alpha_solar_raw": 1.0408385321,
+      "alpha_was_clipped": false,
+      "delta_T_C": 1.2528979342,
+      "month": 10
+    },
+    {
+      "alpha_solar_applied": 1.0524979678,
+      "alpha_solar_raw": 1.0524979678,
+      "alpha_was_clipped": false,
+      "delta_T_C": 1.0272320363,
+      "month": 11
+    },
+    {
+      "alpha_solar_applied": 1.0190451108,
+      "alpha_solar_raw": 1.0190451108,
+      "alpha_was_clipped": false,
+      "delta_T_C": 1.3390853671,
+      "month": 12
+    }
+  ],
+  "observed_pvgis_year": 2022,
+  "output": {
+    "path": "data/processed/ensemble_2050/rcp_2_6/weather_2050_rcp_2_6_pvgis_2022.csv",
+    "sha256": "7ab6a8eea2d761c0558a1c9da0b8af565a38ca3672b994830bb45bb761842442"
+  },
+  "row_count": 8760,
+  "scenario": "rcp_2_6",
+  "schema_version": 1,
+  "sources": {
+    "delta_provenance_path": "data/processed/deltas/climate_deltas_2050.provenance.json",
+    "delta_provenance_sha256": "f6a0ab0d842107ac85810e884ebf4d439cdddf39eff5f2c6ff7a370b70ed7032",
+    "monthly_deltas_path": "data/processed/deltas/monthly_deltas_2050.csv",
+    "monthly_deltas_sha256": "b3aea5b5bbe96e7fb2faf240f267391b80bdfbbf45c9c3689aac7c12ca2f0f7b",
+    "observed_clean_path": "data/processed/observed/pvgis_sarah3_horizontal_hourly_2005_2023.csv",
+    "observed_clean_sha256": "03466dee5883c019802a304566fb02aa3746253ffdd3ca218b234d9a7f9a1678",
+    "observed_raw_path": "data/raw/observed/Timeseries_pvgisWEATHER_50.830_4.350_SA3_0deg_0deg_2005_2023.csv",
+    "observed_raw_sha256": "a12fa6560bcf2e877d4228ab43636dc4ed92434e67aa40611bbd8a04c1760aa6"
+  },
+  "statistics": {
+    "I_solar_W_m2": {
+      "maximum": 993.204128895132,
+      "mean": 149.2356669544757,
+      "minimum": 0.0
+    },
+    "T_out_C": {
+      "maximum": 37.6474405381,
+      "mean": 13.068295530340274,
+      "minimum": -4.7109146329
+    }
+  },
+  "timestamp": {
+    "first": "2022-01-01T00:00:00+00:00",
+    "last": "2022-12-31T23:00:00+00:00",
+    "normalization": "PVGIS :10 source stamps floored to top of hour",
+    "timezone": "UTC"
+  },
+  "units": {
+    "I_beam_horizontal_W_m2": "W/m2",
+    "I_diffuse_horizontal_W_m2": "W/m2",
+    "I_solar_W_m2": "W/m2",
+    "T_out_C": "degC",
+    "pvgis_reconstructed": "boolean",
+    "sun_height_deg": "degree",
+    "wind_speed_10m_m_s": "m/s"
+  }
+}

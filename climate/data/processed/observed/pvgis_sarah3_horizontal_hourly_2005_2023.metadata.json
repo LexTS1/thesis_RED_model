@@ -1,0 +1,96 @@
+{
+  "columns": [
+    "timestamp_utc",
+    "T_out_C",
+    "I_beam_horizontal_W_m2",
+    "I_diffuse_horizontal_W_m2",
+    "I_solar_W_m2",
+    "wind_speed_10m_m_s",
+    "sun_height_deg",
+    "pvgis_reconstructed"
+  ],
+  "output": {
+    "path": "data/processed/observed/pvgis_sarah3_horizontal_hourly_2005_2023.csv",
+    "sha256": "03466dee5883c019802a304566fb02aa3746253ffdd3ca218b234d9a7f9a1678"
+  },
+  "ranges": {
+    "I_beam_horizontal_W_m2": {
+      "maximum": 844.01,
+      "minimum": 0.0
+    },
+    "I_diffuse_horizontal_W_m2": {
+      "maximum": 442.0,
+      "minimum": 0.0
+    },
+    "I_solar_W_m2": {
+      "maximum": 944.01,
+      "minimum": 0.0
+    },
+    "T_out_C": {
+      "maximum": 37.49,
+      "minimum": -13.37
+    },
+    "sun_height_deg": {
+      "maximum": 62.13,
+      "minimum": -1.59
+    },
+    "wind_speed_10m_m_s": {
+      "maximum": 14.28,
+      "minimum": 0.0
+    }
+  },
+  "reconstructed_row_count": 0,
+  "row_count": 166536,
+  "schema_version": 1,
+  "source": {
+    "header": {
+      "azimuth_pvgis_deg": 0.0,
+      "elevation_m": 61.0,
+      "latitude": 50.83,
+      "longitude": 4.35,
+      "radiation_database": "PVGIS-SARAH3",
+      "slope_deg": 0.0
+    },
+    "path": "data/raw/observed/Timeseries_pvgisWEATHER_50.830_4.350_SA3_0deg_0deg_2005_2023.csv",
+    "sha256": "a12fa6560bcf2e877d4228ab43636dc4ed92434e67aa40611bbd8a04c1760aa6"
+  },
+  "timestamp": {
+    "first": "2005-01-01T00:00:00+00:00",
+    "last": "2023-12-31T23:00:00+00:00",
+    "normalization": "floor_to_hour",
+    "source_format": "YYYYMMDD:HHMM",
+    "source_minute": 10,
+    "timezone": "UTC"
+  },
+  "units": {
+    "I_beam_horizontal_W_m2": "W/m2",
+    "I_diffuse_horizontal_W_m2": "W/m2",
+    "I_solar_W_m2": "W/m2",
+    "T_out_C": "degC",
+    "pvgis_reconstructed": "boolean",
+    "sun_height_deg": "degree",
+    "wind_speed_10m_m_s": "m/s"
+  },
+  "year_count": 19,
+  "year_rows": {
+    "2005": 8760,
+    "2006": 8760,
+    "2007": 8760,
+    "2008": 8784,
+    "2009": 8760,
+    "2010": 8760,
+    "2011": 8760,
+    "2012": 8784,
+    "2013": 8760,
+    "2014": 8760,
+    "2015": 8760,
+    "2016": 8784,
+    "2017": 8760,
+    "2018": 8760,
+    "2019": 8760,
+    "2020": 8784,
+    "2021": 8760,
+    "2022": 8760,
+    "2023": 8760
+  }
+}

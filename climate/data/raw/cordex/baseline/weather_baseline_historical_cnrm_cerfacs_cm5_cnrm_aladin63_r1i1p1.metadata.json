@@ -1,0 +1,71 @@
+{
+  "created_utc": "2026-05-05T18:41:56.692978+00:00",
+  "csv_schema": [
+    "timestamp",
+    "T_out_C",
+    "I_solar_W_m2",
+    "scenario",
+    "window",
+    "gcm_model",
+    "rcm_model",
+    "ensemble_member",
+    "source_files"
+  ],
+  "dataset": "projections-cordex-domains-single-levels",
+  "model_chain": {
+    "ensemble_member": "r1i1p1",
+    "gcm_model": "cnrm_cerfacs_cm5",
+    "rcm_model": "cnrm_aladin63"
+  },
+  "netcdf_files": [
+    "inputs/climate/raw/_extracted/baseline/historical/cordex_baseline_historical_cnrm_cerfacs_cm5_cnrm_aladin63_r1i1p1_1981_1985/rsds_EUR-11_CNRM-CERFACS-CNRM-CM5_historical_r1i1p1_CNRM-ALADIN63_v2_day_19810101-19851231.nc",
+    "inputs/climate/raw/_extracted/baseline/historical/cordex_baseline_historical_cnrm_cerfacs_cm5_cnrm_aladin63_r1i1p1_1981_1985/tas_EUR-11_CNRM-CERFACS-CNRM-CM5_historical_r1i1p1_CNRM-ALADIN63_v2_day_19810101-19851231.nc",
+    "inputs/climate/raw/_extracted/baseline/historical/cordex_baseline_historical_cnrm_cerfacs_cm5_cnrm_aladin63_r1i1p1_1986_1990/rsds_EUR-11_CNRM-CERFACS-CNRM-CM5_historical_r1i1p1_CNRM-ALADIN63_v2_day_19860101-19901231.nc",
+    "inputs/climate/raw/_extracted/baseline/historical/cordex_baseline_historical_cnrm_cerfacs_cm5_cnrm_aladin63_r1i1p1_1986_1990/tas_EUR-11_CNRM-CERFACS-CNRM-CM5_historical_r1i1p1_CNRM-ALADIN63_v2_day_19860101-19901231.nc",
+    "inputs/climate/raw/_extracted/baseline/historical/cordex_baseline_historical_cnrm_cerfacs_cm5_cnrm_aladin63_r1i1p1_1991_1995/rsds_EUR-11_CNRM-CERFACS-CNRM-CM5_historical_r1i1p1_CNRM-ALADIN63_v2_day_19910101-19951231.nc",
+    "inputs/climate/raw/_extracted/baseline/historical/cordex_baseline_historical_cnrm_cerfacs_cm5_cnrm_aladin63_r1i1p1_1991_1995/tas_EUR-11_CNRM-CERFACS-CNRM-CM5_historical_r1i1p1_CNRM-ALADIN63_v2_day_19910101-19951231.nc",
+    "inputs/climate/raw/_extracted/baseline/historical/cordex_baseline_historical_cnrm_cerfacs_cm5_cnrm_aladin63_r1i1p1_1996_2000/rsds_EUR-11_CNRM-CERFACS-CNRM-CM5_historical_r1i1p1_CNRM-ALADIN63_v2_day_19960101-20001231.nc",
+    "inputs/climate/raw/_extracted/baseline/historical/cordex_baseline_historical_cnrm_cerfacs_cm5_cnrm_aladin63_r1i1p1_1996_2000/tas_EUR-11_CNRM-CERFACS-CNRM-CM5_historical_r1i1p1_CNRM-ALADIN63_v2_day_19960101-20001231.nc",
+    "inputs/climate/raw/_extracted/baseline/historical/cordex_baseline_historical_cnrm_cerfacs_cm5_cnrm_aladin63_r1i1p1_2001_2005/rsds_EUR-11_CNRM-CERFACS-CNRM-CM5_historical_r1i1p1_CNRM-ALADIN63_v2_day_20010101-20051231.nc",
+    "inputs/climate/raw/_extracted/baseline/historical/cordex_baseline_historical_cnrm_cerfacs_cm5_cnrm_aladin63_r1i1p1_2001_2005/tas_EUR-11_CNRM-CERFACS-CNRM-CM5_historical_r1i1p1_CNRM-ALADIN63_v2_day_20010101-20051231.nc"
+  ],
+  "radiation": {
+    "conversion": "kept_w_m2",
+    "input_units": "W m-2",
+    "output_units": "W m-2",
+    "variable": "rsds"
+  },
+  "row_count": 9131,
+  "scenario": "historical",
+  "source_files": [
+    "inputs/climate/raw/baseline/historical/cordex_baseline_historical_cnrm_cerfacs_cm5_cnrm_aladin63_r1i1p1_1981_1985.zip",
+    "inputs/climate/raw/baseline/historical/cordex_baseline_historical_cnrm_cerfacs_cm5_cnrm_aladin63_r1i1p1_1986_1990.zip",
+    "inputs/climate/raw/baseline/historical/cordex_baseline_historical_cnrm_cerfacs_cm5_cnrm_aladin63_r1i1p1_1991_1995.zip",
+    "inputs/climate/raw/baseline/historical/cordex_baseline_historical_cnrm_cerfacs_cm5_cnrm_aladin63_r1i1p1_1996_2000.zip",
+    "inputs/climate/raw/baseline/historical/cordex_baseline_historical_cnrm_cerfacs_cm5_cnrm_aladin63_r1i1p1_2001_2005.zip"
+  ],
+  "spatial_extraction": {
+    "lat_name": "lat",
+    "lon_name": "lon",
+    "method": "nearest_point",
+    "preselected_before_combine": true,
+    "selected_indices": {
+      "x": 191,
+      "y": 239
+    },
+    "selected_lat": 50.79848111186651,
+    "selected_lon": 4.269705300227394,
+    "target_lat": 50.85,
+    "target_lon": 4.35
+  },
+  "temperature": {
+    "conversion": "kelvin_to_celsius",
+    "input_units": "K",
+    "output_units": "degC",
+    "variable": "tas"
+  },
+  "time_calendar": "gregorian",
+  "time_end": "2005-12-31T12:00:00",
+  "time_start": "1981-01-01T12:00:00",
+  "window": "baseline"
+}
