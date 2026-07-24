@@ -1,0 +1,192 @@
+{
+  "annual_day_weighted_diagnostics": {
+    "rcp_2_6": {
+      "future_solar_mean_W_m2": 143.23908818725502,
+      "future_temperature_mean_C": 10.17069269252414,
+      "historical_solar_mean_W_m2": 134.91337690965955,
+      "historical_temperature_mean_C": 9.101475235301189,
+      "solar_ratio": 1.0617115327501625,
+      "temperature_delta_C": 1.0692174572229511
+    },
+    "rcp_4_5": {
+      "future_solar_mean_W_m2": 144.41968900060095,
+      "future_temperature_mean_C": 10.735085848692654,
+      "historical_solar_mean_W_m2": 134.91337690965955,
+      "historical_temperature_mean_C": 9.101475235301189,
+      "solar_ratio": 1.0704623389369834,
+      "temperature_delta_C": 1.6336106133914647
+    },
+    "rcp_8_5": {
+      "future_solar_mean_W_m2": 143.94189746811927,
+      "future_temperature_mean_C": 11.164665096835021,
+      "historical_solar_mean_W_m2": 134.91337690965955,
+      "historical_temperature_mean_C": 9.101475235301189,
+      "solar_ratio": 1.0669208700076152,
+      "temperature_delta_C": 2.063189861533832
+    }
+  },
+  "caveats": {
+    "hourly_downscaling": "Implemented downstream as monthly PVGIS morphing in climate.src.build_ensemble; demand-model interface integration remains deferred.",
+    "observed_anchor": "Applying the full 1981-2005 to 2050-2070 delta to PVGIS 2005-2023 weather would slightly double-count warming since the historical CORDEX reference period.",
+    "single_model_chain": "Climate-model uncertainty is not sampled because all scenarios use one GCM-RCM-member chain."
+  },
+  "climate_target": {
+    "future_period": "2050-2070",
+    "future_year_count": 21,
+    "historical_period": "1981-2005",
+    "interpretation": "2050 climate represented by complete calendar years 2050-2070"
+  },
+  "dataset": {
+    "domain": "europe",
+    "horizontal_resolution": "0_11_degree_x_0_11_degree",
+    "name": "projections-cordex-domains-single-levels",
+    "temporal_resolution": "daily_mean",
+    "variables": {
+      "solar_radiation": "rsds",
+      "temperature": "tas"
+    }
+  },
+  "method": {
+    "monthly_climatology": "day-weighted arithmetic mean grouped by calendar month",
+    "solar_alpha_applied": "clip(alpha_solar_raw, 0.7, 1.3)",
+    "solar_alpha_raw": "I_future_month_mean / I_historical_month_mean",
+    "temperature_delta": "T_future_month_mean - T_historical_month_mean",
+    "temperature_variance_stretch": "not calculated"
+  },
+  "model_chain": {
+    "ensemble_member": "r1i1p1",
+    "gcm_model": "cnrm_cerfacs_cm5",
+    "rcm_model": "cnrm_aladin63"
+  },
+  "morphing_contract": {
+    "solar_factor": "monthly_deltas_2050.csv column alpha_solar_applied",
+    "solar_factor_observed_range": [
+      0.999780419330248,
+      1.1104768062512007
+    ],
+    "temperature_shift": "monthly_deltas_2050.csv column delta_T_C",
+    "year_month_variability_role": "Inter-annual diagnostic and future sampling summary; its year-month solar ratios are not the morph alpha and are not safety-clipped."
+  },
+  "outputs": {
+    "monthly_climatologies": {
+      "path": "data/processed/deltas/monthly_climatologies.csv",
+      "row_count": 48,
+      "sha256": "46dfe52bac36d3d08919bfe4bb2243dad3ed84029bf1d281e7d4203995a79b70"
+    },
+    "monthly_deltas": {
+      "path": "data/processed/deltas/monthly_deltas_2050.csv",
+      "row_count": 36,
+      "sha256": "b3aea5b5bbe96e7fb2faf240f267391b80bdfbbf45c9c3689aac7c12ca2f0f7b"
+    },
+    "year_month_variability": {
+      "path": "data/processed/deltas/year_month_variability_2050.csv",
+      "row_count": 756,
+      "sha256": "c8318d16fbde1f9eeebca1100c882150109068b3ff2db5865f339eb2034e22b5"
+    }
+  },
+  "schema_version": 1,
+  "solar_alpha_safety": {
+    "clipped_month_count": 0,
+    "maximum": 1.3,
+    "minimum": 0.7,
+    "observed_maximum": {
+      "month": 6,
+      "scenario": "rcp_4_5",
+      "value": 1.1104768062512007
+    },
+    "observed_minimum": {
+      "month": 3,
+      "scenario": "rcp_4_5",
+      "value": 0.999780419330248
+    }
+  },
+  "sources": {
+    "historical": {
+      "csv": "data/raw/cordex/baseline/weather_baseline_historical_cnrm_cerfacs_cm5_cnrm_aladin63_r1i1p1.csv",
+      "csv_sha256": "f8be1b33bb27df03d8f68691b0e76e08f78a2b4e2ae07b11612e8cbad8509dab",
+      "metadata": "data/raw/cordex/baseline/weather_baseline_historical_cnrm_cerfacs_cm5_cnrm_aladin63_r1i1p1.metadata.json",
+      "metadata_sha256": "91667898a1159d2a6b3cef75a83533b1c777fdb39fa433ee7aea1154297182b7",
+      "period_end": "2005-12-31",
+      "period_start": "1981-01-01",
+      "raw_cordex_archives": [
+        "inputs/climate/raw/baseline/historical/cordex_baseline_historical_cnrm_cerfacs_cm5_cnrm_aladin63_r1i1p1_1981_1985.zip",
+        "inputs/climate/raw/baseline/historical/cordex_baseline_historical_cnrm_cerfacs_cm5_cnrm_aladin63_r1i1p1_1986_1990.zip",
+        "inputs/climate/raw/baseline/historical/cordex_baseline_historical_cnrm_cerfacs_cm5_cnrm_aladin63_r1i1p1_1991_1995.zip",
+        "inputs/climate/raw/baseline/historical/cordex_baseline_historical_cnrm_cerfacs_cm5_cnrm_aladin63_r1i1p1_1996_2000.zip",
+        "inputs/climate/raw/baseline/historical/cordex_baseline_historical_cnrm_cerfacs_cm5_cnrm_aladin63_r1i1p1_2001_2005.zip"
+      ],
+      "row_count": 9131,
+      "scenario": "historical",
+      "window": "baseline",
+      "year_count": 25
+    },
+    "rcp_2_6": {
+      "csv": "data/raw/cordex/mid_century/weather_mid_century_rcp_2_6_cnrm_cerfacs_cm5_cnrm_aladin63_r1i1p1.csv",
+      "csv_sha256": "4039010ef92f8723a67165c78574981df0fa6bae22d60340de74f170cf9031c9",
+      "metadata": "data/raw/cordex/mid_century/weather_mid_century_rcp_2_6_cnrm_cerfacs_cm5_cnrm_aladin63_r1i1p1.metadata.json",
+      "metadata_sha256": "1540d4e92cf2c6635f84fd73128658e81277a0796703d85b63a2fba0210dfd32",
+      "period_end": "2070-12-31",
+      "period_start": "2050-01-01",
+      "raw_cordex_archives": [
+        "inputs/climate/raw/mid_century/rcp_2_6/cordex_mid_century_rcp_2_6_cnrm_cerfacs_cm5_cnrm_aladin63_r1i1p1_2046_2050.zip",
+        "inputs/climate/raw/mid_century/rcp_2_6/cordex_mid_century_rcp_2_6_cnrm_cerfacs_cm5_cnrm_aladin63_r1i1p1_2051_2055.zip",
+        "inputs/climate/raw/mid_century/rcp_2_6/cordex_mid_century_rcp_2_6_cnrm_cerfacs_cm5_cnrm_aladin63_r1i1p1_2056_2060.zip",
+        "inputs/climate/raw/mid_century/rcp_2_6/cordex_mid_century_rcp_2_6_cnrm_cerfacs_cm5_cnrm_aladin63_r1i1p1_2061_2065.zip",
+        "inputs/climate/raw/mid_century/rcp_2_6/cordex_mid_century_rcp_2_6_cnrm_cerfacs_cm5_cnrm_aladin63_r1i1p1_2066_2070.zip"
+      ],
+      "row_count": 7670,
+      "scenario": "rcp_2_6",
+      "window": "mid_century",
+      "year_count": 21
+    },
+    "rcp_4_5": {
+      "csv": "data/raw/cordex/mid_century/weather_mid_century_rcp_4_5_cnrm_cerfacs_cm5_cnrm_aladin63_r1i1p1.csv",
+      "csv_sha256": "ce3601d99d6585bddda58402582fa4cb71ca69974d3f3f67247381ef6a52020f",
+      "metadata": "data/raw/cordex/mid_century/weather_mid_century_rcp_4_5_cnrm_cerfacs_cm5_cnrm_aladin63_r1i1p1.metadata.json",
+      "metadata_sha256": "0f6130cc87f40644fb1bb4f9a693af7875c10cdf654b938e9625ccaec82d6c68",
+      "period_end": "2070-12-31",
+      "period_start": "2050-01-01",
+      "raw_cordex_archives": [
+        "inputs/climate/raw/mid_century/rcp_4_5/cordex_mid_century_rcp_4_5_cnrm_cerfacs_cm5_cnrm_aladin63_r1i1p1_2046_2050.zip",
+        "inputs/climate/raw/mid_century/rcp_4_5/cordex_mid_century_rcp_4_5_cnrm_cerfacs_cm5_cnrm_aladin63_r1i1p1_2051_2055.zip",
+        "inputs/climate/raw/mid_century/rcp_4_5/cordex_mid_century_rcp_4_5_cnrm_cerfacs_cm5_cnrm_aladin63_r1i1p1_2056_2060.zip",
+        "inputs/climate/raw/mid_century/rcp_4_5/cordex_mid_century_rcp_4_5_cnrm_cerfacs_cm5_cnrm_aladin63_r1i1p1_2061_2065.zip",
+        "inputs/climate/raw/mid_century/rcp_4_5/cordex_mid_century_rcp_4_5_cnrm_cerfacs_cm5_cnrm_aladin63_r1i1p1_2066_2070.zip"
+      ],
+      "row_count": 7670,
+      "scenario": "rcp_4_5",
+      "window": "mid_century",
+      "year_count": 21
+    },
+    "rcp_8_5": {
+      "csv": "data/raw/cordex/mid_century/weather_mid_century_rcp_8_5_cnrm_cerfacs_cm5_cnrm_aladin63_r1i1p1.csv",
+      "csv_sha256": "c6d4f900f6d40fb3c4416579a1bce6ca1849b54409eece60b8f259f3d9c01916",
+      "metadata": "data/raw/cordex/mid_century/weather_mid_century_rcp_8_5_cnrm_cerfacs_cm5_cnrm_aladin63_r1i1p1.metadata.json",
+      "metadata_sha256": "8fa65aca57310dc21f0de989270cf96857acfef318c2ef24b523be6e928b7ca1",
+      "period_end": "2070-12-31",
+      "period_start": "2050-01-01",
+      "raw_cordex_archives": [
+        "inputs/climate/raw/mid_century/rcp_8_5/cordex_mid_century_rcp_8_5_cnrm_cerfacs_cm5_cnrm_aladin63_r1i1p1_2046_2050.zip",
+        "inputs/climate/raw/mid_century/rcp_8_5/cordex_mid_century_rcp_8_5_cnrm_cerfacs_cm5_cnrm_aladin63_r1i1p1_2051_2055.zip",
+        "inputs/climate/raw/mid_century/rcp_8_5/cordex_mid_century_rcp_8_5_cnrm_cerfacs_cm5_cnrm_aladin63_r1i1p1_2056_2060.zip",
+        "inputs/climate/raw/mid_century/rcp_8_5/cordex_mid_century_rcp_8_5_cnrm_cerfacs_cm5_cnrm_aladin63_r1i1p1_2061_2065.zip",
+        "inputs/climate/raw/mid_century/rcp_8_5/cordex_mid_century_rcp_8_5_cnrm_cerfacs_cm5_cnrm_aladin63_r1i1p1_2066_2070.zip"
+      ],
+      "row_count": 7670,
+      "scenario": "rcp_8_5",
+      "window": "mid_century",
+      "year_count": 21
+    }
+  },
+  "spatial_extraction": {
+    "method": "nearest_point",
+    "selected_indices": {
+      "x": 191,
+      "y": 239
+    },
+    "selected_lat": 50.79848111186651,
+    "selected_lon": 4.269705300227394,
+    "target_lat": 50.85,
+    "target_lon": 4.35
+  }
+}
