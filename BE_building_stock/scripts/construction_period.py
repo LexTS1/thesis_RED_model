@@ -39,10 +39,8 @@ CONSTRUCTION_PERIODS = {
         "Van 1981 tot en met 1990",
     ],
     "1991-2000": ["Van 1991 tot en met 2000"],
-    "2001-2010": [
-        "Van 2001 tot en met 2005",
-        "Van 2006 tot en met 2010",
-    ],
+    "2001-2005": ["Van 2001 tot en met 2005"],
+    "2006-2010": ["Van 2006 tot en met 2010"],
     "2011 onwards": [
         "Van 2011 tot en met 2015",
         "2016 of later",
@@ -93,7 +91,7 @@ def create_construction_period_table(data: pd.DataFrame) -> pd.DataFrame:
 
     result = pd.DataFrame(rows)
 
-    # Unknown construction years are excluded, so the seven percentages for
+    # Unknown construction years are excluded, so the eight percentages for
     # each area describe the known construction-period distribution and sum to 100.
     for area_name in AREAS.values():
         count_column = f"{area_name} dwellings"
