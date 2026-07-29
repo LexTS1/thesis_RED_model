@@ -37,8 +37,8 @@ def pvgis_data():
 
 def test_observed_pvgis_is_clean_complete_and_audited(pvgis_data) -> None:
     config, observed, metadata, years, _ = pvgis_data
-    assert len(observed) == 166536
-    assert sorted(years) == list(range(2005, 2024))
+    assert len(observed) == 157776
+    assert sorted(years) == list(range(2006, 2024))
     assert {year: len(frame) for year, frame in years.items() if len(frame) == 8784} == {
         2008: 8784,
         2012: 8784,
@@ -46,7 +46,7 @@ def test_observed_pvgis_is_clean_complete_and_audited(pvgis_data) -> None:
         2020: 8784,
     }
     assert all(len(frame) in {8760, 8784} for frame in years.values())
-    assert observed["timestamp_utc"].iat[0].isoformat() == "2005-01-01T00:00:00+00:00"
+    assert observed["timestamp_utc"].iat[0].isoformat() == "2006-01-01T00:00:00+00:00"
     assert observed["timestamp_utc"].iat[-1].isoformat() == "2023-12-31T23:00:00+00:00"
     assert observed["T_out_C"].min() == pytest.approx(-13.37)
     assert observed["T_out_C"].max() == pytest.approx(37.49)
@@ -65,7 +65,7 @@ def test_observed_pvgis_is_clean_complete_and_audited(pvgis_data) -> None:
     )
     assert (observed.loc[observed["sun_height_deg"] < 0.0, "I_solar_W_m2"] == 0.0).all()
     horizon = observed.loc[observed["sun_height_deg"] == 0.0, "I_solar_W_m2"]
-    assert horizon.max() == pytest.approx(10.0)
+    assert horizon.max() == 0.0
     assert metadata["source"]["sha256"] == config["observed_weather"]["horizontal"]["csv_sha256"]
     assert metadata["timestamp"]["source_minute"] == 10
     assert metadata["timestamp"]["timezone"] == "UTC"
@@ -153,24 +153,26 @@ def test_materialized_ensemble_contract_and_all_members(pvgis_data) -> None:
     output_root = Path(config["_base_dir"]) / config["observed_weather"]["ensemble"]["directory"]
     manifest = pd.read_csv(output_root / "ensemble_2050_manifest.csv")
     payload = json.loads((output_root / "ensemble_2050_manifest.json").read_text())
-    assert len(manifest) == 57
-    assert manifest["row_count"].sum() == 499608
-    assert manifest.groupby("scenario")["observed_pvgis_year"].nunique().eq(19).all()
+    assert len(manifest) == 54
+    assert manifest["row_count"].sum() == 473328
+    assert manifest.groupby("scenario")["observed_pvgis_year"].nunique().eq(18).all()
     assert sorted(manifest.loc[manifest["is_leap_year"], "observed_pvgis_year"].unique()) == [
         2008,
         2012,
         2016,
         2020,
     ]
-    assert payload["member_count"] == 57
-    assert payload["total_member_hours"] == 499608
+    assert payload["member_count"] == 54
+    assert payload["total_member_hours"] == 473328
     assert payload["facade_forcing"]["materialized_in_members"] is False
     assert payload["morph_contract"]["clipped_month_count"] == 0
-    assert payload["morph_contract"]["alpha_minimum"] == pytest.approx(0.9997804193)
-    assert payload["morph_contract"]["alpha_maximum"] == pytest.approx(1.1104768063)
-    assert payload["ensemble_ranges"]["T_out_C"]["minimum"] == pytest.approx(-12.8788990439)
-    assert payload["ensemble_ranges"]["T_out_C"]["maximum"] == pytest.approx(39.8611552783)
-    assert payload["ensemble_ranges"]["I_solar_W_m2"]["maximum"] == pytest.approx(1037.196441852263)
+    assert payload["climate_target"] == "2041-2060"
+    assert payload["climate_target_label"] == "2050-centred mid-term period"
+    assert payload["morph_contract"]["alpha_minimum"] == pytest.approx(0.9552029895)
+    assert payload["morph_contract"]["alpha_maximum"] == pytest.approx(1.1007481057)
+    assert payload["ensemble_ranges"]["T_out_C"]["minimum"] == pytest.approx(-13.0843043819)
+    assert payload["ensemble_ranges"]["T_out_C"]["maximum"] == pytest.approx(38.476291936)
+    assert payload["ensemble_ranges"]["I_solar_W_m2"]["maximum"] == pytest.approx(998.8493633085661)
 
     expected_columns = {
         "timestamp_utc",
@@ -214,12 +216,12 @@ def test_ensemble_regeneration_is_byte_deterministic(pvgis_data) -> None:
     tracked_before = {
         str(path.relative_to(output_root)): sha256_file(path)
         for path in sorted(output_root.rglob("*"))
-        if path.is_file()
+        if path.is_file() and path.suffix in {".csv", ".json"}
     }
     build_ensemble(config)
     tracked_after = {
         str(path.relative_to(output_root)): sha256_file(path)
         for path in sorted(output_root.rglob("*"))
-        if path.is_file()
+        if path.is_file() and path.suffix in {".csv", ".json"}
     }
     assert tracked_before == tracked_after

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import logging
+import json
 from pathlib import Path
 
 import numpy as np
@@ -14,6 +15,7 @@ from climate.src.deltas import (
     compute_year_month_variability,
 )
 from climate.src.load_cordex import load_all_sources, load_config, sha256_file
+from climate.src.prepare_cordex import prepare_all
 
 
 CONFIG_PATH = Path(__file__).resolve().parents[1] / "config.yaml"
@@ -32,11 +34,16 @@ def climate_data():
 def test_canonical_sources_are_complete_and_hash_verified(climate_data) -> None:
     config, sources, _, _, _ = climate_data
     expected = {
-        "historical": (9131, 25, "1981-01-01", "2005-12-31"),
-        "rcp_2_6": (7670, 21, "2050-01-01", "2070-12-31"),
-        "rcp_4_5": (7670, 21, "2050-01-01", "2070-12-31"),
-        "rcp_8_5": (7670, 21, "2050-01-01", "2070-12-31"),
+        "rcp_2_6_baseline": (6574, 18, "2006-01-01", "2023-12-31"),
+        "rcp_2_6_future": (7305, 20, "2041-01-01", "2060-12-31"),
+        "rcp_4_5_baseline": (6574, 18, "2006-01-01", "2023-12-31"),
+        "rcp_4_5_future": (7305, 20, "2041-01-01", "2060-12-31"),
+        "rcp_8_5_baseline": (6574, 18, "2006-01-01", "2023-12-31"),
+        "rcp_8_5_future": (7305, 20, "2041-01-01", "2060-12-31"),
     }
+    manifest = json.loads(
+        (Path(config["_base_dir"]) / config["cordex_processing"]["manifest"]).read_text()
+    )
     for key, (rows, years, start, end) in expected.items():
         source = sources[key]
         assert len(source.frame) == rows
@@ -45,15 +52,15 @@ def test_canonical_sources_are_complete_and_hash_verified(climate_data) -> None:
         assert source.frame["timestamp"].max().date().isoformat() == end
         assert not source.frame["timestamp"].duplicated().any()
         assert not source.frame[["T_out_C", "I_solar_W_m2"]].isna().any().any()
-        assert source.csv_sha256 == config["sources"][key]["csv_sha256"]
-        assert source.metadata_sha256 == config["sources"][key]["metadata_sha256"]
+        assert source.csv_sha256 == manifest["sources"][key]["csv_sha256"]
+        assert source.metadata_sha256 == manifest["sources"][key]["metadata_sha256"]
 
 
 def test_climatology_and_delta_shapes(climate_data) -> None:
     _, _, climatologies, deltas, variability = climate_data
-    assert len(climatologies) == 48
+    assert len(climatologies) == 72
     assert len(deltas) == 36
-    assert len(variability) == 756
+    assert len(variability) == 720
     assert climatologies.groupby("source_key")["month"].nunique().eq(12).all()
     assert deltas.groupby("scenario")["month"].nunique().eq(12).all()
     assert variability.groupby(["scenario", "climate_year"])["month"].nunique().eq(12).all()
@@ -65,11 +72,11 @@ def test_climatology_and_delta_shapes(climate_data) -> None:
 def test_monthly_delta_identities_and_real_alpha_range(climate_data) -> None:
     _, _, _, deltas, _ = climate_data
     np.testing.assert_allclose(
-        deltas["delta_T_C"], deltas["T_future_C"] - deltas["T_hist_C"], rtol=0, atol=1e-12
+        deltas["delta_T_C"], deltas["T_future_C"] - deltas["T_baseline_C"], rtol=0, atol=1e-12
     )
     np.testing.assert_allclose(
         deltas["alpha_solar_raw"],
-        deltas["I_future_W_m2"] / deltas["I_hist_W_m2"],
+        deltas["I_future_W_m2"] / deltas["I_baseline_W_m2"],
         rtol=0,
         atol=1e-12,
     )
@@ -80,10 +87,10 @@ def test_monthly_delta_identities_and_real_alpha_range(climate_data) -> None:
 
     minimum = deltas.loc[deltas["alpha_solar_raw"].idxmin()]
     maximum = deltas.loc[deltas["alpha_solar_raw"].idxmax()]
-    assert (minimum["scenario"], int(minimum["month"])) == ("rcp_4_5", 3)
-    assert (maximum["scenario"], int(maximum["month"])) == ("rcp_4_5", 6)
-    assert float(minimum["alpha_solar_raw"]) == pytest.approx(0.999780419330248)
-    assert float(maximum["alpha_solar_raw"]) == pytest.approx(1.1104768062512007)
+    assert (minimum["scenario"], int(minimum["month"])) == ("rcp_2_6", 1)
+    assert (maximum["scenario"], int(maximum["month"])) == ("rcp_2_6", 9)
+    assert float(minimum["alpha_solar_raw"]) == pytest.approx(0.9552029895473407)
+    assert float(maximum["alpha_solar_raw"]) == pytest.approx(1.100748105716786)
 
 
 def test_solar_safety_clamp_warns_only_when_activated(caplog) -> None:
@@ -120,13 +127,13 @@ def test_year_month_variability_decomposition(climate_data) -> None:
         validate="many_to_one",
     )
     np.testing.assert_allclose(
-        joined["delta_T_vs_historical_C"],
+        joined["delta_T_vs_baseline_C"],
         joined["delta_T_C"] + joined["T_anomaly_from_future_climatology_C"],
         rtol=0,
         atol=1e-12,
     )
     np.testing.assert_allclose(
-        joined["alpha_solar_vs_historical"],
+        joined["alpha_solar_vs_baseline"],
         joined["alpha_solar_raw"] * joined["solar_factor_from_future_climatology"],
         rtol=0,
         atol=1e-12,
@@ -141,16 +148,16 @@ def test_year_month_variability_decomposition(climate_data) -> None:
 
 def test_day_weighted_annual_acceptance_anchors(climate_data) -> None:
     _, sources, _, _, _ = climate_data
-    historical = sources["historical"].frame
     expected = {
-        "rcp_2_6": (1.0692174572229511, 1.0617115327501625),
-        "rcp_4_5": (1.6336106133914647, 1.0704623389369834),
-        "rcp_8_5": (2.063189861533832, 1.0669208700076152),
+        "rcp_2_6": ("rcp_2_6_baseline", "rcp_2_6_future", 0.9142846853936142, 1.0358714265299587),
+        "rcp_4_5": ("rcp_4_5_baseline", "rcp_4_5_future", 0.8080116231571282, 1.023052118726499),
+        "rcp_8_5": ("rcp_8_5_baseline", "rcp_8_5_future", 1.1314445332631937, 1.006536723077346),
     }
-    for key, (delta_t, alpha) in expected.items():
-        future = sources[key].frame
-        assert future["T_out_C"].mean() - historical["T_out_C"].mean() == pytest.approx(delta_t)
-        assert future["I_solar_W_m2"].mean() / historical["I_solar_W_m2"].mean() == pytest.approx(alpha)
+    for _, (baseline_key, future_key, delta_t, alpha) in expected.items():
+        baseline = sources[baseline_key].frame
+        future = sources[future_key].frame
+        assert future["T_out_C"].mean() - baseline["T_out_C"].mean() == pytest.approx(delta_t)
+        assert future["I_solar_W_m2"].mean() / baseline["I_solar_W_m2"].mean() == pytest.approx(alpha)
 
 
 def test_build_outputs_are_byte_deterministic(climate_data) -> None:
@@ -161,3 +168,23 @@ def test_build_outputs_are_byte_deterministic(climate_data) -> None:
     second_hashes = {name: sha256_file(path) for name, path in second_paths.items()}
     assert first_hashes == second_hashes
 
+
+def test_raw_cds_preparation_is_byte_deterministic(climate_data) -> None:
+    config, _, _, _, _ = climate_data
+    netcdf_paths = [
+        Path(config["_base_dir"]) / spec["raw"][variable]["netcdf"]
+        for spec in config["sources"].values()
+        for variable in ("temperature", "solar_radiation")
+    ]
+    missing = [path for path in netcdf_paths if not path.is_file()]
+    if missing:
+        pytest.skip(
+            "Raw CDS NetCDF archives are not distributed with the repository; "
+            f"{len(missing)} source files are unavailable"
+        )
+
+    first_paths = prepare_all(config)
+    first_hashes = {name: sha256_file(path) for name, path in first_paths.items()}
+    second_paths = prepare_all(config)
+    second_hashes = {name: sha256_file(path) for name, path in second_paths.items()}
+    assert first_hashes == second_hashes

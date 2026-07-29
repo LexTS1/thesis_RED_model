@@ -15,6 +15,7 @@ import pandas as pd
 
 from .load_cordex import (
     CordexSource,
+    baseline_source_key,
     load_all_sources,
     load_config,
     resolve_config_path,
@@ -46,6 +47,7 @@ def compute_monthly_climatologies(
                 {
                     "source_key": key,
                     "scenario": source.scenario,
+                    "role": str(spec["role"]),
                     "window": source.window,
                     "period_start": str(spec["period_start"]),
                     "period_end": str(spec["period_end"]),
@@ -91,29 +93,30 @@ def compute_monthly_deltas(
 ) -> pd.DataFrame:
     """Compute one monthly temperature shift and solar factor per future RCP."""
 
-    baseline_key = str(config["baseline_source"])
-    historical = climatologies.loc[
-        climatologies["source_key"] == baseline_key
-    ].set_index("month")
-    if len(historical) != 12:
-        raise ValueError("The configured historical baseline does not contain twelve months.")
-
     minimum = float(config["solar_alpha_safety"]["minimum"])
     maximum = float(config["solar_alpha_safety"]["maximum"])
     records: list[dict[str, Any]] = []
     for key, spec in config["sources"].items():
         if spec["role"] != "future":
             continue
+        baseline_key = baseline_source_key(config, str(spec["scenario"]))
+        baseline = climatologies.loc[
+            climatologies["source_key"] == baseline_key
+        ].set_index("month")
+        if len(baseline) != 12:
+            raise ValueError(
+                f"Scenario-matched baseline {baseline_key!r} does not contain twelve months."
+            )
         future = climatologies.loc[climatologies["source_key"] == key].set_index("month")
         if len(future) != 12:
             raise ValueError(f"Future source {key!r} does not contain twelve months.")
         for month in range(1, 13):
-            hist_row = historical.loc[month]
+            baseline_row = baseline.loc[month]
             future_row = future.loc[month]
-            hist_solar = float(hist_row["I_solar_mean_W_m2"])
-            if hist_solar <= 0.0:
-                raise ValueError(f"Historical solar climatology is non-positive in month {month}.")
-            alpha_raw = float(future_row["I_solar_mean_W_m2"]) / hist_solar
+            baseline_solar = float(baseline_row["I_solar_mean_W_m2"])
+            if baseline_solar <= 0.0:
+                raise ValueError(f"Baseline solar climatology is non-positive in month {month}.")
+            alpha_raw = float(future_row["I_solar_mean_W_m2"]) / baseline_solar
             alpha_applied, was_clipped = apply_solar_alpha_safety(
                 alpha_raw,
                 scenario=str(spec["scenario"]),
@@ -124,14 +127,18 @@ def compute_monthly_deltas(
             records.append(
                 {
                     "scenario": str(spec["scenario"]),
+                    "baseline_source_key": baseline_key,
+                    "future_source_key": key,
                     "month": month,
                     "month_name": calendar.month_abbr[month],
-                    "n_hist_days": int(hist_row["n_days"]),
+                    "n_baseline_days": int(baseline_row["n_days"]),
                     "n_future_days": int(future_row["n_days"]),
-                    "T_hist_C": float(hist_row["T_mean_C"]),
+                    "T_baseline_C": float(baseline_row["T_mean_C"]),
                     "T_future_C": float(future_row["T_mean_C"]),
-                    "delta_T_C": float(future_row["T_mean_C"] - hist_row["T_mean_C"]),
-                    "I_hist_W_m2": hist_solar,
+                    "delta_T_C": float(
+                        future_row["T_mean_C"] - baseline_row["T_mean_C"]
+                    ),
+                    "I_baseline_W_m2": baseline_solar,
                     "I_future_W_m2": float(future_row["I_solar_mean_W_m2"]),
                     "alpha_solar_raw": alpha_raw,
                     "alpha_solar_applied": alpha_applied,
@@ -148,16 +155,16 @@ def compute_year_month_variability(
 ) -> pd.DataFrame:
     """Retain future year-month anomalies alongside the scenario climatologies."""
 
-    baseline_key = str(config["baseline_source"])
-    historical = climatologies.loc[
-        climatologies["source_key"] == baseline_key
-    ].set_index("month")
     records: list[dict[str, Any]] = []
 
     for key, source in sources.items():
         spec = config["sources"][key]
         if spec["role"] != "future":
             continue
+        baseline_key = baseline_source_key(config, str(spec["scenario"]))
+        baseline = climatologies.loc[
+            climatologies["source_key"] == baseline_key
+        ].set_index("month")
         future_climatology = climatologies.loc[
             climatologies["source_key"] == key
         ].set_index("month")
@@ -175,29 +182,33 @@ def compute_year_month_variability(
 
         for (year, month), values in grouped.iterrows():
             future_row = future_climatology.loc[int(month)]
-            hist_row = historical.loc[int(month)]
+            baseline_row = baseline.loc[int(month)]
             future_solar = float(future_row["I_solar_mean_W_m2"])
-            hist_solar = float(hist_row["I_solar_mean_W_m2"])
+            baseline_solar = float(baseline_row["I_solar_mean_W_m2"])
             year_solar = float(values["I_future_year_month_W_m2"])
             records.append(
                 {
                     "scenario": str(spec["scenario"]),
+                    "baseline_source_key": baseline_key,
+                    "future_source_key": key,
                     "climate_year": int(year),
                     "month": int(month),
                     "month_name": calendar.month_abbr[int(month)],
                     "n_days": int(values["n_days"]),
                     "T_future_year_month_C": float(values["T_future_year_month_C"]),
                     "T_future_climatology_C": float(future_row["T_mean_C"]),
+                    "T_baseline_climatology_C": float(baseline_row["T_mean_C"]),
                     "T_anomaly_from_future_climatology_C": float(
                         values["T_future_year_month_C"] - future_row["T_mean_C"]
                     ),
-                    "delta_T_vs_historical_C": float(
-                        values["T_future_year_month_C"] - hist_row["T_mean_C"]
+                    "delta_T_vs_baseline_C": float(
+                        values["T_future_year_month_C"] - baseline_row["T_mean_C"]
                     ),
                     "I_future_year_month_W_m2": year_solar,
                     "I_future_climatology_W_m2": future_solar,
+                    "I_baseline_climatology_W_m2": baseline_solar,
                     "solar_factor_from_future_climatology": year_solar / future_solar,
-                    "alpha_solar_vs_historical": year_solar / hist_solar,
+                    "alpha_solar_vs_baseline": year_solar / baseline_solar,
                 }
             )
     return pd.DataFrame.from_records(records)
@@ -213,18 +224,20 @@ def _relative_to_config(path: Path, config: Mapping[str, Any]) -> str:
 def _annual_diagnostics(
     sources: Mapping[str, CordexSource], config: Mapping[str, Any]
 ) -> dict[str, dict[str, float]]:
-    baseline = sources[str(config["baseline_source"])].frame
     output: dict[str, dict[str, float]] = {}
     for key, source in sources.items():
         if config["sources"][key]["role"] != "future":
             continue
+        baseline_key = baseline_source_key(config, source.scenario)
+        baseline = sources[baseline_key].frame
         output[source.scenario] = {
-            "historical_temperature_mean_C": float(baseline["T_out_C"].mean()),
+            "baseline_source_key": baseline_key,
+            "baseline_temperature_mean_C": float(baseline["T_out_C"].mean()),
             "future_temperature_mean_C": float(source.frame["T_out_C"].mean()),
             "temperature_delta_C": float(
                 source.frame["T_out_C"].mean() - baseline["T_out_C"].mean()
             ),
-            "historical_solar_mean_W_m2": float(baseline["I_solar_W_m2"].mean()),
+            "baseline_solar_mean_W_m2": float(baseline["I_solar_W_m2"].mean()),
             "future_solar_mean_W_m2": float(source.frame["I_solar_W_m2"].mean()),
             "solar_ratio": float(
                 source.frame["I_solar_W_m2"].mean()
@@ -274,7 +287,7 @@ def write_outputs(
             "csv_sha256": source.csv_sha256,
             "metadata": _relative_to_config(source.metadata_path, config),
             "metadata_sha256": source.metadata_sha256,
-            "raw_cordex_archives": source.metadata.get("source_files", []),
+            "raw_cordex_netcdf": source.metadata.get("source_files", []),
         }
 
     alpha_min_index = deltas["alpha_solar_raw"].idxmin()
@@ -287,15 +300,16 @@ def write_outputs(
         "model_chain": config["model_chain"],
         "spatial_extraction": config["spatial_extraction"],
         "climate_target": {
-            "interpretation": "2050 climate represented by complete calendar years 2050-2070",
-            "future_year_count": 21,
-            "historical_period": "1981-2005",
-            "future_period": "2050-2070",
+            "interpretation": "2050-centred IPCC mid-term period",
+            "future_year_count": 20,
+            "baseline_period": "2006-2023",
+            "future_period": "2041-2060",
+            "scenario_matched_baselines": config["scenario_baselines"],
         },
         "method": {
             "monthly_climatology": "day-weighted arithmetic mean grouped by calendar month",
-            "temperature_delta": "T_future_month_mean - T_historical_month_mean",
-            "solar_alpha_raw": "I_future_month_mean / I_historical_month_mean",
+            "temperature_delta": "T_2041-2060_month_mean - T_2006-2023_month_mean within the same RCP branch",
+            "solar_alpha_raw": "I_2041-2060_month_mean / I_2006-2023_month_mean within the same RCP branch",
             "solar_alpha_applied": "clip(alpha_solar_raw, 0.7, 1.3)",
             "temperature_variance_stretch": "not calculated",
         },
@@ -327,6 +341,12 @@ def write_outputs(
             ),
         },
         "sources": source_manifest,
+        "processed_cordex_manifest": {
+            "path": str(config["cordex_processing"]["manifest"]),
+            "sha256": sha256_file(
+                resolve_config_path(config, config["cordex_processing"]["manifest"])
+            ),
+        },
         "outputs": {
             name: {
                 "path": _relative_to_config(path, config),
@@ -345,6 +365,7 @@ def write_outputs(
         "caveats": {
             "single_model_chain": config["provenance"]["single_chain_caveat"],
             "observed_anchor": config["provenance"]["observed_anchor_caveat"],
+            "weather_ensemble": config["provenance"]["weather_ensemble_caveat"],
             "hourly_downscaling": (
                 "Implemented downstream as monthly PVGIS morphing in "
                 "climate.src.build_ensemble; demand-model interface integration remains deferred."
@@ -369,7 +390,20 @@ def build(config: Mapping[str, Any]) -> dict[str, Path]:
     deltas = compute_monthly_deltas(climatologies, config)
     variability = compute_year_month_variability(sources, climatologies, config)
 
-    if len(climatologies) != 48 or len(deltas) != 36 or len(variability) != 756:
+    expected_climatologies = len(config["sources"]) * 12
+    expected_deltas = sum(
+        12 for spec in config["sources"].values() if spec["role"] == "future"
+    )
+    expected_variability = sum(
+        int(spec["expected_years"]) * 12
+        for spec in config["sources"].values()
+        if spec["role"] == "future"
+    )
+    if (
+        len(climatologies) != expected_climatologies
+        or len(deltas) != expected_deltas
+        or len(variability) != expected_variability
+    ):
         raise ValueError(
             "Unexpected output dimensions: "
             f"climatologies={len(climatologies)}, deltas={len(deltas)}, "

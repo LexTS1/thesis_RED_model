@@ -1,4 +1,4 @@
-"""Audit the persisted PVGIS baseline and 57-member 2050 weather ensemble."""
+"""Audit the persisted PVGIS baseline and 54-member 2050 weather ensemble."""
 
 from __future__ import annotations
 
@@ -6,6 +6,7 @@ import argparse
 import calendar
 import json
 import logging
+import platform
 import sys
 from pathlib import Path
 from typing import Any, Mapping
@@ -13,7 +14,13 @@ from typing import Any, Mapping
 import numpy as np
 import pandas as pd
 
-from .load_cordex import load_all_sources, load_config, resolve_config_path, sha256_file
+from .load_cordex import (
+    baseline_source_key,
+    load_all_sources,
+    load_config,
+    resolve_config_path,
+    sha256_file,
+)
 from .load_observed import load_clean_observed, split_complete_years
 from .morph import DeltaContract, load_delta_contract, scenario_parameters
 
@@ -319,7 +326,7 @@ def build_observed_reference_comparison(
         how="inner",
         validate="one_to_one",
     )
-    if len(comparison) != len(reference):
+    if len(comparison) != len(observed_metrics):
         raise ValueError("PVGIS and official BE100 degree-day years do not align.")
     comparison["HDD_error_C_days"] = (
         comparison["pvgis_HDD_C_days"]
@@ -394,8 +401,13 @@ def calculate_cordex_annual_degree_days(
                 }
             )
     result = pd.DataFrame.from_records(records)
-    if len(result) != 88:
-        raise ValueError(f"CORDEX degree-day table contains {len(result)} years; expected 88.")
+    expected_years = sum(
+        int(spec["expected_years"]) for spec in config["sources"].values()
+    )
+    if len(result) != expected_years:
+        raise ValueError(
+            f"CORDEX degree-day table contains {len(result)} years; expected {expected_years}."
+        )
     return result
 
 
@@ -403,25 +415,37 @@ def build_cordex_morph_comparison(
     cordex: pd.DataFrame,
     members: pd.DataFrame,
     scenarios: list[str],
+    config: Mapping[str, Any],
 ) -> pd.DataFrame:
     """Compare direct CORDEX and paired-morph degree-day changes by scenario."""
 
-    historical = cordex.loc[cordex["role"] == "baseline"]
-    if len(historical) != 25:
-        raise ValueError("CORDEX degree-day comparison requires 25 historical years.")
     records: list[dict[str, Any]] = []
     for scenario in scenarios:
+        baseline_key = baseline_source_key(config, scenario)
+        baseline = cordex.loc[cordex["source_key"] == baseline_key]
         future = cordex.loc[
             (cordex["role"] == "future") & (cordex["scenario"] == scenario)
         ]
         morphed = members.loc[members["scenario"] == scenario]
-        if len(future) != 21 or len(morphed) != 19:
+        expected_baseline_years = int(config["sources"][baseline_key]["expected_years"])
+        future_key = next(
+            key
+            for key, spec in config["sources"].items()
+            if spec["role"] == "future" and str(spec["scenario"]) == scenario
+        )
+        expected_future_years = int(config["sources"][future_key]["expected_years"])
+        if (
+            len(baseline) != expected_baseline_years
+            or len(future) != expected_future_years
+            or len(morphed) != int(config["observed_weather"]["expected_years"])
+        ):
             raise ValueError(
                 f"Degree-day comparison has incomplete samples for {scenario}."
             )
         record: dict[str, Any] = {
             "scenario": scenario,
-            "cordex_historical_years": int(len(historical)),
+            "cordex_baseline_source_key": baseline_key,
+            "cordex_baseline_years": int(len(baseline)),
             "cordex_future_years": int(len(future)),
             "morphed_observed_years": int(len(morphed)),
         }
@@ -429,9 +453,9 @@ def build_cordex_morph_comparison(
             metric = f"{indicator}_C_days"
             observed_column = f"observed_{indicator}_C_days"
             morphed_column = f"morphed_{indicator}_C_days"
-            historical_mean = float(historical[metric].mean())
+            baseline_mean = float(baseline[metric].mean())
             future_mean = float(future[metric].mean())
-            cordex_change = future_mean - historical_mean
+            cordex_change = future_mean - baseline_mean
             observed_mean = float(morphed[observed_column].mean())
             morphed_mean = float(morphed[morphed_column].mean())
             paired_change = float(
@@ -439,7 +463,7 @@ def build_cordex_morph_comparison(
             )
             record.update(
                 {
-                    f"cordex_historical_mean_{metric}": historical_mean,
+                    f"cordex_baseline_mean_{metric}": baseline_mean,
                     f"cordex_future_mean_{metric}": future_mean,
                     f"cordex_change_{metric}": cordex_change,
                     f"pvgis_observed_mean_{metric}": observed_mean,
@@ -882,7 +906,7 @@ def _markdown_report(
             "",
             "**Overall status: PASS**",
             "",
-            "The persisted PVGIS baseline and 2050 ensemble were audited without "
+            "The persisted PVGIS baseline and 2050-centred ensemble were audited without "
             "regenerating any weather member.",
             "",
             "## Coverage and hard checks",
@@ -917,7 +941,7 @@ def _markdown_report(
             "",
             "## Official Brussels reference comparison",
             "",
-            "The same degree-day formulas were applied to PVGIS 2005–2023 and "
+            "The same degree-day formulas were applied to PVGIS 2006–2023 and "
             "paired by year with the official Eurostat BE100 series.",
             "",
             f"- HDD Pearson correlation: "
@@ -935,8 +959,8 @@ def _markdown_report(
             "",
             "## Direct CORDEX comparison",
             "",
-            "Identical degree-day definitions were calculated for every historical "
-            "and future CORDEX year. The comparison below contrasts the direct "
+            "Identical degree-day definitions were calculated for every scenario-matched "
+            "2006–2023 baseline and 2041–2060 CORDEX year. The comparison below contrasts the direct "
             "CORDEX ensemble-mean change with the mean paired change in the morphed "
             "PVGIS ensemble. Exact equality is not required because degree days are "
             "non-linear threshold indicators and the morph intentionally retains the "
@@ -972,6 +996,7 @@ def _markdown_report(
             "",
             f"- {config['provenance']['single_chain_caveat']}",
             f"- {config['provenance']['observed_anchor_caveat']}",
+            f"- {config['provenance']['weather_ensemble_caveat']}",
             "",
         ]
     )
@@ -1094,13 +1119,18 @@ def run_validation(config: Mapping[str, Any]) -> dict[str, Path]:
 
     members = pd.DataFrame.from_records(member_rows)
     monthly = pd.DataFrame.from_records(monthly_rows)
-    if len(members) != 57 or int(members["row_count"].sum()) != 499608:
+    expected_members = len(scenarios) * int(config["observed_weather"]["expected_years"])
+    expected_hours = len(observed) * len(scenarios)
+    if len(members) != expected_members or int(members["row_count"].sum()) != expected_hours:
         raise ValueError("Validation output does not contain the canonical ensemble size.")
-    if len(monthly) != 684:
-        raise ValueError("Validation output does not contain 57 x 12 monthly checks.")
+    expected_months = expected_members * 12
+    if len(monthly) != expected_months:
+        raise ValueError(
+            f"Validation output does not contain {expected_members} x 12 monthly checks."
+        )
     cordex_annual = calculate_cordex_annual_degree_days(config)
     cordex_morph = build_cordex_morph_comparison(
-        cordex_annual, members, scenarios
+        cordex_annual, members, scenarios, config
     )
 
     output_spec = config["validation"]["outputs"]
@@ -1135,6 +1165,11 @@ def run_validation(config: Mapping[str, Any]) -> dict[str, Path]:
     report = {
         "schema_version": 1,
         "status": "pass",
+        "climate_target": {
+            "period": config["observed_weather"]["ensemble"]["climate_target"],
+            "label": config["observed_weather"]["ensemble"]["climate_target_label"],
+        },
+        "ensemble_design": config["provenance"]["weather_ensemble_caveat"],
         "hard_error_count": 0,
         "plausibility_warning_count": len(all_warnings),
         "counts": {
@@ -1171,6 +1206,15 @@ def run_validation(config: Mapping[str, Any]) -> dict[str, Path]:
         "tolerances": config["validation"]["tolerances"],
         "physical_ranges": config["physical_ranges"],
         "plausibility_bands": config["validation"]["plausibility"],
+        "processing_environment": {
+            "python": platform.python_version(),
+            "numpy": np.__version__,
+            "pandas": pd.__version__,
+            "requirements_path": "requirements.txt",
+            "requirements_sha256": sha256_file(
+                Path(config["_base_dir"]) / "requirements.txt"
+            ),
+        },
         "diagnostic_ranges": {
             "ensemble_temperature_C": {
                 "minimum": float(members["T_min_C"].min()),
@@ -1234,6 +1278,14 @@ def run_validation(config: Mapping[str, Any]) -> dict[str, Path]:
                 ),
                 "provenance_sha256": delta_contract.provenance_sha256,
             },
+            "processed_cordex_manifest": {
+                "path": str(config["cordex_processing"]["manifest"]),
+                "sha256": sha256_file(
+                    resolve_config_path(
+                        config, config["cordex_processing"]["manifest"]
+                    )
+                ),
+            },
             "official_BE100_degree_days": {
                 "provider": official_metadata["provider"],
                 "dataset_code": official_metadata["dataset_code"],
@@ -1289,6 +1341,7 @@ def run_validation(config: Mapping[str, Any]) -> dict[str, Path]:
         "caveats": {
             "single_model_chain": config["provenance"]["single_chain_caveat"],
             "observed_anchor": config["provenance"]["observed_anchor_caveat"],
+            "weather_ensemble": config["provenance"]["weather_ensemble_caveat"],
         },
     }
     _atomic_write_json(report, report_json_path)

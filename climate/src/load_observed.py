@@ -135,14 +135,19 @@ def _normalize_timestamps(series: pd.Series, observed: Mapping[str, Any]) -> pd.
 
 
 def _validate_hourly_coverage(
-    timestamps: pd.Series, observed: Mapping[str, Any], label: str
+    timestamps: pd.Series,
+    observed: Mapping[str, Any],
+    label: str,
+    *,
+    source: bool = False,
 ) -> None:
     if timestamps.duplicated().any():
         raise ValueError(f"PVGIS {label} contains duplicate normalized timestamps.")
     if not timestamps.is_monotonic_increasing:
         raise ValueError(f"PVGIS {label} timestamps are not strictly ordered.")
-    start = pd.Timestamp(str(observed["period_start"]), tz="UTC")
-    end = pd.Timestamp(str(observed["period_end"]), tz="UTC") + pd.Timedelta(hours=23)
+    prefix = "source_" if source else ""
+    start = pd.Timestamp(str(observed[f"{prefix}period_start"]), tz="UTC")
+    end = pd.Timestamp(str(observed[f"{prefix}period_end"]), tz="UTC") + pd.Timedelta(hours=23)
     expected = pd.date_range(start=start, end=end, freq="h")
     actual = pd.DatetimeIndex(timestamps)
     if not actual.equals(expected):
@@ -150,9 +155,10 @@ def _validate_hourly_coverage(
             f"PVGIS {label} is not the configured continuous hourly series; "
             f"missing={len(expected.difference(actual))}, extra={len(actual.difference(expected))}."
         )
-    if len(actual) != int(observed["expected_rows"]):
+    expected_rows = int(observed[f"{prefix}expected_rows"])
+    if len(actual) != expected_rows:
         raise ValueError(
-            f"PVGIS {label} contains {len(actual)} rows; expected {observed['expected_rows']}."
+            f"PVGIS {label} contains {len(actual)} rows; expected {expected_rows}."
         )
 
 
@@ -188,7 +194,7 @@ def load_pvgis_plane(
         raise ValueError(f"PVGIS {label} contains no hourly data rows.")
 
     timestamps = _normalize_timestamps(data["time"], observed)
-    _validate_hourly_coverage(timestamps, observed, label)
+    _validate_hourly_coverage(timestamps, observed, label, source=True)
     result = pd.DataFrame(
         {
             "timestamp_utc": timestamps,
@@ -208,11 +214,22 @@ def load_pvgis_plane(
         raise ValueError(f"PVGIS {label} contains non-finite required values.")
 
     result = clamp_negative_irradiance(result, IRRADIANCE_COLUMNS, label)
-    result["pvgis_reconstructed"] = result["pvgis_reconstructed"].astype(int).astype(bool)
+    reconstruction_values = result["pvgis_reconstructed"]
+    if not reconstruction_values.isin({0.0, 1.0}).all():
+        raise ValueError(
+            f"PVGIS {label} reconstruction flags must contain only numeric 0 or 1."
+        )
+    result["pvgis_reconstructed"] = reconstruction_values.eq(1.0)
     if result["pvgis_reconstructed"].any():
         raise ValueError(f"PVGIS {label} unexpectedly contains reconstructed radiation values.")
     if (result["wind_speed_10m_m_s"] < 0.0).any():
         raise ValueError(f"PVGIS {label} contains negative wind speed.")
+    canonical_start = pd.Timestamp(str(observed["period_start"]), tz="UTC")
+    canonical_end = pd.Timestamp(str(observed["period_end"]), tz="UTC") + pd.Timedelta(hours=23)
+    result = result.loc[
+        result["timestamp_utc"].between(canonical_start, canonical_end)
+    ].reset_index(drop=True)
+    _validate_hourly_coverage(result["timestamp_utc"], observed, label)
     return PvgisPlane(
         label=label,
         frame=result,
@@ -334,13 +351,43 @@ def build_clean_observed(config: Mapping[str, Any]) -> dict[str, Path]:
     csv_path = output_dir / processed["clean_weather"]
     metadata_path = output_dir / processed["clean_metadata"]
     _atomic_write_csv(frame, csv_path)
+    source_years = set(
+        range(
+            pd.Timestamp(config["observed_weather"]["source_period_start"]).year,
+            pd.Timestamp(config["observed_weather"]["source_period_end"]).year + 1,
+        )
+    )
+    canonical_years = set(years)
 
     metadata = {
         "schema_version": 1,
         "source": {
+            "provider": config["observed_weather"]["provider"],
+            "api_version": config["observed_weather"]["api_version"],
+            "api_request_url": config["observed_weather"]["horizontal"][
+                "api_request_url"
+            ],
+            "documentation_url": config["observed_weather"]["documentation_url"],
+            "usage_conditions_url": config["observed_weather"][
+                "usage_conditions_url"
+            ],
+            "radiation_semantics": config["observed_weather"][
+                "radiation_semantics"
+            ],
             "path": str(plane.source_path.relative_to(Path(config["_base_dir"]))),
             "sha256": plane.source_sha256,
             "header": plane.header_metadata,
+            "download_period": {
+                "first": str(config["observed_weather"]["source_period_start"]),
+                "last": str(config["observed_weather"]["source_period_end"]),
+                "row_count": int(config["observed_weather"]["source_expected_rows"]),
+            },
+        },
+        "canonical_selection": {
+            "first": str(config["observed_weather"]["period_start"]),
+            "last": str(config["observed_weather"]["period_end"]),
+            "excluded_source_years": sorted(source_years - canonical_years),
+            "reason": "Match the 2006-2023 CORDEX baseline period exactly.",
         },
         "timestamp": {
             "source_format": "YYYYMMDD:HHMM",

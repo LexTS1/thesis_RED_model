@@ -1,49 +1,54 @@
 {
   "caveats": {
-    "observed_anchor": "Applying the full 1981-2005 to 2050-2070 delta to PVGIS 2005-2023 weather would slightly double-count warming since the historical CORDEX reference period.",
-    "single_model_chain": "Climate-model uncertainty is not sampled because all scenarios use one GCM-RCM-member chain."
+    "observed_anchor": "Each 2041-2060 scenario climatology is differenced against its matching 2006-2023 CORDEX scenario branch and applied to the same 2006-2023 PVGIS period. Matching the periods removes the former one-year temporal-anchor mismatch, while delta morphing still retains the observed point-weather distribution rather than reproducing the CORDEX absolute baseline.",
+    "single_model_chain": "This is a single GCM-RCM-member sensitivity study. It samples RCP forcing and paired observed weather years, but it does not sample structural climate-model uncertainty and is not a probabilistic climate projection.",
+    "weather_ensemble": "The 54 members form a paired deterministic empirical weather-year ensemble (18 PVGIS years repeated across 3 RCPs), not 54 independent Monte Carlo samples."
+  },
+  "climate_target": {
+    "label": "2050-centred mid-term period",
+    "period": "2041-2060"
   },
   "counts": {
-    "cordex_annual_degree_day_rows": 88,
-    "ensemble_member_hours": 499608,
-    "ensemble_members": 57,
-    "monthly_morph_checks": 684,
-    "observed_rows": 166536,
-    "observed_years": 19,
-    "official_reference_years": 19
+    "cordex_annual_degree_day_rows": 114,
+    "ensemble_member_hours": 473328,
+    "ensemble_members": 54,
+    "monthly_morph_checks": 648,
+    "observed_rows": 157776,
+    "observed_years": 18,
+    "official_reference_years": 18
   },
   "diagnostic_ranges": {
     "direct_CORDEX_vs_morph_change": {
       "rcp_2_6": {
-        "cordex_change_CDD_C_days": 17.398733840215776,
-        "cordex_change_HDD_C_days": -327.4595040457589,
-        "morphed_paired_change_CDD_C_days": 18.241380156489473,
-        "morphed_paired_change_HDD_C_days": -300.3770067363544
+        "cordex_change_CDD_C_days": 22.05498684354556,
+        "cordex_change_HDD_C_days": -269.52399353019655,
+        "morphed_paired_change_CDD_C_days": 16.429751368964816,
+        "morphed_paired_change_HDD_C_days": -257.6129652102593
       },
       "rcp_4_5": {
-        "cordex_change_CDD_C_days": 39.88212210518973,
-        "cordex_change_HDD_C_days": -503.08791620163674,
-        "morphed_paired_change_CDD_C_days": 30.030986413594736,
-        "morphed_paired_change_HDD_C_days": -452.8474428457561
+        "cordex_change_CDD_C_days": 7.771448906759442,
+        "cordex_change_HDD_C_days": -264.0022449408548,
+        "morphed_paired_change_CDD_C_days": 11.7369533004,
+        "morphed_paired_change_HDD_C_days": -247.65970157191109
       },
       "rcp_8_5": {
-        "cordex_change_CDD_C_days": 48.1000103469122,
-        "cordex_change_HDD_C_days": -624.5217453729538,
-        "morphed_paired_change_CDD_C_days": 38.92241235598596,
-        "morphed_paired_change_HDD_C_days": -572.8301937662859
+        "cordex_change_CDD_C_days": 24.875836419019446,
+        "cordex_change_HDD_C_days": -352.24340298152583,
+        "morphed_paired_change_CDD_C_days": 11.791134335829629,
+        "morphed_paired_change_HDD_C_days": -364.45339074279633
       }
     },
     "ensemble_GHI_W_m2": {
-      "maximum": 1037.1964418523,
+      "maximum": 998.8493633086,
       "minimum": 0.0
     },
     "ensemble_temperature_C": {
-      "maximum": 39.8611552783,
-      "minimum": -12.8788990439
+      "maximum": 38.476291936,
+      "minimum": -13.0843043819
     },
     "morphed_annual_solar_kWh_m2": {
-      "maximum": 1317.0392967247453,
-      "minimum": 1105.4469844516314
+      "maximum": 1276.1835772955887,
+      "minimum": 1047.716611336935
     },
     "observed_annual_solar_kWh_m2": {
       "maximum": 1231.26255,
@@ -51,56 +56,57 @@
     },
     "official_BE100_comparison": {
       "CDD": {
-        "mean_absolute_error_C_days": 5.224495614035088,
-        "mean_bias_C_days": -3.7365131578947364,
-        "pearson_correlation": 0.9377052222010364
+        "mean_absolute_error_C_days": 5.10212962962963,
+        "mean_bias_C_days": -3.5314814814814808,
+        "pearson_correlation": 0.9379979347140922
       },
       "HDD": {
-        "mean_absolute_error_C_days": 154.98177631578946,
-        "mean_bias_C_days": 154.98177631578946,
-        "pearson_correlation": 0.98692879566176
+        "mean_absolute_error_C_days": 151.7552083333333,
+        "mean_bias_C_days": 151.7552083333333,
+        "pearson_correlation": 0.9884348476507376
       }
     },
     "paired_CDD_change_C_days": {
-      "maximum": 83.50293320360001,
+      "maximum": 40.141013130166655,
       "minimum": 0.0
     },
     "paired_HDD_ratio": {
-      "maximum": 0.904865849347368,
-      "minimum": 0.7341154613822523
+      "maximum": 0.9237405440768065,
+      "minimum": 0.8317417248646573
     },
     "paired_annual_solar_ratio": {
-      "maximum": 1.0738745859952972,
-      "minimum": 1.0611372082598005
+      "maximum": 1.03922405676903,
+      "minimum": 1.0062071644168515
     }
   },
+  "ensemble_design": "The 54 members form a paired deterministic empirical weather-year ensemble (18 PVGIS years repeated across 3 RCPs), not 54 independent Monte Carlo samples.",
   "hard_error_count": 0,
   "inputs": {
     "clean_observed": {
-      "metadata_path": "data/processed/observed/pvgis_sarah3_horizontal_hourly_2005_2023.metadata.json",
-      "metadata_sha256": "ab5c4dd59fd590de6e94658297d2c99b6c9f9906e555a56b0734c64c3a307885",
-      "path": "data/processed/observed/pvgis_sarah3_horizontal_hourly_2005_2023.csv",
-      "recorded_row_count": 166536,
-      "sha256": "03466dee5883c019802a304566fb02aa3746253ffdd3ca218b234d9a7f9a1678"
+      "metadata_path": "data/processed/observed/pvgis_sarah3_horizontal_hourly_2006_2023.metadata.json",
+      "metadata_sha256": "56ddb9a832c931b0b67464f0c8e0f89ef9dc12e976add252d3e26a9f5fd81619",
+      "path": "data/processed/observed/pvgis_sarah3_horizontal_hourly_2006_2023.csv",
+      "recorded_row_count": 157776,
+      "sha256": "a9bebd7b44da6abd349c1a695fa5e47552439e1ee1772a4339efa0bfacec1ede"
     },
     "config": {
       "path": "config.yaml",
-      "sha256": "7dc880aea1512bfba4aa06d8fd4e93b93473e235c669bf85dcccc1eaee982e75"
+      "sha256": "34042d26f6da701c720f5fd0787b06b6b6bdfb2d44f713856e2d129eca4c79b1"
     },
     "ensemble_manifest_csv": {
       "path": "data/processed/ensemble_2050/ensemble_2050_manifest.csv",
-      "sha256": "0ac2426bd97c7edbad6293ef2963edc15e9ff20a57054dddb3c89b8e3b22b936"
+      "sha256": "d543101e7ea78ed2ddaba45de0ca0f44ec997e73ba696c2970de54b1e75cccfc"
     },
     "ensemble_manifest_json": {
       "method_tag": "monthly_delta_morph_v1",
       "path": "data/processed/ensemble_2050/ensemble_2050_manifest.json",
-      "sha256": "626f325b4d586573f180ae6bb5cc79c9bdcbf3fe23fecdb6a6242425acbe7cbb"
+      "sha256": "f54cc2dcf14db10fc00a9669a8ddfad80c83a435b31b1f7c3fdf9b171450be24"
     },
     "monthly_deltas": {
       "path": "data/processed/deltas/monthly_deltas_2050.csv",
       "provenance_path": "data/processed/deltas/climate_deltas_2050.provenance.json",
-      "provenance_sha256": "f6a0ab0d842107ac85810e884ebf4d439cdddf39eff5f2c6ff7a370b70ed7032",
-      "sha256": "b3aea5b5bbe96e7fb2faf240f267391b80bdfbbf45c9c3689aac7c12ca2f0f7b"
+      "provenance_sha256": "f857a4a7b069b9470850770c03e5622df8ed612fe6059e94ff9c10ea7ec75016",
+      "sha256": "e40ccb491db9d0ecfe8c9e8462f713cf096279ef2b219236d05222512135b242"
     },
     "official_BE100_degree_days": {
       "api_response_updated": "2026-05-08T11:00:00+0200",
@@ -112,6 +118,10 @@
       "provider": "Eurostat",
       "sha256": "e74152de14f81bc0a1163020a54a4abd85ec05663692b448692efb4103eac1b2",
       "source_url": "https://ec.europa.eu/eurostat/api/dissemination/statistics/1.0/data/nrg_chddr2_a?geo=BE100&lang=en"
+    },
+    "processed_cordex_manifest": {
+      "path": "data/processed/cordex/cordex_daily_manifest.json",
+      "sha256": "2cc1323c4246e6f2706d674a95c1436627920cf441fd6cdd30ed7f24f46678d8"
     }
   },
   "method": {
@@ -125,32 +135,32 @@
   "outputs": {
     "cordex_annual_degree_days": {
       "path": "data/processed/validation/cordex_annual_degree_days.csv",
-      "row_count": 88,
-      "sha256": "f8816fdce4f15e0beacfe055e211ca4b8377da81e2d21ce9a6406f148df583a3"
+      "row_count": 114,
+      "sha256": "9ae77a6e72bbf2558409347d9caf09fed3b264dd55973865f2ad2efb8b487dde"
     },
     "cordex_morph_comparison": {
       "path": "data/processed/validation/cordex_morph_degree_day_comparison.csv",
       "row_count": 3,
-      "sha256": "7285be01c8bff707423279acf60a0c2b9ebb3d2cc31b9cf21fa9c175a57c7512"
+      "sha256": "736a296e6048d12690eb483bd90a2c39e51b419efdf8b18b4b4325b8809d7217"
     },
     "member_summary": {
       "path": "data/processed/validation/ensemble_validation_members.csv",
-      "row_count": 57,
-      "sha256": "8bb36bc9b0ea38d34d624ec109ac0bfd39f41b678b8c6534277397234ec7289a"
+      "row_count": 54,
+      "sha256": "5520e716e1179c4b53c78fb5e25e77227f9e248aa8bb26c09fb13b2f2cff8a98"
     },
     "monthly_invariants": {
       "path": "data/processed/validation/ensemble_validation_monthly_invariants.csv",
-      "row_count": 684,
-      "sha256": "9d2de78547f9590932a1727c2aeccfb5d938c5625fd78dc78000a1ced85fd261"
+      "row_count": 648,
+      "sha256": "3abc806bf4112a103eb39ae274d88dd8dbecc8f6d1fb951c9053b98df03a923e"
     },
     "observed_reference_comparison": {
       "path": "data/processed/validation/observed_be100_degree_day_comparison.csv",
-      "row_count": 19,
-      "sha256": "e254c20d7e54f03dcaf53807c85b22b27024a1aa1f33c3b16e03afa3f825ec57"
+      "row_count": 18,
+      "sha256": "58c7cdc9764d7409415827e41feb07fdbac55029ee97a661da896986e7479755"
     },
     "report_markdown": {
       "path": "data/processed/validation/climate_validation_report.md",
-      "sha256": "a6d774f69ce337fee40e4d1cdb070ca7b7f81e9eb0439072820baab34735be0d"
+      "sha256": "d03e633f7b188f3ef47bdf02775fc809c90b0056732457d918240e6f8794a372"
     }
   },
   "physical_ranges": {
@@ -178,6 +188,13 @@
     ]
   },
   "plausibility_warning_count": 0,
+  "processing_environment": {
+    "numpy": "2.0.2",
+    "pandas": "2.3.3",
+    "python": "3.9.6",
+    "requirements_path": "requirements.txt",
+    "requirements_sha256": "6eb3765e73a0c4c6e803f403bd564e29656cbabda0b00a22940bdb6e021afee6"
+  },
   "schema_version": 1,
   "status": "pass",
   "tolerances": {

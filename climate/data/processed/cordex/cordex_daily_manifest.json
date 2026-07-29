@@ -1,0 +1,353 @@
+{
+  "baseline": {
+    "period": "2006-2023",
+    "scenario_matching": {
+      "rcp_2_6": "rcp_2_6_baseline",
+      "rcp_4_5": "rcp_4_5_baseline",
+      "rcp_8_5": "rcp_8_5_baseline"
+    },
+    "year_count": 18
+  },
+  "caveats": {
+    "observed_anchor": "Each 2041-2060 scenario climatology is differenced against its matching 2006-2023 CORDEX scenario branch and applied to the same 2006-2023 PVGIS period. Matching the periods removes the former one-year temporal-anchor mismatch, while delta morphing still retains the observed point-weather distribution rather than reproducing the CORDEX absolute baseline.",
+    "single_model_chain": "This is a single GCM-RCM-member sensitivity study. It samples RCP forcing and paired observed weather years, but it does not sample structural climate-model uncertainty and is not a probabilistic climate projection."
+  },
+  "climate_target": {
+    "label": "2050-centred IPCC mid-term period",
+    "period": "2041-2060",
+    "year_count": 20
+  },
+  "dataset": {
+    "catalogue_version": "latest",
+    "cds_url": "https://cds.climate.copernicus.eu/datasets/projections-cordex-domains-single-levels",
+    "cordex_file_version": "v2",
+    "doi": "10.24381/cds.bc91edc3",
+    "domain": "europe",
+    "domain_id": "EUR-11",
+    "horizontal_resolution": "0_11_degree_x_0_11_degree",
+    "licence_url": "https://cds.climate.copernicus.eu/datasets/projections-cordex-domains-single-levels?tab=download",
+    "name": "projections-cordex-domains-single-levels",
+    "project": "CORDEX",
+    "provider": "Copernicus Climate Data Store",
+    "temporal_resolution": "daily_mean",
+    "variables": {
+      "solar_radiation": "rsds",
+      "temperature": "tas"
+    }
+  },
+  "model_chain": {
+    "ensemble_member": "r1i1p1",
+    "gcm_model": "cnrm_cerfacs_cm5",
+    "rcm_model": "cnrm_aladin63"
+  },
+  "processing": {
+    "netCDF4": "1.7.2",
+    "numpy": "2.0.2",
+    "pandas": "2.3.3",
+    "python": "3.9.6",
+    "script": "climate.src.prepare_cordex",
+    "solar_conversion": "none",
+    "temperature_conversion": "T_out_C = tas_K - 273.15",
+    "timestamp_convention": "daily mean stamped at 12:00:00"
+  },
+  "schema_version": 1,
+  "sources": {
+    "rcp_2_6_baseline": {
+      "csv": "data/processed/cordex/daily/weather_observed_anchor_rcp_2_6_2006_2023.csv",
+      "csv_sha256": "ddfbf34d45089dc33d861c6d769c769f657e52a480dee5263096103a4edd56df",
+      "metadata": "data/processed/cordex/daily/weather_observed_anchor_rcp_2_6_2006_2023.metadata.json",
+      "metadata_sha256": "bc5aa7f1b9addb58e99b3aaa594d0933a0637ca8b59f9acad22e7be6f71381a9",
+      "period_end": "2023-12-31",
+      "period_start": "2006-01-01",
+      "raw_netcdf": [
+        {
+          "path": "data/raw/cordex/cds/rcp_2_6/baseline_2006_2023/tas_EUR-11_CNRM-CERFACS-CNRM-CM5_rcp26_r1i1p1_CNRM-ALADIN63_v2_day_20060101-20231231.nc",
+          "sha256": "722978630a78f8f029c62e9d7437e171f7593638c2eecff038057668628baaba",
+          "size_bytes": 236090791
+        },
+        {
+          "path": "data/raw/cordex/cds/rcp_2_6/baseline_2006_2023/rsds_EUR-11_CNRM-CERFACS-CNRM-CM5_rcp26_r1i1p1_CNRM-ALADIN63_v2_day_20060101-20231231.nc",
+          "sha256": "27e4b517fa218bec80ffe188401768a6b794bab8d568783042e5467897f2f211",
+          "size_bytes": 236090737
+        }
+      ],
+      "raw_provenance_images": [
+        {
+          "path": "data/raw/cordex/cds/rcp_2_6/baseline_2006_2023/tas_EUR-11_CNRM-CERFACS-CNRM-CM5_rcp26_r1i1p1_CNRM-ALADIN63_v2_day_20060101-20231231.provenance.png",
+          "sha256": "2d0e9f29fac96b693cfd05bd8bf52fd8cfb79299b854dcf19c1661a48e79175a"
+        },
+        {
+          "path": "data/raw/cordex/cds/rcp_2_6/baseline_2006_2023/rsds_EUR-11_CNRM-CERFACS-CNRM-CM5_rcp26_r1i1p1_CNRM-ALADIN63_v2_day_20060101-20231231.provenance.png",
+          "sha256": "8198699390bce5b698eb70b019e2ec5a834b0548f81983b6ccda2a469017c0f4"
+        }
+      ],
+      "raw_provenance_json": [
+        {
+          "path": "data/raw/cordex/cds/rcp_2_6/baseline_2006_2023/tas_EUR-11_CNRM-CERFACS-CNRM-CM5_rcp26_r1i1p1_CNRM-ALADIN63_v2_day_20060101-20231231.provenance.json",
+          "sha256": "8ce2da2dac89e7d7776b32790102f4d415c14095e50957ef6a25096a05129b0a"
+        },
+        {
+          "path": "data/raw/cordex/cds/rcp_2_6/baseline_2006_2023/rsds_EUR-11_CNRM-CERFACS-CNRM-CM5_rcp26_r1i1p1_CNRM-ALADIN63_v2_day_20060101-20231231.provenance.json",
+          "sha256": "a765bc0c035aac4f1c791ccb800490facb462ead8aad98c7e8ed6c62606ea12e"
+        }
+      ],
+      "role": "baseline",
+      "row_count": 6574,
+      "scenario": "rcp_2_6",
+      "source_key": "rcp_2_6_baseline",
+      "window": "observed_anchor",
+      "year_count": 18
+    },
+    "rcp_2_6_future": {
+      "csv": "data/processed/cordex/daily/weather_2050_centered_rcp_2_6_2041_2060.csv",
+      "csv_sha256": "b62f15d936dd6482bdf6eb64d2986ed41c1dadf0699ccb5400ae89ce3774789c",
+      "metadata": "data/processed/cordex/daily/weather_2050_centered_rcp_2_6_2041_2060.metadata.json",
+      "metadata_sha256": "02a67656042d8863bea014d34857a3b8e5bc1421e787c1560205acc23e5eefb9",
+      "period_end": "2060-12-31",
+      "period_start": "2041-01-01",
+      "raw_netcdf": [
+        {
+          "path": "data/raw/cordex/cds/rcp_2_6/target_2041_2060/tas_EUR-11_CNRM-CERFACS-CNRM-CM5_rcp26_r1i1p1_CNRM-ALADIN63_v2_day_20410101-20601231.nc",
+          "sha256": "839050ac208d43c92e4b4787e14ea1f9765b437d1832cf4c0a5665fe9d280e7f",
+          "size_bytes": 262334367
+        },
+        {
+          "path": "data/raw/cordex/cds/rcp_2_6/target_2041_2060/rsds_EUR-11_CNRM-CERFACS-CNRM-CM5_rcp26_r1i1p1_CNRM-ALADIN63_v2_day_20410101-20601231.nc",
+          "sha256": "350dcee9831434dea7bac4836626a189e5e4e78b36cb2dcdb0b450e4c5f087b9",
+          "size_bytes": 262334313
+        }
+      ],
+      "raw_provenance_images": [
+        {
+          "path": "data/raw/cordex/cds/rcp_2_6/target_2041_2060/tas_EUR-11_CNRM-CERFACS-CNRM-CM5_rcp26_r1i1p1_CNRM-ALADIN63_v2_day_20410101-20601231.provenance.png",
+          "sha256": "d5bf5edf4dd94ba6e1c0f29dc607124006bcea7f3ef85f9bfebb9705f7c83c64"
+        },
+        {
+          "path": "data/raw/cordex/cds/rcp_2_6/target_2041_2060/rsds_EUR-11_CNRM-CERFACS-CNRM-CM5_rcp26_r1i1p1_CNRM-ALADIN63_v2_day_20410101-20601231.provenance.png",
+          "sha256": "9b71a48c5cf97433d3cf47c2563c7515c35eb00e4907119e14208283d6b17db6"
+        }
+      ],
+      "raw_provenance_json": [
+        {
+          "path": "data/raw/cordex/cds/rcp_2_6/target_2041_2060/tas_EUR-11_CNRM-CERFACS-CNRM-CM5_rcp26_r1i1p1_CNRM-ALADIN63_v2_day_20410101-20601231.provenance.json",
+          "sha256": "cdd1d0cc7acd9e352a3f66b62b49ae21cc2365087d3816afa8a061f52eb024a8"
+        },
+        {
+          "path": "data/raw/cordex/cds/rcp_2_6/target_2041_2060/rsds_EUR-11_CNRM-CERFACS-CNRM-CM5_rcp26_r1i1p1_CNRM-ALADIN63_v2_day_20410101-20601231.provenance.json",
+          "sha256": "e0c33aae54681a1424764417e74ecfd96de46d55a8733f0b37e29ac62c5f6703"
+        }
+      ],
+      "role": "future",
+      "row_count": 7305,
+      "scenario": "rcp_2_6",
+      "source_key": "rcp_2_6_future",
+      "window": "target_2050_centered",
+      "year_count": 20
+    },
+    "rcp_4_5_baseline": {
+      "csv": "data/processed/cordex/daily/weather_observed_anchor_rcp_4_5_2006_2023.csv",
+      "csv_sha256": "5510b309c33fbc469b711bb4ded326302516c7449032cf2ecff1273b3cf3aeb6",
+      "metadata": "data/processed/cordex/daily/weather_observed_anchor_rcp_4_5_2006_2023.metadata.json",
+      "metadata_sha256": "a7ea0a83056dbf8bf30f9eb55136a3182d591aece84b2241f76cf4eb86b06c75",
+      "period_end": "2023-12-31",
+      "period_start": "2006-01-01",
+      "raw_netcdf": [
+        {
+          "path": "data/raw/cordex/cds/rcp_4_5/baseline_2006_2023/tas_EUR-11_CNRM-CERFACS-CNRM-CM5_rcp45_r1i1p1_CNRM-ALADIN63_v2_day_20060101-20231231.nc",
+          "sha256": "ba4afe64df117416b313d99d0cd8466f28a2e10f2ac79d3c6834b4809181f790",
+          "size_bytes": 236090825
+        },
+        {
+          "path": "data/raw/cordex/cds/rcp_4_5/baseline_2006_2023/rsds_EUR-11_CNRM-CERFACS-CNRM-CM5_rcp45_r1i1p1_CNRM-ALADIN63_v2_day_20060101-20231231.nc",
+          "sha256": "8283b14813b618470f0b0cfd9d8e958210daf664d43ba4d73fedc91550db20dc",
+          "size_bytes": 236090817
+        }
+      ],
+      "raw_provenance_images": [
+        {
+          "path": "data/raw/cordex/cds/rcp_4_5/baseline_2006_2023/tas_EUR-11_CNRM-CERFACS-CNRM-CM5_rcp45_r1i1p1_CNRM-ALADIN63_v2_day_20060101-20231231.provenance.png",
+          "sha256": "c6b2e287079399f3062a0089f3eb8ca97d15711612fa3ac47efd03cccb64caea"
+        },
+        {
+          "path": "data/raw/cordex/cds/rcp_4_5/baseline_2006_2023/rsds_EUR-11_CNRM-CERFACS-CNRM-CM5_rcp45_r1i1p1_CNRM-ALADIN63_v2_day_20060101-20231231.provenance.png",
+          "sha256": "773c189b6d9c6c7177e86ef5ca23cae0c858ee5a5bec0d98020fea7120921b80"
+        }
+      ],
+      "raw_provenance_json": [
+        {
+          "path": "data/raw/cordex/cds/rcp_4_5/baseline_2006_2023/tas_EUR-11_CNRM-CERFACS-CNRM-CM5_rcp45_r1i1p1_CNRM-ALADIN63_v2_day_20060101-20231231.provenance.json",
+          "sha256": "61d14e7a893ffad6344fb08f55604a291a0451b8ad22d95e07503bcfcfd6c4b2"
+        },
+        {
+          "path": "data/raw/cordex/cds/rcp_4_5/baseline_2006_2023/rsds_EUR-11_CNRM-CERFACS-CNRM-CM5_rcp45_r1i1p1_CNRM-ALADIN63_v2_day_20060101-20231231.provenance.json",
+          "sha256": "4e82e01b35c03f2398e3e960542132f51d6f34e9202738924346ef8f4a3cd5c0"
+        }
+      ],
+      "role": "baseline",
+      "row_count": 6574,
+      "scenario": "rcp_4_5",
+      "source_key": "rcp_4_5_baseline",
+      "window": "observed_anchor",
+      "year_count": 18
+    },
+    "rcp_4_5_future": {
+      "csv": "data/processed/cordex/daily/weather_2050_centered_rcp_4_5_2041_2060.csv",
+      "csv_sha256": "4b8219ef36195c31b490d0304d114e2f8976f8a9c7ea607b809896755d2f9eee",
+      "metadata": "data/processed/cordex/daily/weather_2050_centered_rcp_4_5_2041_2060.metadata.json",
+      "metadata_sha256": "bd267b556850fbba32175e1d27fd8518e2d99546f285bbf7dff23950d53eecbd",
+      "period_end": "2060-12-31",
+      "period_start": "2041-01-01",
+      "raw_netcdf": [
+        {
+          "path": "data/raw/cordex/cds/rcp_4_5/target_2041_2060/tas_EUR-11_CNRM-CERFACS-CNRM-CM5_rcp45_r1i1p1_CNRM-ALADIN63_v2_day_20410101-20601231.nc",
+          "sha256": "6244384414fdb22b039fe51b0625076039fcf30c77d6f6865f5852b3d870153b",
+          "size_bytes": 262334470
+        },
+        {
+          "path": "data/raw/cordex/cds/rcp_4_5/target_2041_2060/rsds_EUR-11_CNRM-CERFACS-CNRM-CM5_rcp45_r1i1p1_CNRM-ALADIN63_v2_day_20410101-20601231.nc",
+          "sha256": "e037fceef76d069b934f618f511065c96fed79f785b8f1c567260b60c6bec864",
+          "size_bytes": 262334462
+        }
+      ],
+      "raw_provenance_images": [
+        {
+          "path": "data/raw/cordex/cds/rcp_4_5/target_2041_2060/tas_EUR-11_CNRM-CERFACS-CNRM-CM5_rcp45_r1i1p1_CNRM-ALADIN63_v2_day_20410101-20601231.provenance.png",
+          "sha256": "7b8fb426ce297da7e6431c5a6463396b3617518ef9fbae46f332a62550b5f69f"
+        },
+        {
+          "path": "data/raw/cordex/cds/rcp_4_5/target_2041_2060/rsds_EUR-11_CNRM-CERFACS-CNRM-CM5_rcp45_r1i1p1_CNRM-ALADIN63_v2_day_20410101-20601231.provenance.png",
+          "sha256": "d6319eb9736af84c2d1ea18da84319f6eae887b69566f52f75d006ae6a42e7a5"
+        }
+      ],
+      "raw_provenance_json": [
+        {
+          "path": "data/raw/cordex/cds/rcp_4_5/target_2041_2060/tas_EUR-11_CNRM-CERFACS-CNRM-CM5_rcp45_r1i1p1_CNRM-ALADIN63_v2_day_20410101-20601231.provenance.json",
+          "sha256": "1fb0ede544208079b2003739a3cb3852630a700040426d74849c9585c563db4f"
+        },
+        {
+          "path": "data/raw/cordex/cds/rcp_4_5/target_2041_2060/rsds_EUR-11_CNRM-CERFACS-CNRM-CM5_rcp45_r1i1p1_CNRM-ALADIN63_v2_day_20410101-20601231.provenance.json",
+          "sha256": "d86aeac079baef3511f57258207f1aed89b511e4d9fb48f9b501ffe7ce78cfa2"
+        }
+      ],
+      "role": "future",
+      "row_count": 7305,
+      "scenario": "rcp_4_5",
+      "source_key": "rcp_4_5_future",
+      "window": "target_2050_centered",
+      "year_count": 20
+    },
+    "rcp_8_5_baseline": {
+      "csv": "data/processed/cordex/daily/weather_observed_anchor_rcp_8_5_2006_2023.csv",
+      "csv_sha256": "e202ce5ae83fd5dadb69c91c1f558d8fecd744461be9efa4e65761d09789979d",
+      "metadata": "data/processed/cordex/daily/weather_observed_anchor_rcp_8_5_2006_2023.metadata.json",
+      "metadata_sha256": "e8807f1f5b01b35b9fd6fc4c566befd52c06748ecff9bbaa8d50c431e2c3418e",
+      "period_end": "2023-12-31",
+      "period_start": "2006-01-01",
+      "raw_netcdf": [
+        {
+          "path": "data/raw/cordex/cds/rcp_8_5/baseline_2006_2023/tas_EUR-11_CNRM-CERFACS-CNRM-CM5_rcp85_r1i1p1_CNRM-ALADIN63_v2_day_20060101-20231231.nc",
+          "sha256": "8b4aeb5527c8860ebfc1108b97be88abd8fb8a05087350cc22dc5bd40ac79f70",
+          "size_bytes": 236090791
+        },
+        {
+          "path": "data/raw/cordex/cds/rcp_8_5/baseline_2006_2023/rsds_EUR-11_CNRM-CERFACS-CNRM-CM5_rcp85_r1i1p1_CNRM-ALADIN63_v2_day_20060101-20231231.nc",
+          "sha256": "e1fd4742f1b8d9f4abb9e509690e9a06f4577685111d73bd0d83c857de3f5a98",
+          "size_bytes": 236090737
+        }
+      ],
+      "raw_provenance_images": [
+        {
+          "path": "data/raw/cordex/cds/rcp_8_5/baseline_2006_2023/tas_EUR-11_CNRM-CERFACS-CNRM-CM5_rcp85_r1i1p1_CNRM-ALADIN63_v2_day_20060101-20231231.provenance.png",
+          "sha256": "803fa812c1fdfacb8969f1f7903d600e55bb5d7b2a7eceea8cdbb89cdbc8f806"
+        },
+        {
+          "path": "data/raw/cordex/cds/rcp_8_5/baseline_2006_2023/rsds_EUR-11_CNRM-CERFACS-CNRM-CM5_rcp85_r1i1p1_CNRM-ALADIN63_v2_day_20060101-20231231.provenance.png",
+          "sha256": "3dc397d14396c8a43cfec1e8e86da0fc7940e5e3080e36e66a754bc24bbfc931"
+        }
+      ],
+      "raw_provenance_json": [
+        {
+          "path": "data/raw/cordex/cds/rcp_8_5/baseline_2006_2023/tas_EUR-11_CNRM-CERFACS-CNRM-CM5_rcp85_r1i1p1_CNRM-ALADIN63_v2_day_20060101-20231231.provenance.json",
+          "sha256": "c6252e0ada3824277a065d33cb6f3b23f4507b5ab9d068683d358365127fdd47"
+        },
+        {
+          "path": "data/raw/cordex/cds/rcp_8_5/baseline_2006_2023/rsds_EUR-11_CNRM-CERFACS-CNRM-CM5_rcp85_r1i1p1_CNRM-ALADIN63_v2_day_20060101-20231231.provenance.json",
+          "sha256": "86dd82aea4ec5dcb4d7a56f5a23e8a35c68898a8c5e06570b3651b7475b61877"
+        }
+      ],
+      "role": "baseline",
+      "row_count": 6574,
+      "scenario": "rcp_8_5",
+      "source_key": "rcp_8_5_baseline",
+      "window": "observed_anchor",
+      "year_count": 18
+    },
+    "rcp_8_5_future": {
+      "csv": "data/processed/cordex/daily/weather_2050_centered_rcp_8_5_2041_2060.csv",
+      "csv_sha256": "1086d82d266677904639bdf8365995805296d7e5501f731b21a5a1a38a31baec",
+      "metadata": "data/processed/cordex/daily/weather_2050_centered_rcp_8_5_2041_2060.metadata.json",
+      "metadata_sha256": "459537f38792bfaf7fd6ca4a142b3bf1384f81be66b1858d395998ed224efde1",
+      "period_end": "2060-12-31",
+      "period_start": "2041-01-01",
+      "raw_netcdf": [
+        {
+          "path": "data/raw/cordex/cds/rcp_8_5/target_2041_2060/tas_EUR-11_CNRM-CERFACS-CNRM-CM5_rcp85_r1i1p1_CNRM-ALADIN63_v2_day_20410101-20601231.nc",
+          "sha256": "1eebf59720ac074b7887438de0d3894cd7e93430c9d4d1b08b54d39c4d479612",
+          "size_bytes": 262334367
+        },
+        {
+          "path": "data/raw/cordex/cds/rcp_8_5/target_2041_2060/rsds_EUR-11_CNRM-CERFACS-CNRM-CM5_rcp85_r1i1p1_CNRM-ALADIN63_v2_day_20410101-20601231.nc",
+          "sha256": "21fe037167b97cb80617777637b7f0b583af145ace44417ee2a42d34dcf35e13",
+          "size_bytes": 262334313
+        }
+      ],
+      "raw_provenance_images": [
+        {
+          "path": "data/raw/cordex/cds/rcp_8_5/target_2041_2060/tas_EUR-11_CNRM-CERFACS-CNRM-CM5_rcp85_r1i1p1_CNRM-ALADIN63_v2_day_20410101-20601231.provenance.png",
+          "sha256": "fc66841089a924edf1904dff2f4a77c309428aac68cb6105361422ebcc0b3f26"
+        },
+        {
+          "path": "data/raw/cordex/cds/rcp_8_5/target_2041_2060/rsds_EUR-11_CNRM-CERFACS-CNRM-CM5_rcp85_r1i1p1_CNRM-ALADIN63_v2_day_20410101-20601231.provenance.png",
+          "sha256": "44d39a8b31ba70e8237e3c8fbd0150be7a94a56c7c4f9ea7885101aefe8b74ec"
+        }
+      ],
+      "raw_provenance_json": [
+        {
+          "path": "data/raw/cordex/cds/rcp_8_5/target_2041_2060/tas_EUR-11_CNRM-CERFACS-CNRM-CM5_rcp85_r1i1p1_CNRM-ALADIN63_v2_day_20410101-20601231.provenance.json",
+          "sha256": "875dca9941be9a653a05b24e8d092cdaa23ed28049ea15d8d8aa669baf59d341"
+        },
+        {
+          "path": "data/raw/cordex/cds/rcp_8_5/target_2041_2060/rsds_EUR-11_CNRM-CERFACS-CNRM-CM5_rcp85_r1i1p1_CNRM-ALADIN63_v2_day_20410101-20601231.provenance.json",
+          "sha256": "8a08414c34ca0bd0902fc3291c80fb5c87e01ae050a746933f08dd0135163993"
+        }
+      ],
+      "role": "future",
+      "row_count": 7305,
+      "scenario": "rcp_8_5",
+      "source_key": "rcp_8_5_future",
+      "window": "target_2050_centered",
+      "year_count": 20
+    }
+  },
+  "spatial_extraction": {
+    "cds_area_subset": {
+      "east": 6.5,
+      "north": 51.6,
+      "south": 49.4,
+      "west": 2.4
+    },
+    "full_domain_indices": {
+      "x": 191,
+      "y": 239
+    },
+    "method": "nearest_point",
+    "selected_indices": {
+      "x": 11,
+      "y": 13
+    },
+    "selected_lat": 50.79848111186651,
+    "selected_lon": 4.269705300227394,
+    "target_lat": 50.85,
+    "target_lon": 4.35
+  }
+}

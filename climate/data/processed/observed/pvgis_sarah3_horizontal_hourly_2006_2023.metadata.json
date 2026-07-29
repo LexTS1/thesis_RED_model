@@ -1,4 +1,12 @@
 {
+  "canonical_selection": {
+    "excluded_source_years": [
+      2005
+    ],
+    "first": "2006-01-01",
+    "last": "2023-12-31",
+    "reason": "Match the 2006-2023 CORDEX baseline period exactly."
+  },
   "columns": [
     "timestamp_utc",
     "T_out_C",
@@ -10,8 +18,8 @@
     "pvgis_reconstructed"
   ],
   "output": {
-    "path": "data/processed/observed/pvgis_sarah3_horizontal_hourly_2005_2023.csv",
-    "sha256": "03466dee5883c019802a304566fb02aa3746253ffdd3ca218b234d9a7f9a1678"
+    "path": "data/processed/observed/pvgis_sarah3_horizontal_hourly_2006_2023.csv",
+    "sha256": "a9bebd7b44da6abd349c1a695fa5e47552439e1ee1772a4339efa0bfacec1ede"
   },
   "ranges": {
     "I_beam_horizontal_W_m2": {
@@ -32,7 +40,7 @@
     },
     "sun_height_deg": {
       "maximum": 62.13,
-      "minimum": -1.59
+      "minimum": 0.0
     },
     "wind_speed_10m_m_s": {
       "maximum": 14.28,
@@ -40,9 +48,17 @@
     }
   },
   "reconstructed_row_count": 0,
-  "row_count": 166536,
+  "row_count": 157776,
   "schema_version": 1,
   "source": {
+    "api_request_url": "https://re.jrc.ec.europa.eu/api/v5_3/seriescalc?lat=50.830&lon=4.350&startyear=2005&endyear=2023&raddatabase=PVGIS-SARAH3&outputformat=csv&angle=0&aspect=0&components=1&usehorizon=1",
+    "api_version": "v5_3",
+    "documentation_url": "https://joint-research-centre.ec.europa.eu/photovoltaic-geographical-information-system-pvgis/using-pvgis-5/pvgis-5-user-manual_en",
+    "download_period": {
+      "first": "2005-01-01",
+      "last": "2023-12-31",
+      "row_count": 166536
+    },
     "header": {
       "azimuth_pvgis_deg": 0.0,
       "elevation_m": 61.0,
@@ -52,10 +68,13 @@
       "slope_deg": 0.0
     },
     "path": "data/raw/observed/Timeseries_pvgisWEATHER_50.830_4.350_SA3_0deg_0deg_2005_2023.csv",
-    "sha256": "a12fa6560bcf2e877d4228ab43636dc4ed92434e67aa40611bbd8a04c1760aa6"
+    "provider": "PVGIS",
+    "radiation_semantics": "Satellite-derived irradiance at the HH:10 scan time, treated by PVGIS as representative of the hour; temperature and wind are hourly reanalysis values.",
+    "sha256": "a12fa6560bcf2e877d4228ab43636dc4ed92434e67aa40611bbd8a04c1760aa6",
+    "usage_conditions_url": "https://joint-research-centre.ec.europa.eu/photovoltaic-geographical-information-system-pvgis/general-information/usage-conditions-data-protection_en"
   },
   "timestamp": {
-    "first": "2005-01-01T00:00:00+00:00",
+    "first": "2006-01-01T00:00:00+00:00",
     "last": "2023-12-31T23:00:00+00:00",
     "normalization": "floor_to_hour",
     "source_format": "YYYYMMDD:HHMM",
@@ -71,9 +90,8 @@
     "sun_height_deg": "degree",
     "wind_speed_10m_m_s": "m/s"
   },
-  "year_count": 19,
+  "year_count": 18,
   "year_rows": {
-    "2005": 8760,
     "2006": 8760,
     "2007": 8760,
     "2008": 8784,

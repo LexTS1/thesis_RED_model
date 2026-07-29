@@ -1,10 +1,12 @@
 {
   "caveats": {
-    "observed_anchor": "Applying the full 1981-2005 to 2050-2070 delta to PVGIS 2005-2023 weather would slightly double-count warming since the historical CORDEX reference period.",
-    "single_model_chain": "Climate-model uncertainty is not sampled because all scenarios use one GCM-RCM-member chain.",
-    "weather_axis": "One member for each complete observed PVGIS year 2005-2023."
+    "observed_anchor": "Each 2041-2060 scenario climatology is differenced against its matching 2006-2023 CORDEX scenario branch and applied to the same 2006-2023 PVGIS period. Matching the periods removes the former one-year temporal-anchor mismatch, while delta morphing still retains the observed point-weather distribution rather than reproducing the CORDEX absolute baseline.",
+    "single_model_chain": "This is a single GCM-RCM-member sensitivity study. It samples RCP forcing and paired observed weather years, but it does not sample structural climate-model uncertainty and is not a probabilistic climate projection.",
+    "weather_axis": "One paired member for each complete observed PVGIS year 2006-2023 within each RCP.",
+    "weather_ensemble": "The 54 members form a paired deterministic empirical weather-year ensemble (18 PVGIS years repeated across 3 RCPs), not 54 independent Monte Carlo samples."
   },
-  "climate_target": "2050-2070",
+  "climate_target": "2041-2060",
+  "climate_target_label": "2050-centred mid-term period",
   "columns": [
     "timestamp_utc",
     "T_out_C",
@@ -33,118 +35,118 @@
   },
   "monthly_parameters": [
     {
-      "alpha_solar_applied": 1.047806043,
-      "alpha_solar_raw": 1.047806043,
+      "alpha_solar_applied": 1.0269122245,
+      "alpha_solar_raw": 1.0269122245,
       "alpha_was_clipped": false,
-      "delta_T_C": 1.1625593363,
+      "delta_T_C": 1.180875487,
       "month": 1
     },
     {
-      "alpha_solar_applied": 1.0663220219,
-      "alpha_solar_raw": 1.0663220219,
+      "alpha_solar_applied": 1.0604652042,
+      "alpha_solar_raw": 1.0604652042,
       "alpha_was_clipped": false,
-      "delta_T_C": 0.4252203935,
+      "delta_T_C": 0.2180344297,
       "month": 2
     },
     {
-      "alpha_solar_applied": 0.9997804193,
-      "alpha_solar_raw": 0.9997804193,
+      "alpha_solar_applied": 0.9903614674,
+      "alpha_solar_raw": 0.9903614674,
       "alpha_was_clipped": false,
-      "delta_T_C": 1.1767587913,
+      "delta_T_C": 0.2856956181,
       "month": 3
     },
     {
-      "alpha_solar_applied": 1.0826441593,
-      "alpha_solar_raw": 1.0826441593,
+      "alpha_solar_applied": 1.0002984611,
+      "alpha_solar_raw": 1.0002984611,
       "alpha_was_clipped": false,
-      "delta_T_C": 1.3809706508,
+      "delta_T_C": 0.3241987779,
       "month": 4
     },
     {
-      "alpha_solar_applied": 1.0846610918,
-      "alpha_solar_raw": 1.0846610918,
+      "alpha_solar_applied": 1.0407735557,
+      "alpha_solar_raw": 1.0407735557,
       "alpha_was_clipped": false,
-      "delta_T_C": 1.9399827264,
+      "delta_T_C": 1.4067527251,
       "month": 5
     },
     {
-      "alpha_solar_applied": 1.1104768063,
-      "alpha_solar_raw": 1.1104768063,
+      "alpha_solar_applied": 1.036412872,
+      "alpha_solar_raw": 1.036412872,
       "alpha_was_clipped": false,
-      "delta_T_C": 2.1930443309,
+      "delta_T_C": 1.5944040765,
       "month": 6
     },
     {
-      "alpha_solar_applied": 1.0723459774,
-      "alpha_solar_raw": 1.0723459774,
+      "alpha_solar_applied": 1.0165283521,
+      "alpha_solar_raw": 1.0165283521,
       "alpha_was_clipped": false,
-      "delta_T_C": 1.8560450925,
+      "delta_T_C": 0.6912933842,
       "month": 7
     },
     {
-      "alpha_solar_applied": 1.0523990297,
-      "alpha_solar_raw": 1.0523990297,
+      "alpha_solar_applied": 1.017112313,
+      "alpha_solar_raw": 1.017112313,
       "alpha_was_clipped": false,
-      "delta_T_C": 1.6783844041,
+      "delta_T_C": 0.4490779207,
       "month": 8
     },
     {
-      "alpha_solar_applied": 1.0758741902,
-      "alpha_solar_raw": 1.0758741902,
+      "alpha_solar_applied": 1.0429160566,
+      "alpha_solar_raw": 1.0429160566,
       "alpha_was_clipped": false,
-      "delta_T_C": 2.0245114049,
+      "delta_T_C": 0.1902248185,
       "month": 9
     },
     {
-      "alpha_solar_applied": 1.0751160125,
-      "alpha_solar_raw": 1.0751160125,
+      "alpha_solar_applied": 1.019918328,
+      "alpha_solar_raw": 1.019918328,
       "alpha_was_clipped": false,
-      "delta_T_C": 1.8856973553,
+      "delta_T_C": 0.9913559069,
       "month": 10
     },
     {
-      "alpha_solar_applied": 1.0412571462,
-      "alpha_solar_raw": 1.0412571462,
+      "alpha_solar_applied": 1.0028101973,
+      "alpha_solar_raw": 1.0028101973,
       "alpha_was_clipped": false,
-      "delta_T_C": 2.2893250868,
+      "delta_T_C": 1.3285003606,
       "month": 11
     },
     {
-      "alpha_solar_applied": 1.0367830143,
-      "alpha_solar_raw": 1.0367830143,
+      "alpha_solar_applied": 1.0066147765,
+      "alpha_solar_raw": 1.0066147765,
       "alpha_was_clipped": false,
-      "delta_T_C": 1.5264463269,
+      "delta_T_C": 0.996163924,
       "month": 12
     }
   ],
   "observed_pvgis_year": 2009,
   "output": {
     "path": "data/processed/ensemble_2050/rcp_4_5/weather_2050_rcp_4_5_pvgis_2009.csv",
-    "sha256": "9b00b0c89e12abc62d32c7aaaf2f8e930a71cf64dfdd2ad99d14b82175ab1fe0"
+    "sha256": "fd87a5353592e17ff73e8745874e02868940501d2a818d5f44b766cae4c10fb5"
   },
   "row_count": 8760,
   "scenario": "rcp_4_5",
   "schema_version": 1,
   "sources": {
     "delta_provenance_path": "data/processed/deltas/climate_deltas_2050.provenance.json",
-    "delta_provenance_sha256": "f6a0ab0d842107ac85810e884ebf4d439cdddf39eff5f2c6ff7a370b70ed7032",
+    "delta_provenance_sha256": "f857a4a7b069b9470850770c03e5622df8ed612fe6059e94ff9c10ea7ec75016",
     "monthly_deltas_path": "data/processed/deltas/monthly_deltas_2050.csv",
-    "monthly_deltas_sha256": "b3aea5b5bbe96e7fb2faf240f267391b80bdfbbf45c9c3689aac7c12ca2f0f7b",
-    "observed_clean_path": "data/processed/observed/pvgis_sarah3_horizontal_hourly_2005_2023.csv",
-    "observed_clean_sha256": "03466dee5883c019802a304566fb02aa3746253ffdd3ca218b234d9a7f9a1678",
+    "monthly_deltas_sha256": "e40ccb491db9d0ecfe8c9e8462f713cf096279ef2b219236d05222512135b242",
+    "observed_clean_path": "data/processed/observed/pvgis_sarah3_horizontal_hourly_2006_2023.csv",
+    "observed_clean_sha256": "a9bebd7b44da6abd349c1a695fa5e47552439e1ee1772a4339efa0bfacec1ede",
     "observed_raw_path": "data/raw/observed/Timeseries_pvgisWEATHER_50.830_4.350_SA3_0deg_0deg_2005_2023.csv",
     "observed_raw_sha256": "a12fa6560bcf2e877d4228ab43636dc4ed92434e67aa40611bbd8a04c1760aa6"
   },
   "statistics": {
     "I_solar_W_m2": {
-      "maximum": 1014.9869057262629,
-      "mean": 134.62302642533535,
+      "maximum": 952.3182112010569,
+      "mean": 128.53797917063935,
       "minimum": 0.0
     },
     "T_out_C": {
-      "maximum": 34.4683844041,
-      "mean": 12.142830073708126,
-      "minimum": -10.1974406637
+      "maximum": 33.2390779207,
+      "mean": 11.31740174150484,
+      "minimum": -10.179124513
     }
   },
   "timestamp": {

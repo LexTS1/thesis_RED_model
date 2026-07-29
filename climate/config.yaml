@@ -1,10 +1,18 @@
-schema_version: 4
+schema_version: 6
 
 dataset:
   name: projections-cordex-domains-single-levels
+  provider: Copernicus Climate Data Store
+  project: CORDEX
+  domain_id: EUR-11
   domain: europe
   horizontal_resolution: 0_11_degree_x_0_11_degree
   temporal_resolution: daily_mean
+  cds_url: https://cds.climate.copernicus.eu/datasets/projections-cordex-domains-single-levels
+  doi: 10.24381/cds.bc91edc3
+  catalogue_version: latest
+  cordex_file_version: v2
+  licence_url: https://cds.climate.copernicus.eu/datasets/projections-cordex-domains-single-levels?tab=download
   variables:
     temperature: tas
     solar_radiation: rsds
@@ -21,8 +29,16 @@ spatial_extraction:
   selected_lat: 50.79848111186651
   selected_lon: 4.269705300227394
   selected_indices:
+    x: 11
+    y: 13
+  full_domain_indices:
     x: 191
     y: 239
+  cds_area_subset:
+    west: 2.4
+    south: 49.4
+    east: 6.5
+    north: 51.6
 
 physical_ranges:
   temperature_C: [-35.0, 50.0]
@@ -32,81 +48,129 @@ solar_alpha_safety:
   minimum: 0.7
   maximum: 1.3
 
-baseline_source: historical
+scenario_baselines:
+  rcp_2_6: rcp_2_6_baseline
+  rcp_4_5: rcp_4_5_baseline
+  rcp_8_5: rcp_8_5_baseline
 
 provenance:
   legacy_model_root: /Users/alex/Library/CloudStorage/OneDrive-VrijeUniversiteitBrussel/Documenten/VUB/MA IW/Master Thesis/Legacy Models/model_v3
-  single_chain_caveat: Climate-model uncertainty is not sampled because all scenarios use one GCM-RCM-member chain.
-  observed_anchor_caveat: Applying the full 1981-2005 to 2050-2070 delta to PVGIS 2005-2023 weather would slightly double-count warming since the historical CORDEX reference period.
+  single_chain_caveat: This is a single GCM-RCM-member sensitivity study. It samples RCP forcing and paired observed weather years, but it does not sample structural climate-model uncertainty and is not a probabilistic climate projection.
+  observed_anchor_caveat: Each 2041-2060 scenario climatology is differenced against its matching 2006-2023 CORDEX scenario branch and applied to the same 2006-2023 PVGIS period. Matching the periods removes the former one-year temporal-anchor mismatch, while delta morphing still retains the observed point-weather distribution rather than reproducing the CORDEX absolute baseline.
+  weather_ensemble_caveat: The 54 members form a paired deterministic empirical weather-year ensemble (18 PVGIS years repeated across 3 RCPs), not 54 independent Monte Carlo samples.
+
+cordex_processing:
+  script: climate.src.prepare_cordex
+  output_directory: data/processed/cordex/daily
+  manifest: data/processed/cordex/cordex_daily_manifest.json
+  timestamp_convention: daily mean stamped at 12:00:00
+  temperature_conversion: T_out_C = tas_K - 273.15
+  solar_conversion: none
 
 sources:
-  historical:
+  rcp_2_6_baseline:
     role: baseline
-    scenario: historical
-    window: baseline
-    period_start: 1981-01-01
-    period_end: 2005-12-31
-    expected_rows: 9131
-    expected_years: 25
-    csv: data/raw/cordex/baseline/weather_baseline_historical_cnrm_cerfacs_cm5_cnrm_aladin63_r1i1p1.csv
-    metadata: data/raw/cordex/baseline/weather_baseline_historical_cnrm_cerfacs_cm5_cnrm_aladin63_r1i1p1.metadata.json
-    legacy_csv: inputs/climate/processed/baseline/weather_baseline_historical_cnrm_cerfacs_cm5_cnrm_aladin63_r1i1p1.csv
-    legacy_metadata: inputs/climate/processed/baseline/weather_baseline_historical_cnrm_cerfacs_cm5_cnrm_aladin63_r1i1p1.metadata.json
-    csv_sha256: f8be1b33bb27df03d8f68691b0e76e08f78a2b4e2ae07b11612e8cbad8509dab
-    metadata_sha256: 91667898a1159d2a6b3cef75a83533b1c777fdb39fa433ee7aea1154297182b7
+    scenario: rcp_2_6
+    window: observed_anchor
+    period_start: 2006-01-01
+    period_end: 2023-12-31
+    expected_rows: 6574
+    expected_years: 18
+    csv: data/processed/cordex/daily/weather_observed_anchor_rcp_2_6_2006_2023.csv
+    metadata: data/processed/cordex/daily/weather_observed_anchor_rcp_2_6_2006_2023.metadata.json
+    raw:
+      temperature: {netcdf: data/raw/cordex/cds/rcp_2_6/baseline_2006_2023/tas_EUR-11_CNRM-CERFACS-CNRM-CM5_rcp26_r1i1p1_CNRM-ALADIN63_v2_day_20060101-20231231.nc, netcdf_sha256: 722978630a78f8f029c62e9d7437e171f7593638c2eecff038057668628baaba, provenance_json: data/raw/cordex/cds/rcp_2_6/baseline_2006_2023/tas_EUR-11_CNRM-CERFACS-CNRM-CM5_rcp26_r1i1p1_CNRM-ALADIN63_v2_day_20060101-20231231.provenance.json, provenance_json_sha256: 8ce2da2dac89e7d7776b32790102f4d415c14095e50957ef6a25096a05129b0a, provenance_image: data/raw/cordex/cds/rcp_2_6/baseline_2006_2023/tas_EUR-11_CNRM-CERFACS-CNRM-CM5_rcp26_r1i1p1_CNRM-ALADIN63_v2_day_20060101-20231231.provenance.png, provenance_image_sha256: 2d0e9f29fac96b693cfd05bd8bf52fd8cfb79299b854dcf19c1661a48e79175a}
+      solar_radiation: {netcdf: data/raw/cordex/cds/rcp_2_6/baseline_2006_2023/rsds_EUR-11_CNRM-CERFACS-CNRM-CM5_rcp26_r1i1p1_CNRM-ALADIN63_v2_day_20060101-20231231.nc, netcdf_sha256: 27e4b517fa218bec80ffe188401768a6b794bab8d568783042e5467897f2f211, provenance_json: data/raw/cordex/cds/rcp_2_6/baseline_2006_2023/rsds_EUR-11_CNRM-CERFACS-CNRM-CM5_rcp26_r1i1p1_CNRM-ALADIN63_v2_day_20060101-20231231.provenance.json, provenance_json_sha256: a765bc0c035aac4f1c791ccb800490facb462ead8aad98c7e8ed6c62606ea12e, provenance_image: data/raw/cordex/cds/rcp_2_6/baseline_2006_2023/rsds_EUR-11_CNRM-CERFACS-CNRM-CM5_rcp26_r1i1p1_CNRM-ALADIN63_v2_day_20060101-20231231.provenance.png, provenance_image_sha256: 8198699390bce5b698eb70b019e2ec5a834b0548f81983b6ccda2a469017c0f4}
 
-  rcp_2_6:
+  rcp_2_6_future:
     role: future
     scenario: rcp_2_6
-    window: mid_century
-    period_start: 2050-01-01
-    period_end: 2070-12-31
-    expected_rows: 7670
-    expected_years: 21
-    csv: data/raw/cordex/mid_century/weather_mid_century_rcp_2_6_cnrm_cerfacs_cm5_cnrm_aladin63_r1i1p1.csv
-    metadata: data/raw/cordex/mid_century/weather_mid_century_rcp_2_6_cnrm_cerfacs_cm5_cnrm_aladin63_r1i1p1.metadata.json
-    legacy_csv: inputs/climate/processed/mid_century/weather_mid_century_rcp_2_6_cnrm_cerfacs_cm5_cnrm_aladin63_r1i1p1.csv
-    legacy_metadata: inputs/climate/processed/mid_century/weather_mid_century_rcp_2_6_cnrm_cerfacs_cm5_cnrm_aladin63_r1i1p1.metadata.json
-    csv_sha256: 4039010ef92f8723a67165c78574981df0fa6bae22d60340de74f170cf9031c9
-    metadata_sha256: 1540d4e92cf2c6635f84fd73128658e81277a0796703d85b63a2fba0210dfd32
+    baseline_source: rcp_2_6_baseline
+    window: target_2050_centered
+    period_start: 2041-01-01
+    period_end: 2060-12-31
+    expected_rows: 7305
+    expected_years: 20
+    csv: data/processed/cordex/daily/weather_2050_centered_rcp_2_6_2041_2060.csv
+    metadata: data/processed/cordex/daily/weather_2050_centered_rcp_2_6_2041_2060.metadata.json
+    raw:
+      temperature: {netcdf: data/raw/cordex/cds/rcp_2_6/target_2041_2060/tas_EUR-11_CNRM-CERFACS-CNRM-CM5_rcp26_r1i1p1_CNRM-ALADIN63_v2_day_20410101-20601231.nc, netcdf_sha256: 839050ac208d43c92e4b4787e14ea1f9765b437d1832cf4c0a5665fe9d280e7f, provenance_json: data/raw/cordex/cds/rcp_2_6/target_2041_2060/tas_EUR-11_CNRM-CERFACS-CNRM-CM5_rcp26_r1i1p1_CNRM-ALADIN63_v2_day_20410101-20601231.provenance.json, provenance_json_sha256: cdd1d0cc7acd9e352a3f66b62b49ae21cc2365087d3816afa8a061f52eb024a8, provenance_image: data/raw/cordex/cds/rcp_2_6/target_2041_2060/tas_EUR-11_CNRM-CERFACS-CNRM-CM5_rcp26_r1i1p1_CNRM-ALADIN63_v2_day_20410101-20601231.provenance.png, provenance_image_sha256: d5bf5edf4dd94ba6e1c0f29dc607124006bcea7f3ef85f9bfebb9705f7c83c64}
+      solar_radiation: {netcdf: data/raw/cordex/cds/rcp_2_6/target_2041_2060/rsds_EUR-11_CNRM-CERFACS-CNRM-CM5_rcp26_r1i1p1_CNRM-ALADIN63_v2_day_20410101-20601231.nc, netcdf_sha256: 350dcee9831434dea7bac4836626a189e5e4e78b36cb2dcdb0b450e4c5f087b9, provenance_json: data/raw/cordex/cds/rcp_2_6/target_2041_2060/rsds_EUR-11_CNRM-CERFACS-CNRM-CM5_rcp26_r1i1p1_CNRM-ALADIN63_v2_day_20410101-20601231.provenance.json, provenance_json_sha256: e0c33aae54681a1424764417e74ecfd96de46d55a8733f0b37e29ac62c5f6703, provenance_image: data/raw/cordex/cds/rcp_2_6/target_2041_2060/rsds_EUR-11_CNRM-CERFACS-CNRM-CM5_rcp26_r1i1p1_CNRM-ALADIN63_v2_day_20410101-20601231.provenance.png, provenance_image_sha256: 9b71a48c5cf97433d3cf47c2563c7515c35eb00e4907119e14208283d6b17db6}
 
-  rcp_4_5:
+  rcp_4_5_baseline:
+    role: baseline
+    scenario: rcp_4_5
+    window: observed_anchor
+    period_start: 2006-01-01
+    period_end: 2023-12-31
+    expected_rows: 6574
+    expected_years: 18
+    csv: data/processed/cordex/daily/weather_observed_anchor_rcp_4_5_2006_2023.csv
+    metadata: data/processed/cordex/daily/weather_observed_anchor_rcp_4_5_2006_2023.metadata.json
+    raw:
+      temperature: {netcdf: data/raw/cordex/cds/rcp_4_5/baseline_2006_2023/tas_EUR-11_CNRM-CERFACS-CNRM-CM5_rcp45_r1i1p1_CNRM-ALADIN63_v2_day_20060101-20231231.nc, netcdf_sha256: ba4afe64df117416b313d99d0cd8466f28a2e10f2ac79d3c6834b4809181f790, provenance_json: data/raw/cordex/cds/rcp_4_5/baseline_2006_2023/tas_EUR-11_CNRM-CERFACS-CNRM-CM5_rcp45_r1i1p1_CNRM-ALADIN63_v2_day_20060101-20231231.provenance.json, provenance_json_sha256: 61d14e7a893ffad6344fb08f55604a291a0451b8ad22d95e07503bcfcfd6c4b2, provenance_image: data/raw/cordex/cds/rcp_4_5/baseline_2006_2023/tas_EUR-11_CNRM-CERFACS-CNRM-CM5_rcp45_r1i1p1_CNRM-ALADIN63_v2_day_20060101-20231231.provenance.png, provenance_image_sha256: c6b2e287079399f3062a0089f3eb8ca97d15711612fa3ac47efd03cccb64caea}
+      solar_radiation: {netcdf: data/raw/cordex/cds/rcp_4_5/baseline_2006_2023/rsds_EUR-11_CNRM-CERFACS-CNRM-CM5_rcp45_r1i1p1_CNRM-ALADIN63_v2_day_20060101-20231231.nc, netcdf_sha256: 8283b14813b618470f0b0cfd9d8e958210daf664d43ba4d73fedc91550db20dc, provenance_json: data/raw/cordex/cds/rcp_4_5/baseline_2006_2023/rsds_EUR-11_CNRM-CERFACS-CNRM-CM5_rcp45_r1i1p1_CNRM-ALADIN63_v2_day_20060101-20231231.provenance.json, provenance_json_sha256: 4e82e01b35c03f2398e3e960542132f51d6f34e9202738924346ef8f4a3cd5c0, provenance_image: data/raw/cordex/cds/rcp_4_5/baseline_2006_2023/rsds_EUR-11_CNRM-CERFACS-CNRM-CM5_rcp45_r1i1p1_CNRM-ALADIN63_v2_day_20060101-20231231.provenance.png, provenance_image_sha256: 773c189b6d9c6c7177e86ef5ca23cae0c858ee5a5bec0d98020fea7120921b80}
+
+  rcp_4_5_future:
     role: future
     scenario: rcp_4_5
-    window: mid_century
-    period_start: 2050-01-01
-    period_end: 2070-12-31
-    expected_rows: 7670
-    expected_years: 21
-    csv: data/raw/cordex/mid_century/weather_mid_century_rcp_4_5_cnrm_cerfacs_cm5_cnrm_aladin63_r1i1p1.csv
-    metadata: data/raw/cordex/mid_century/weather_mid_century_rcp_4_5_cnrm_cerfacs_cm5_cnrm_aladin63_r1i1p1.metadata.json
-    legacy_csv: inputs/climate/processed/mid_century/weather_mid_century_rcp_4_5_cnrm_cerfacs_cm5_cnrm_aladin63_r1i1p1.csv
-    legacy_metadata: inputs/climate/processed/mid_century/weather_mid_century_rcp_4_5_cnrm_cerfacs_cm5_cnrm_aladin63_r1i1p1.metadata.json
-    csv_sha256: ce3601d99d6585bddda58402582fa4cb71ca69974d3f3f67247381ef6a52020f
-    metadata_sha256: 0f6130cc87f40644fb1bb4f9a693af7875c10cdf654b938e9625ccaec82d6c68
+    baseline_source: rcp_4_5_baseline
+    window: target_2050_centered
+    period_start: 2041-01-01
+    period_end: 2060-12-31
+    expected_rows: 7305
+    expected_years: 20
+    csv: data/processed/cordex/daily/weather_2050_centered_rcp_4_5_2041_2060.csv
+    metadata: data/processed/cordex/daily/weather_2050_centered_rcp_4_5_2041_2060.metadata.json
+    raw:
+      temperature: {netcdf: data/raw/cordex/cds/rcp_4_5/target_2041_2060/tas_EUR-11_CNRM-CERFACS-CNRM-CM5_rcp45_r1i1p1_CNRM-ALADIN63_v2_day_20410101-20601231.nc, netcdf_sha256: 6244384414fdb22b039fe51b0625076039fcf30c77d6f6865f5852b3d870153b, provenance_json: data/raw/cordex/cds/rcp_4_5/target_2041_2060/tas_EUR-11_CNRM-CERFACS-CNRM-CM5_rcp45_r1i1p1_CNRM-ALADIN63_v2_day_20410101-20601231.provenance.json, provenance_json_sha256: 1fb0ede544208079b2003739a3cb3852630a700040426d74849c9585c563db4f, provenance_image: data/raw/cordex/cds/rcp_4_5/target_2041_2060/tas_EUR-11_CNRM-CERFACS-CNRM-CM5_rcp45_r1i1p1_CNRM-ALADIN63_v2_day_20410101-20601231.provenance.png, provenance_image_sha256: 7b8fb426ce297da7e6431c5a6463396b3617518ef9fbae46f332a62550b5f69f}
+      solar_radiation: {netcdf: data/raw/cordex/cds/rcp_4_5/target_2041_2060/rsds_EUR-11_CNRM-CERFACS-CNRM-CM5_rcp45_r1i1p1_CNRM-ALADIN63_v2_day_20410101-20601231.nc, netcdf_sha256: e037fceef76d069b934f618f511065c96fed79f785b8f1c567260b60c6bec864, provenance_json: data/raw/cordex/cds/rcp_4_5/target_2041_2060/rsds_EUR-11_CNRM-CERFACS-CNRM-CM5_rcp45_r1i1p1_CNRM-ALADIN63_v2_day_20410101-20601231.provenance.json, provenance_json_sha256: d86aeac079baef3511f57258207f1aed89b511e4d9fb48f9b501ffe7ce78cfa2, provenance_image: data/raw/cordex/cds/rcp_4_5/target_2041_2060/rsds_EUR-11_CNRM-CERFACS-CNRM-CM5_rcp45_r1i1p1_CNRM-ALADIN63_v2_day_20410101-20601231.provenance.png, provenance_image_sha256: d6319eb9736af84c2d1ea18da84319f6eae887b69566f52f75d006ae6a42e7a5}
 
-  rcp_8_5:
+  rcp_8_5_baseline:
+    role: baseline
+    scenario: rcp_8_5
+    window: observed_anchor
+    period_start: 2006-01-01
+    period_end: 2023-12-31
+    expected_rows: 6574
+    expected_years: 18
+    csv: data/processed/cordex/daily/weather_observed_anchor_rcp_8_5_2006_2023.csv
+    metadata: data/processed/cordex/daily/weather_observed_anchor_rcp_8_5_2006_2023.metadata.json
+    raw:
+      temperature: {netcdf: data/raw/cordex/cds/rcp_8_5/baseline_2006_2023/tas_EUR-11_CNRM-CERFACS-CNRM-CM5_rcp85_r1i1p1_CNRM-ALADIN63_v2_day_20060101-20231231.nc, netcdf_sha256: 8b4aeb5527c8860ebfc1108b97be88abd8fb8a05087350cc22dc5bd40ac79f70, provenance_json: data/raw/cordex/cds/rcp_8_5/baseline_2006_2023/tas_EUR-11_CNRM-CERFACS-CNRM-CM5_rcp85_r1i1p1_CNRM-ALADIN63_v2_day_20060101-20231231.provenance.json, provenance_json_sha256: c6252e0ada3824277a065d33cb6f3b23f4507b5ab9d068683d358365127fdd47, provenance_image: data/raw/cordex/cds/rcp_8_5/baseline_2006_2023/tas_EUR-11_CNRM-CERFACS-CNRM-CM5_rcp85_r1i1p1_CNRM-ALADIN63_v2_day_20060101-20231231.provenance.png, provenance_image_sha256: 803fa812c1fdfacb8969f1f7903d600e55bb5d7b2a7eceea8cdbb89cdbc8f806}
+      solar_radiation: {netcdf: data/raw/cordex/cds/rcp_8_5/baseline_2006_2023/rsds_EUR-11_CNRM-CERFACS-CNRM-CM5_rcp85_r1i1p1_CNRM-ALADIN63_v2_day_20060101-20231231.nc, netcdf_sha256: e1fd4742f1b8d9f4abb9e509690e9a06f4577685111d73bd0d83c857de3f5a98, provenance_json: data/raw/cordex/cds/rcp_8_5/baseline_2006_2023/rsds_EUR-11_CNRM-CERFACS-CNRM-CM5_rcp85_r1i1p1_CNRM-ALADIN63_v2_day_20060101-20231231.provenance.json, provenance_json_sha256: 86dd82aea4ec5dcb4d7a56f5a23e8a35c68898a8c5e06570b3651b7475b61877, provenance_image: data/raw/cordex/cds/rcp_8_5/baseline_2006_2023/rsds_EUR-11_CNRM-CERFACS-CNRM-CM5_rcp85_r1i1p1_CNRM-ALADIN63_v2_day_20060101-20231231.provenance.png, provenance_image_sha256: 3dc397d14396c8a43cfec1e8e86da0fc7940e5e3080e36e66a754bc24bbfc931}
+
+  rcp_8_5_future:
     role: future
     scenario: rcp_8_5
-    window: mid_century
-    period_start: 2050-01-01
-    period_end: 2070-12-31
-    expected_rows: 7670
-    expected_years: 21
-    csv: data/raw/cordex/mid_century/weather_mid_century_rcp_8_5_cnrm_cerfacs_cm5_cnrm_aladin63_r1i1p1.csv
-    metadata: data/raw/cordex/mid_century/weather_mid_century_rcp_8_5_cnrm_cerfacs_cm5_cnrm_aladin63_r1i1p1.metadata.json
-    legacy_csv: inputs/climate/processed/mid_century/weather_mid_century_rcp_8_5_cnrm_cerfacs_cm5_cnrm_aladin63_r1i1p1.csv
-    legacy_metadata: inputs/climate/processed/mid_century/weather_mid_century_rcp_8_5_cnrm_cerfacs_cm5_cnrm_aladin63_r1i1p1.metadata.json
-    csv_sha256: c6d4f900f6d40fb3c4416579a1bce6ca1849b54409eece60b8f259f3d9c01916
-    metadata_sha256: 8fa65aca57310dc21f0de989270cf96857acfef318c2ef24b523be6e928b7ca1
+    baseline_source: rcp_8_5_baseline
+    window: target_2050_centered
+    period_start: 2041-01-01
+    period_end: 2060-12-31
+    expected_rows: 7305
+    expected_years: 20
+    csv: data/processed/cordex/daily/weather_2050_centered_rcp_8_5_2041_2060.csv
+    metadata: data/processed/cordex/daily/weather_2050_centered_rcp_8_5_2041_2060.metadata.json
+    raw:
+      temperature: {netcdf: data/raw/cordex/cds/rcp_8_5/target_2041_2060/tas_EUR-11_CNRM-CERFACS-CNRM-CM5_rcp85_r1i1p1_CNRM-ALADIN63_v2_day_20410101-20601231.nc, netcdf_sha256: 1eebf59720ac074b7887438de0d3894cd7e93430c9d4d1b08b54d39c4d479612, provenance_json: data/raw/cordex/cds/rcp_8_5/target_2041_2060/tas_EUR-11_CNRM-CERFACS-CNRM-CM5_rcp85_r1i1p1_CNRM-ALADIN63_v2_day_20410101-20601231.provenance.json, provenance_json_sha256: 875dca9941be9a653a05b24e8d092cdaa23ed28049ea15d8d8aa669baf59d341, provenance_image: data/raw/cordex/cds/rcp_8_5/target_2041_2060/tas_EUR-11_CNRM-CERFACS-CNRM-CM5_rcp85_r1i1p1_CNRM-ALADIN63_v2_day_20410101-20601231.provenance.png, provenance_image_sha256: fc66841089a924edf1904dff2f4a77c309428aac68cb6105361422ebcc0b3f26}
+      solar_radiation: {netcdf: data/raw/cordex/cds/rcp_8_5/target_2041_2060/rsds_EUR-11_CNRM-CERFACS-CNRM-CM5_rcp85_r1i1p1_CNRM-ALADIN63_v2_day_20410101-20601231.nc, netcdf_sha256: 21fe037167b97cb80617777637b7f0b583af145ace44417ee2a42d34dcf35e13, provenance_json: data/raw/cordex/cds/rcp_8_5/target_2041_2060/rsds_EUR-11_CNRM-CERFACS-CNRM-CM5_rcp85_r1i1p1_CNRM-ALADIN63_v2_day_20410101-20601231.provenance.json, provenance_json_sha256: 8a08414c34ca0bd0902fc3291c80fb5c87e01ae050a746933f08dd0135163993, provenance_image: data/raw/cordex/cds/rcp_8_5/target_2041_2060/rsds_EUR-11_CNRM-CERFACS-CNRM-CM5_rcp85_r1i1p1_CNRM-ALADIN63_v2_day_20410101-20601231.provenance.png, provenance_image_sha256: 44d39a8b31ba70e8237e3c8fbd0150be7a94a56c7c4f9ea7885101aefe8b74ec}
 
 observed_weather:
   provider: PVGIS
+  api_version: v5_3
+  api_endpoint: https://re.jrc.ec.europa.eu/api/v5_3/seriescalc
+  documentation_url: https://joint-research-centre.ec.europa.eu/photovoltaic-geographical-information-system-pvgis/using-pvgis-5/pvgis-5-user-manual_en
+  usage_conditions_url: https://joint-research-centre.ec.europa.eu/photovoltaic-geographical-information-system-pvgis/general-information/usage-conditions-data-protection_en
   radiation_database: PVGIS-SARAH3
-  period_start: 2005-01-01
+  radiation_semantics: Satellite-derived irradiance at the HH:10 scan time, treated by PVGIS as representative of the hour; temperature and wind are hourly reanalysis values.
+  source_period_start: 2005-01-01
+  source_period_end: 2023-12-31
+  source_expected_rows: 166536
+  source_expected_years: 19
+  period_start: 2006-01-01
   period_end: 2023-12-31
-  expected_rows: 166536
-  expected_years: 19
+  expected_rows: 157776
+  expected_years: 18
   latitude: 50.830
   longitude: 4.350
   elevation_m: 61
@@ -115,6 +179,7 @@ observed_weather:
     normalization: floor_to_hour
     timezone: UTC
   horizontal:
+    api_request_url: "https://re.jrc.ec.europa.eu/api/v5_3/seriescalc?lat=50.830&lon=4.350&startyear=2005&endyear=2023&raddatabase=PVGIS-SARAH3&outputformat=csv&angle=0&aspect=0&components=1&usehorizon=1"
     legacy_csv: inputs/weather/Timeseries_pvgisWEATHER_50.830_4.350_SA3_0deg_0deg_2005_2023.csv
     csv: data/raw/observed/Timeseries_pvgisWEATHER_50.830_4.350_SA3_0deg_0deg_2005_2023.csv
     csv_sha256: a12fa6560bcf2e877d4228ab43636dc4ed92434e67aa40611bbd8a04c1760aa6
@@ -122,24 +187,28 @@ observed_weather:
     azimuth_pvgis_deg: 0
   facades:
     south:
+      api_request_url: "https://re.jrc.ec.europa.eu/api/v5_3/seriescalc?lat=50.830&lon=4.350&startyear=2005&endyear=2023&raddatabase=PVGIS-SARAH3&outputformat=csv&angle=90&aspect=0&components=1&usehorizon=1"
       legacy_csv: inputs/solar/TimeseriesSOUTH_50.830_4.350_SA3_90deg_0deg_2005_2023.csv
       csv: data/raw/observed/TimeseriesSOUTH_50.830_4.350_SA3_90deg_0deg_2005_2023.csv
       csv_sha256: c667e440b35d715226d38302c0104b35b5d5764fed6125e5bcc80d08fabf1f41
       slope_deg: 90
       azimuth_pvgis_deg: 0
     east:
+      api_request_url: "https://re.jrc.ec.europa.eu/api/v5_3/seriescalc?lat=50.830&lon=4.350&startyear=2005&endyear=2023&raddatabase=PVGIS-SARAH3&outputformat=csv&angle=90&aspect=-90&components=1&usehorizon=1"
       legacy_csv: inputs/solar/TimeseriesEAST_50.830_4.350_SA3_90deg_-90deg_2005_2023.csv
       csv: data/raw/observed/TimeseriesEAST_50.830_4.350_SA3_90deg_-90deg_2005_2023.csv
       csv_sha256: b1a28b883b4633c7b55388b5b43f571e79efcd391bc0ce6bc07019b5e25d8065
       slope_deg: 90
       azimuth_pvgis_deg: -90
     west:
+      api_request_url: "https://re.jrc.ec.europa.eu/api/v5_3/seriescalc?lat=50.830&lon=4.350&startyear=2005&endyear=2023&raddatabase=PVGIS-SARAH3&outputformat=csv&angle=90&aspect=90&components=1&usehorizon=1"
       legacy_csv: inputs/solar/TimeseriesWEST_50.830_4.350_SA3_90deg_90deg_2005_2023.csv
       csv: data/raw/observed/TimeseriesWEST_50.830_4.350_SA3_90deg_90deg_2005_2023.csv
       csv_sha256: 2767619730916a7bca7fe58275301af35dc43db33040cad9a975264954dbabb5
       slope_deg: 90
       azimuth_pvgis_deg: 90
     north:
+      api_request_url: "https://re.jrc.ec.europa.eu/api/v5_3/seriescalc?lat=50.830&lon=4.350&startyear=2005&endyear=2023&raddatabase=PVGIS-SARAH3&outputformat=csv&angle=90&aspect=-179&components=1&usehorizon=1"
       legacy_csv: inputs/solar/TimeseriesNORTH_50.830_4.350_SA3_90deg_-179deg_2005_2023.csv
       csv: data/raw/observed/TimeseriesNORTH_50.830_4.350_SA3_90deg_-179deg_2005_2023.csv
       csv_sha256: 002ee4e68ba2ff1e9da7eb8f1e16c441bba47a8ad5ed36d81dc169204a2cb66d
@@ -147,11 +216,12 @@ observed_weather:
       azimuth_pvgis_deg: -179
   processed:
     directory: data/processed/observed
-    clean_weather: pvgis_sarah3_horizontal_hourly_2005_2023.csv
-    clean_metadata: pvgis_sarah3_horizontal_hourly_2005_2023.metadata.json
+    clean_weather: pvgis_sarah3_horizontal_hourly_2006_2023.csv
+    clean_metadata: pvgis_sarah3_horizontal_hourly_2006_2023.metadata.json
   ensemble:
     directory: data/processed/ensemble_2050
-    climate_target: 2050-2070
+    climate_target: 2041-2060
+    climate_target_label: 2050-centred mid-term period
     method_tag: monthly_delta_morph_v1
     manifest_csv: ensemble_2050_manifest.csv
     manifest_json: ensemble_2050_manifest.json
