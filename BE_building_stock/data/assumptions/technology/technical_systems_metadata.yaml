@@ -1,7 +1,19 @@
-metadata_version: 1.0
+metadata_version: 1.2
 observation_year: 2024
 target_year: 2050
-scope: stock-only modular heating, cooling, and PV assignment layer
+scope: isolated optional stock-only heating, cooling, and PV assignment layer
+core_pipeline_dependency: false
+input_renovation_scenarios:
+  - central
+  - high
+evidence_vintage_note: The evidence snapshot is intentionally versioned to 2024 and requires a dedicated refresh before use as current technology-stock evidence.
+physical_state_interface:
+  current_regional_carrier_mix:
+    - TABULA_existing
+    - TABULA_standard_B_proxy
+  advanced_heat_pump_package:
+    - TABULA_advanced_A_proxy
+  note: The heating-system assignment is a separate technology scenario with its own provenance; the Belgian TABULA Low Energy services package specifies a different 2010-era system package.
 out_of_scope:
   - heating efficiency
   - heat-pump COP

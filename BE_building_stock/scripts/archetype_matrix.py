@@ -8,6 +8,14 @@ from pathlib import Path
 import pandas as pd
 from pandas.errors import MergeError
 
+from stock_joint_distribution import (
+    JOINT_DISTRIBUTION_METHOD,
+    build_regional_joint_distribution,
+    load_cadastral,
+    load_hc37,
+    regional_stock_totals,
+)
+
 
 SCRIPT_DIR = Path(__file__).resolve().parent
 PROJECT_ROOT = SCRIPT_DIR.parent
@@ -25,17 +33,17 @@ DEFAULT_AIRTIGHTNESS_FILE = (
 DEFAULT_U_VALUES_FILE = (
     DATA_DIR / "inputs" / "physical" / "U_values_per_construction_period.csv"
 )
-DEFAULT_PERIOD_STOCK_FILE = (
+DEFAULT_STATE_PACKAGES_FILE = (
     DATA_DIR
-    / "derived"
-    / "construction_periods"
-    / "dwellings_by_construction_period.csv"
+    / "assumptions"
+    / "renovation"
+    / "renovation_physical_state_packages_TABULA.csv"
 )
-DEFAULT_TYPE_STOCK_FILE = (
-    DATA_DIR
-    / "derived"
-    / "stock_composition"
-    / "dwellings_by_building_type.csv"
+DEFAULT_CADASTRAL_STOCK_FILE = (
+    DATA_DIR / "raw" / "statbel" / "building_stock_open_data_2025.xlsx"
+)
+DEFAULT_JOINT_CENSUS_FILE = (
+    DATA_DIR / "raw" / "statbel" / "TF_CENSUS_2021_HC37_1.xlsx"
 )
 DEFAULT_BASE_OUTPUT = DATA_DIR / "matrices" / "national" / "base_physical_archetype_matrix.csv"
 DEFAULT_STOCK_OUTPUT = (
@@ -43,7 +51,10 @@ DEFAULT_STOCK_OUTPUT = (
 )
 
 EXPECTED_ARCHETYPE_COUNT = 25
-WEIGHTING_METHOD = "independence_assumption_type_share_times_period_share"
+WEIGHTING_METHOD = JOINT_DISTRIBUTION_METHOD
+INFILTRATION_N_FACTOR = 20.0
+AIR_DENSITY_KG_M3 = 1.2
+AIR_SPECIFIC_HEAT_J_KG_K = 1005.0
 
 GEOMETRY_PDF_COLUMNS = [
     "floor_surface_area_m2",
@@ -78,19 +89,27 @@ U_VALUE_FIELDS = {
 }
 
 MODEL_ASSUMPTIONS = [
-    "No dwelling-type x construction-period cross-tabulation is supplied; "
-    "national archetype shares use the independence assumption.",
+    "R1-R3 age profiles use official Statbel 2025 cadastral building counts "
+    "jointly classified by building type and construction period, scaled to "
+    "the corresponding 2025 T8 dwelling totals.",
+    "The R4 age profile uses official Statbel Census 2021 HC37 conventional "
+    "dwellings in residential buildings with 2 or 3+ dwellings, scaled to the "
+    "regional 2025 T8 R4 dwelling total.",
     "Statbel R4 apartment-building dwellings are split equally between the "
     "enclosed and exposed apartment archetypes because the input has no subtype split.",
-    "The 2001-2010 construction-period count is split equally between 2001-2005 "
-    "and 2006-2010 because the aggregated input crosses the TABULA boundary.",
+    "HC37 supplies exact 2001-2005 and 2006-2010 counts. For cadastral house "
+    "profiles only, the 1982-1991 and 2002-2011 bins are allocated uniformly "
+    "across years at the TABULA cut-offs.",
     "The residential-archetype scope is R1-R4. R5 commerce houses and R6 other "
     "buildings are reported as excluded residual dwellings rather than assigned "
     "to a TABULA archetype without evidence.",
     "Dwellings with unknown construction period are distributed pro rata by "
     "normalising the known-period counts to 1.",
-    "regional_share is empty because regional dwelling-type marginals are not "
-    "available in the supplied building-type input.",
+    "regional_share is empty in the national matrix; regional shares are "
+    "reported in the separate regional stock-weighted matrix.",
+    "TABULA v50 is converted to an annual-average infiltration airflow proxy "
+    "with q50=v50*A_env and Vdot_inf=q50/20. The fixed n-factor 20 is used as "
+    "a transparent screening assumption.",
 ]
 
 
@@ -211,6 +230,9 @@ def verify_v50_against_pdf(
         page_texts, "Table 9: In/exfiltration rates at 50 Pa"
     )
     table_text = "\n".join(page_texts[caption_page - 1 : caption_page + 1])
+    table_text = table_text.replace("sce-\nnario", "scenario").replace(
+        "upgrade\n2,5", "upgrade scenario\n2,5"
+    )
     errors: list[str] = []
 
     for age_class in airtightness["tabula_v50_age_class"].drop_duplicates():
@@ -293,11 +315,116 @@ def verify_u_values_against_pdf(
     return errors
 
 
+def verify_state_packages_against_pdf(
+    page_texts: list[str], state_packages: pd.DataFrame
+) -> list[str]:
+    required = {
+        "state_id",
+        "physical_parameter_mode",
+        "U_facade_W_m2K",
+        "U_roof_W_m2K",
+        "U_floor_W_m2K",
+        "U_window_W_m2K",
+        "U_door_W_m2K",
+        "v50_m3_h_m2",
+        "hrv_eta",
+        "summer_bypass",
+    }
+    require_columns(
+        state_packages, required, "renovation_physical_state_packages_TABULA.csv"
+    )
+    require_unique(
+        state_packages,
+        ["state_id"],
+        "renovation_physical_state_packages_TABULA.csv",
+    )
+    expected_states = {
+        "TABULA_standard_B_proxy": {
+            "U_facade_W_m2K": 0.4,
+            "U_roof_W_m2K": 0.3,
+            "U_floor_W_m2K": 0.4,
+            "U_window_W_m2K": 2.0,
+            "U_door_W_m2K": 2.9,
+            "v50_m3_h_m2": 6.0,
+            "hrv_eta": 0.0,
+        },
+        "TABULA_advanced_A_proxy": {
+            "U_facade_W_m2K": 0.25,
+            "U_roof_W_m2K": 0.15,
+            "U_floor_W_m2K": 0.25,
+            "U_window_W_m2K": 1.6,
+            "U_door_W_m2K": 1.6,
+            "v50_m3_h_m2": 2.5,
+            "hrv_eta": 0.8,
+        },
+    }
+    errors: list[str] = []
+    indexed = state_packages.set_index("state_id")
+    for state_id, expected in expected_states.items():
+        if state_id not in indexed.index:
+            errors.append(f"Renovation package is missing {state_id}")
+            continue
+        row = indexed.loc[state_id]
+        for field, expected_value in expected.items():
+            compare_value(errors, f"{state_id} {field}", row[field], expected_value)
+
+    source_text = "\n".join(page_texts[54:61])
+    required_source_fragments = [
+        "U facade: 0.4 W/m²K",
+        "U floor: 0.4 W/m²K",
+        "U roof: 0.3 W/m²K",
+        "U window: 2 W/m²K",
+        "U door: 2.9 W/m²K",
+        "U facade: 0.25 W/m²K",
+        "U floor: 0.25 W/m²K",
+        "U roof: 0.15 W/m²K",
+        "U window: 1.6 W/m²K",
+        "U door: 1.6 W/m²K",
+        "heat recuperation (η 0,8) with by-pass",
+    ]
+    for fragment in required_source_fragments:
+        if fragment not in source_text:
+            errors.append(f"TABULA source fragment could not be located: {fragment}")
+
+    caption_page = find_last_caption_page(
+        page_texts, "Table 9: In/exfiltration rates at 50 Pa"
+    )
+    table_text = "\n".join(page_texts[caption_page - 1 : caption_page + 1])
+    table_text = re.sub(
+        r"EPB 2010 upgrade sce-\n(6\s+6\s+6\s+6\s+6)\nnario",
+        r"EPB 2010 upgrade scenario\n\1",
+        table_text,
+    ).replace("Low Energy upgrade\n2,5", "Low Energy upgrade scenario\n2,5")
+    for source_label, expected_value in (
+        ("EPB 2010 upgrade scenario", 6.0),
+        ("Low Energy upgrade scenario", 2.5),
+    ):
+        match = re.search(
+            rf"^{re.escape(source_label)}\s+"
+            r"(\d+(?:,\d+)?)\s+(\d+(?:,\d+)?)\s+(\d+(?:,\d+)?)\s+"
+            r"(\d+(?:,\d+)?)\s+(\d+(?:,\d+)?)\s*$",
+            table_text,
+            re.MULTILINE,
+        )
+        if not match:
+            errors.append(f"TABULA Table 9 row could not be parsed: {source_label}")
+            continue
+        for index, value in enumerate(match.groups(), start=1):
+            compare_value(
+                errors,
+                f"Table 9 {source_label} dwelling type {index}",
+                parse_pdf_number(value),
+                expected_value,
+            )
+    return errors
+
+
 def verify_physical_csvs_against_pdf(
     pdf_path: Path,
     geometry: pd.DataFrame,
     airtightness: pd.DataFrame,
     u_values: pd.DataFrame,
+    state_packages: pd.DataFrame,
 ) -> None:
     try:
         import pdfplumber
@@ -316,6 +443,7 @@ def verify_physical_csvs_against_pdf(
         errors = verify_geometry_against_pdf(pdf, page_texts, geometry)
         errors.extend(verify_v50_against_pdf(page_texts, airtightness))
         errors.extend(verify_u_values_against_pdf(page_texts, u_values))
+        errors.extend(verify_state_packages_against_pdf(page_texts, state_packages))
 
     if errors:
         formatted_errors = "\n- ".join(errors)
@@ -323,6 +451,49 @@ def verify_physical_csvs_against_pdf(
             "Physical CSV values conflict with the TABULA/VITO PDF; no outputs were "
             f"written:\n- {formatted_errors}"
         )
+
+
+def add_heat_loss_fields(data: pd.DataFrame) -> pd.DataFrame:
+    result = data.copy()
+    result["q50_m3_h"] = (
+        result["v50_m3_h_m2"] * result["total_building_envelope_area_m2"]
+    )
+    result["n50_h_1"] = result["q50_m3_h"] / result["protected_volume_m3"]
+    result["infiltration_n_factor"] = INFILTRATION_N_FACTOR
+    result["infiltration_airflow_normal_m3_h"] = (
+        result["q50_m3_h"] / INFILTRATION_N_FACTOR
+    )
+    result["infiltration_ach_normal_h_1"] = (
+        result["n50_h_1"] / INFILTRATION_N_FACTOR
+    )
+    result["transmission_heat_loss_H_tr_W_K"] = (
+        result["U_roof_W_m2K"] * result["roof_area_m2"]
+        + result["U_facade_W_m2K"]
+        * (
+            result["exterior_wall_area_m2"]
+            + result[
+                "exterior_wall_bordering_unheated_neighboring_spaces_m2"
+            ]
+        )
+        + result["U_floor_W_m2K"]
+        * (
+            result["floor_on_soil_m2"]
+            + result["floor_bordering_unheated_neighboring_spaces_m2"]
+        )
+        + result["U_window_W_m2K"] * result["windows_total_m2"]
+        + result["U_door_W_m2K"] * result["doors_area_m2"]
+    )
+    result["infiltration_heat_loss_H_inf_W_K"] = (
+        AIR_DENSITY_KG_M3
+        * AIR_SPECIFIC_HEAT_J_KG_K
+        * result["infiltration_airflow_normal_m3_h"]
+        / 3600.0
+    )
+    result["specific_heat_loss_z_W_m2K"] = (
+        result["transmission_heat_loss_H_tr_W_K"]
+        + result["infiltration_heat_loss_H_inf_W_K"]
+    ) / result["floor_surface_area_m2"]
+    return result
 
 
 def reshape_airtightness(airtightness: pd.DataFrame) -> pd.DataFrame:
@@ -489,125 +660,41 @@ def create_base_matrix(
         *u_value_fields,
         "v50_m3_h_m2",
     ]
-    result = merged[output_columns].sort_values("TABULA_type_number").reset_index(drop=True)
+    result = (
+        merged[output_columns]
+        .sort_values("TABULA_type_number")
+        .reset_index(drop=True)
+    )
+    result = add_heat_loss_fields(result)
     return result, geometry_fields, u_value_fields
-
-
-def load_type_shares(
-    type_stock: pd.DataFrame,
-) -> tuple[dict[str, float], int, int]:
-    require_columns(
-        type_stock,
-        {"Building type containing the dwelling", "Code", "Dwellings"},
-        "dwellings_by_building_type.csv",
-    )
-    require_unique(type_stock, ["Code"], "dwellings_by_building_type.csv")
-
-    total_rows = type_stock[
-        type_stock["Building type containing the dwelling"].str.strip().eq("Total")
-    ]
-    if len(total_rows) != 1:
-        raise ValueError(
-            "dwellings_by_building_type.csv must contain exactly one Total row"
-        )
-    all_type_dwellings = int(total_rows.iloc[0]["Dwellings"])
-
-    component_rows = type_stock[~type_stock.index.isin(total_rows.index)]
-    component_total = int(component_rows["Dwellings"].sum())
-    if component_total != all_type_dwellings:
-        raise ValueError(
-            "Building-type component counts do not sum to the Statbel total: "
-            f"components={component_total}, total={all_type_dwellings}"
-        )
-
-    by_code = component_rows.set_index("Code")["Dwellings"]
-    required_codes = {"R1", "R2", "R3", "R4", "R5", "R6"}
-    missing_codes = required_codes - set(by_code.index)
-    if missing_codes:
-        raise ValueError(
-            f"dwellings_by_building_type.csv is missing codes: {sorted(missing_codes)}"
-        )
-
-    modeled_counts = {
-        "Detached house": float(by_code["R3"]),
-        "Semi-detached house": float(by_code["R2"]),
-        "Terraced house": float(by_code["R1"]),
-        "Apartment, enclosed": float(by_code["R4"]) / 2.0,
-        "Apartment, exposed": float(by_code["R4"]) / 2.0,
-    }
-    modeled_total = sum(modeled_counts.values())
-    return (
-        {dwelling_type: count / modeled_total for dwelling_type, count in modeled_counts.items()},
-        int(modeled_total),
-        all_type_dwellings,
-    )
-
-
-def load_period_shares(period_stock: pd.DataFrame) -> dict[str, float]:
-    period_field = "Construction-period class"
-    count_field = "Belgium dwellings"
-    require_columns(
-        period_stock,
-        {period_field, count_field},
-        "dwellings_by_construction_period.csv",
-    )
-    require_unique(period_stock, [period_field], "dwellings_by_construction_period.csv")
-    by_period = period_stock.set_index(period_field)[count_field]
-    required_periods = {
-        "Before 1919",
-        "1919-1945",
-        "1946-1970",
-        "1971-1990",
-        "1991-2000",
-        "2001-2010",
-        "2011 onwards",
-    }
-    missing_periods = required_periods - set(by_period.index)
-    if missing_periods:
-        raise ValueError(
-            "dwellings_by_construction_period.csv is missing classes: "
-            f"{sorted(missing_periods)}"
-        )
-
-    modeled_counts = {
-        "pre-1946": float(by_period["Before 1919"] + by_period["1919-1945"]),
-        "1946-1970": float(by_period["1946-1970"]),
-        "1971-1990": float(by_period["1971-1990"]),
-        "1991-2005": float(by_period["1991-2000"] + 0.5 * by_period["2001-2010"]),
-        "post-2005": float(0.5 * by_period["2001-2010"] + by_period["2011 onwards"]),
-    }
-    modeled_total = sum(modeled_counts.values())
-    return {
-        construction_period: count / modeled_total
-        for construction_period, count in modeled_counts.items()
-    }
 
 
 def create_stock_weighted_matrix(
     base: pd.DataFrame,
-    type_stock: pd.DataFrame,
-    period_stock: pd.DataFrame,
+    cadastral: pd.DataFrame,
+    hc37: pd.DataFrame,
 ) -> tuple[pd.DataFrame, int, int]:
-    type_shares, modeled_dwellings, all_type_dwellings = load_type_shares(type_stock)
-    period_shares = load_period_shares(period_stock)
-
-    missing_types = set(base["dwelling_type"]) - set(type_shares)
-    missing_periods = set(base["construction_period"]) - set(period_shares)
-    if missing_types or missing_periods:
-        raise ValueError(
-            "Stock marginals do not cover the base archetypes: "
-            f"missing dwelling types={sorted(missing_types)}, "
-            f"missing periods={sorted(missing_periods)}"
-        )
-
-    result = base.copy()
-    result["national_share"] = result.apply(
-        lambda row: type_shares[row["dwelling_type"]]
-        * period_shares[row["construction_period"]],
-        axis=1,
+    regional_joint = build_regional_joint_distribution(cadastral, hc37)
+    national_joint = (
+        regional_joint.groupby(
+            ["dwelling_type", "construction_period"], as_index=False, sort=False
+        )["regional_number_of_dwellings"]
+        .sum()
+        .rename(columns={"regional_number_of_dwellings": "number_of_dwellings"})
     )
+    result = base.merge(
+        national_joint,
+        on=["dwelling_type", "construction_period"],
+        how="left",
+        validate="one_to_one",
+    )
+    require_no_missing(
+        result, ["number_of_dwellings"], "national joint archetype merge"
+    )
+
+    modeled_dwellings, all_type_dwellings = regional_stock_totals(cadastral)
+    result["national_share"] = result["number_of_dwellings"] / modeled_dwellings
     excluded_dwellings = all_type_dwellings - modeled_dwellings
-    result["number_of_dwellings"] = modeled_dwellings * result["national_share"]
     result["modelled_stock_dwellings_R1_R4"] = modeled_dwellings
     result["excluded_residual_R5_R6_dwellings"] = excluded_dwellings
     result["excluded_residual_R5_R6_share"] = excluded_dwellings / all_type_dwellings
@@ -647,7 +734,7 @@ def create_stock_weighted_matrix(
         abs_tol=1e-6,
     ):
         raise ValueError(
-            "Archetype dwelling counts do not sum to the Statbel total: "
+            "Archetype dwelling counts do not sum to the Statbel R1-R4 total: "
             f"archetypes={result['number_of_dwellings'].sum()}, "
             f"modeled R1-R4={modeled_dwellings}"
         )
@@ -664,8 +751,15 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--geometry", type=Path, default=DEFAULT_GEOMETRY_FILE)
     parser.add_argument("--airtightness", type=Path, default=DEFAULT_AIRTIGHTNESS_FILE)
     parser.add_argument("--u-values", type=Path, default=DEFAULT_U_VALUES_FILE)
-    parser.add_argument("--period-stock", type=Path, default=DEFAULT_PERIOD_STOCK_FILE)
-    parser.add_argument("--type-stock", type=Path, default=DEFAULT_TYPE_STOCK_FILE)
+    parser.add_argument(
+        "--state-packages", type=Path, default=DEFAULT_STATE_PACKAGES_FILE
+    )
+    parser.add_argument(
+        "--cadastral-stock", type=Path, default=DEFAULT_CADASTRAL_STOCK_FILE
+    )
+    parser.add_argument(
+        "--joint-census", type=Path, default=DEFAULT_JOINT_CENSUS_FILE
+    )
     parser.add_argument("--base-output", type=Path, default=DEFAULT_BASE_OUTPUT)
     parser.add_argument("--stock-output", type=Path, default=DEFAULT_STOCK_OUTPUT)
     parser.add_argument(
@@ -683,8 +777,9 @@ def main() -> None:
         args.geometry,
         args.airtightness,
         args.u_values,
-        args.period_stock,
-        args.type_stock,
+        args.state_packages,
+        args.cadastral_stock,
+        args.joint_census,
     ]
     missing_inputs = [str(path) for path in input_paths if not path.is_file()]
     if missing_inputs:
@@ -693,17 +788,18 @@ def main() -> None:
     geometry = pd.read_csv(args.geometry)
     airtightness = pd.read_csv(args.airtightness)
     u_values = pd.read_csv(args.u_values)
-    period_stock = pd.read_csv(args.period_stock)
-    type_stock = pd.read_csv(args.type_stock)
+    state_packages = pd.read_csv(args.state_packages)
+    cadastral = load_cadastral(args.cadastral_stock)
+    hc37 = load_hc37(args.joint_census)
 
     base, _, _ = create_base_matrix(geometry, airtightness, u_values)
     stock_weighted, modeled_dwellings, all_type_dwellings = create_stock_weighted_matrix(
-        base, type_stock, period_stock
+        base, cadastral, hc37
     )
 
     # Verify all source values before writing either output.
     verify_physical_csvs_against_pdf(
-        args.tabula_pdf, geometry, airtightness, u_values
+        args.tabula_pdf, geometry, airtightness, u_values, state_packages
     )
 
     args.base_output.parent.mkdir(parents=True, exist_ok=True)
@@ -725,7 +821,10 @@ def main() -> None:
         f"{all_type_dwellings - modeled_dwellings} "
         f"of {all_type_dwellings} all-type dwellings"
     )
-    print("- TABULA verification: Tables 9, 10, and 19 match the physical CSVs")
+    print(
+        "- TABULA verification: Tables 9, 10, and 19 plus the standard and "
+        "advanced renovation packages match the physical CSVs"
+    )
     print("- assumptions:")
     for assumption in MODEL_ASSUMPTIONS:
         print(f"  - {assumption}")

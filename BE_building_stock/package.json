@@ -7,6 +7,6 @@
   },
   "scripts": {
     "renovation": "node scripts/renovation_scenarios_2050.mjs",
-    "technology": "node scripts/technology_layer_2050.mjs"
+    "technology:optional": "node scripts/technology_layer_2050.mjs"
   }
 }

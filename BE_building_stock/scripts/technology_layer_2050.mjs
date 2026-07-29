@@ -57,10 +57,11 @@ const REGIONS = [
   "Walloon Region",
   "Brussels-Capital Region",
 ];
-const SCENARIOS = ["low", "central", "high"];
+const SCENARIOS = ["central", "high"];
 const RENOVATION_STATES = [
-  "as_is_TABULA",
-  "renovated_TABULA_low_energy",
+  "TABULA_existing",
+  "TABULA_standard_B_proxy",
+  "TABULA_advanced_A_proxy",
 ];
 const COOLING_CASES = [
   "no_active_cooling",
@@ -373,15 +374,15 @@ function validateInputs(tables) {
     assert(nearlyEqual(regionalStock.get(rKey), stock), `${rKey} has inconsistent regional stock`);
     addToGroup(stateGroups, `${row.scenario}\u0000${row.region}\u0000${row.archetype_id}`, row);
   }
-  assert(stateGroups.size === 225, `expected 225 scenario-region-archetype groups; found ${stateGroups.size}`);
+  assert(stateGroups.size === 150, `expected 150 scenario-region-archetype groups; found ${stateGroups.size}`);
   for (const [key, group] of stateGroups) {
-    assert(group.length === 2, `${key} must contain two renovation states`);
+    assert(group.length === 3, `${key} must contain three renovation states`);
     assert(RENOVATION_STATES.every((state) => group.some((row) => row.renovation_state === state)), `${key} is missing a renovation state`);
   }
   for (const scenario of SCENARIOS) {
     for (const region of REGIONS) {
       const rows = states.filter((row) => row.scenario === scenario && row.region === region);
-      assert(rows.length === 50, `${scenario}/${region} must contain 50 state rows`);
+      assert(rows.length === 75, `${scenario}/${region} must contain 75 state rows`);
       const sum = rows.reduce((total, row) => total + Number(row.state_dwellings), 0);
       assert(Math.abs(sum - regionalStock.get(`${scenario}\u0000${region}`)) <= DWELLING_TOLERANCE, `${scenario}/${region} does not reconstruct regional modeled stock`);
     }
@@ -392,7 +393,7 @@ function validateInputs(tables) {
   const heatingSharesByRegion = new Map();
   for (const region of REGIONS) {
     const rows = tables.heatingShares.rows.filter((row) => row.region === region);
-    assert(rows.length === 4, `${region} must contain four as-is heating shares`);
+    assert(rows.length === 4, `${region} must contain four current heating shares`);
     for (const row of rows) {
       numberValue(row.raw_share, `${region}/${row.heating_variant_id} raw_share`, { min: 0, max: 1 });
       numberValue(row.normalization_factor, `${region}/${row.heating_variant_id} normalization_factor`, { min: 0 });
@@ -413,23 +414,30 @@ function validateInputs(tables) {
   requireUnique(tables.packages.rows, ["package_id"], "technical-system packages");
   const packagesById = new Map(tables.packages.rows.map((row) => [row.package_id, row]));
   for (const row of tables.packages.rows) {
-    assert(RENOVATION_STATES.includes(String(row.applicable_renovation_state)), `${row.package_id} has unknown renovation state`);
+    const applicableStates = String(row.applicable_renovation_state).split("|");
+    assert(
+      applicableStates.every((state) => RENOVATION_STATES.includes(state)),
+      `${row.package_id} has an unknown renovation state`,
+    );
     assert(String(row.energy_carrier) !== "", `${row.package_id} has blank energy_carrier`);
     assert(String(row.space_heating_system) !== "", `${row.package_id} has blank space_heating_system`);
     booleanValue(row.summer_bypass, `${row.package_id} summer_bypass`);
     booleanValue(row.reversible_cooling_capable, `${row.package_id} reversible_cooling_capable`);
   }
-  const renovatedPackage = packagesById.get("renovated_air_water_heat_pump");
-  assert(renovatedPackage, "renovated heat-pump package is missing");
-  assert(Number(renovatedPackage.supply_temperature_c) === 45, "renovated supply temperature must be 45 C");
-  assert(nearlyEqual(renovatedPackage.hrv_eta, 0.8), "renovated hrv_eta must equal 0.80");
-  assert(booleanValue(renovatedPackage.summer_bypass, "renovated summer_bypass"), "renovated package must have summer bypass");
-  assert(booleanValue(renovatedPackage.reversible_cooling_capable, "renovated reversible capability"), "renovated package must be reversible-cooling capable");
+  const advancedPackage = packagesById.get("advanced_air_water_heat_pump");
+  assert(advancedPackage, "advanced heat-pump package is missing");
+  assert(Number(advancedPackage.supply_temperature_c) === 45, "advanced supply temperature must be 45 C");
+  assert(nearlyEqual(advancedPackage.hrv_eta, 0.8), "advanced hrv_eta must equal 0.80");
+  assert(booleanValue(advancedPackage.summer_bypass, "advanced summer_bypass"), "advanced package must have summer bypass");
+  assert(booleanValue(advancedPackage.reversible_cooling_capable, "advanced reversible capability"), "advanced package must be reversible-cooling capable");
   for (const rows of heatingSharesByRegion.values()) {
     for (const share of rows) {
       const packageRow = packagesById.get(share.heating_variant_id);
       assert(packageRow, `heating package ${share.heating_variant_id} is missing`);
-      assert(packageRow.applicable_renovation_state === "as_is_TABULA", `${share.heating_variant_id} must apply to as-is rows`);
+      assert(
+        packageRow.applicable_renovation_state === "TABULA_existing|TABULA_standard_B_proxy",
+        `${share.heating_variant_id} must apply to the existing and standard proxy rows`,
+      );
       assert(packageRow.energy_carrier === share.energy_carrier, `${share.heating_variant_id} carrier differs between inputs`);
     }
   }
@@ -499,7 +507,7 @@ function validateInputs(tables) {
 function buildHeatingRows(context) {
   const rows = [];
   for (const state of context.states) {
-    const variants = state.renovation_state === "as_is_TABULA"
+    const variants = state.renovation_state !== "TABULA_advanced_A_proxy"
       ? context.heatingSharesByRegion.get(state.region).map((share) => ({
           share: Number(share.variant_share),
           shareRow: share,
@@ -508,7 +516,7 @@ function buildHeatingRows(context) {
       : [{
           share: 1,
           shareRow: null,
-          packageRow: context.packagesById.get("renovated_air_water_heat_pump"),
+          packageRow: context.packagesById.get("advanced_air_water_heat_pump"),
         }];
     for (const variant of variants) {
       const packageRow = variant.packageRow;
@@ -540,7 +548,7 @@ function buildHeatingRows(context) {
 function buildCoolingRows(context) {
   const rows = [];
   for (const state of context.states) {
-    const reversible = state.renovation_state === "renovated_TABULA_low_energy";
+    const reversible = state.renovation_state === "TABULA_advanced_A_proxy";
     for (const coolingCase of COOLING_CASES) {
       const input = context.coolingByKey.get(`${coolingCase}\u0000${state.region}`);
       const activeShare = Number(input.active_cooling_share);
@@ -675,7 +683,9 @@ function buildPvRows(context, assignments) {
   for (const state of context.states) {
     const group = dwellingGroup(state);
     const projection = assignments.get(state.region);
-    const basis = state.renovation_state === "as_is_TABULA" ? projection.current : projection.projected;
+    const basis = state.renovation_state === "TABULA_advanced_A_proxy"
+      ? projection.projected
+      : projection.current;
     const participationRate = group === "house" ? basis.houseRate : basis.apartmentRate;
     const installedCapacity = participationRate === 0
       ? 0
@@ -735,13 +745,13 @@ function validateVariantGroups(rows, extraKeyColumns, tableName) {
 
 
 function validateHeatingRows(rows, context) {
-  assert(rows.length === 1125, `heating output must contain 1125 rows; found ${rows.length}`);
+  assert(rows.length === 1350, `heating output must contain 1350 rows; found ${rows.length}`);
   requireUnique(rows, ["scenario", "region", "archetype_id", "renovation_state", "heating_variant_id"], "heating output");
   const groups = validateVariantGroups(rows, [], "heating output");
   assert(groups.size === 450, `heating output must contain 450 state groups; found ${groups.size}`);
   for (const [key, group] of groups) {
-    const asIs = group[0].renovation_state === "as_is_TABULA";
-    assert(group.length === (asIs ? 4 : 1), `${key} must contain ${asIs ? 4 : 1} heating variants`);
+    const currentProxy = group[0].renovation_state !== "TABULA_advanced_A_proxy";
+    assert(group.length === (currentProxy ? 4 : 1), `${key} must contain ${currentProxy ? 4 : 1} heating variants`);
     for (const row of group) {
       booleanValue(row.summer_bypass, `${key} summer_bypass`);
       booleanValue(row.reversible_cooling_capable, `${key} reversible_cooling_capable`);
@@ -770,7 +780,7 @@ function validateCoolingRows(rows, context) {
     assert(active && inactive, `${key} is missing active or inactive cooling`);
     for (const row of group) {
       const capable = booleanValue(row.heating_system_reversible_cooling_capable, `${key} heat-pump capability`);
-      assert(capable === (row.renovation_state === "renovated_TABULA_low_energy"), `${key} confuses installed cooling with renovated heat-pump capability`);
+      assert(capable === (row.renovation_state === "TABULA_advanced_A_proxy"), `${key} has inconsistent heat-pump capability`);
     }
   }
   for (const scenario of SCENARIOS) {
@@ -824,7 +834,9 @@ function validatePvRows(rows, context) {
     assert(installed && absent, `${key} is missing a PV variant`);
     assert(nearlyEqual(absent.allocated_capacity_mw, 0), `${key} no-PV row carries capacity`);
     assert(nearlyEqual(absent.assigned_capacity_kwp_per_participating_dwelling, 0), `${key} no-PV row carries per-dwelling capacity`);
-    const expectedBasis = installed.renovation_state === "as_is_TABULA" ? OBSERVATION_YEAR : TARGET_YEAR;
+    const expectedBasis = installed.renovation_state === "TABULA_advanced_A_proxy"
+      ? TARGET_YEAR
+      : OBSERVATION_YEAR;
     assert(Number(installed.pv_basis_year) === expectedBasis, `${key} has wrong PV basis year`);
     if (installed.dwelling_group === "apartment" && expectedBasis === OBSERVATION_YEAR) {
       assert(nearlyEqual(installed.variant_share, 0), `${key} assigns current PV to apartments`);
