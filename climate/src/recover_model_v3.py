@@ -1,4 +1,4 @@
-"""Recover canonical CORDEX and PVGIS inputs from legacy model_v3."""
+"""Recover legacy-backed PVGIS inputs; raw CORDEX NetCDF comes directly from CDS."""
 
 from __future__ import annotations
 
@@ -51,10 +51,15 @@ def _copy_verified(
 def recover_inputs(
     config: Mapping[str, Any], source_root: Path, overwrite: bool = False
 ) -> None:
-    """Copy and verify every configured CORDEX and PVGIS input."""
+    """Copy and verify every configured input that still has a legacy source."""
 
     for key, spec in config["sources"].items():
-        LOGGER.info("Recovering configured CORDEX source %s", key)
+        if "legacy_csv" not in spec or "legacy_metadata" not in spec:
+            LOGGER.info(
+                "Skipping CORDEX source %s; its raw CDS NetCDF is configured in place.", key
+            )
+            continue
+        LOGGER.info("Recovering configured legacy CORDEX source %s", key)
         _copy_verified(
             source_root / spec["legacy_csv"],
             resolve_config_path(config, spec["csv"]),
@@ -83,7 +88,7 @@ def recover_inputs(
 
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(
-        description="Recover byte-identical CORDEX and PVGIS inputs from legacy model_v3."
+        description="Recover byte-identical legacy-backed PVGIS inputs from model_v3."
     )
     parser.add_argument("--config", type=Path, default=DEFAULT_CONFIG)
     parser.add_argument(
@@ -110,7 +115,7 @@ def main(argv: list[str] | None = None) -> int:
     except Exception as exc:
         LOGGER.error("Climate-input recovery failed: %s", exc)
         return 1
-    LOGGER.info("All canonical CORDEX and PVGIS inputs are present and hash-verified.")
+    LOGGER.info("All configured legacy-backed inputs are present and hash-verified.")
     return 0
 
 

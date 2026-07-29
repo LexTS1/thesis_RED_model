@@ -18,6 +18,7 @@ REQUIRED_COLUMNS = {
     "T_out_C",
     "I_solar_W_m2",
     "scenario",
+    "role",
     "window",
     "gcm_model",
     "rcm_model",
@@ -72,7 +73,8 @@ def load_config(path: str | Path) -> dict[str, Any]:
         "spatial_extraction",
         "physical_ranges",
         "solar_alpha_safety",
-        "baseline_source",
+        "scenario_baselines",
+        "cordex_processing",
         "sources",
         "outputs",
         "validation",
@@ -93,6 +95,21 @@ def resolve_config_path(config: Mapping[str, Any], value: str | Path) -> Path:
     if path.is_absolute():
         return path
     return Path(config["_base_dir"]) / path
+
+
+def baseline_source_key(config: Mapping[str, Any], scenario: str) -> str:
+    """Return the configured scenario-matched CORDEX baseline source key."""
+
+    baselines = config["scenario_baselines"]
+    if scenario not in baselines:
+        raise KeyError(f"No CORDEX baseline is configured for scenario {scenario!r}")
+    key = str(baselines[scenario])
+    if key not in config["sources"]:
+        raise KeyError(f"Configured CORDEX baseline {key!r} does not exist")
+    spec = config["sources"][key]
+    if spec["role"] != "baseline" or str(spec["scenario"]) != scenario:
+        raise ValueError(f"Configured baseline {key!r} is not matched to {scenario!r}")
+    return key
 
 
 def _assert_hash(path: Path, expected: str, label: str) -> str:
@@ -125,6 +142,14 @@ def _validate_metadata(
         )
     if metadata.get("scenario") != spec["scenario"] or metadata.get("window") != spec["window"]:
         raise ValueError(f"Source {key!r} metadata scenario/window does not match config.yaml.")
+    if metadata.get("source_key") != key or metadata.get("role") != spec["role"]:
+        raise ValueError(f"Source {key!r} metadata key/role does not match config.yaml.")
+    if metadata.get("period_start") != str(spec["period_start"]) or metadata.get(
+        "period_end"
+    ) != str(spec["period_end"]):
+        raise ValueError(f"Source {key!r} metadata period does not match config.yaml.")
+    if metadata.get("dataset_identity") != config["dataset"]:
+        raise ValueError(f"Source {key!r} metadata dataset identity does not match config.yaml.")
     if metadata.get("model_chain") != config["model_chain"]:
         raise ValueError(f"Source {key!r} metadata model chain does not match config.yaml.")
     if int(metadata.get("row_count", -1)) != int(spec["expected_rows"]):
@@ -198,6 +223,7 @@ def _validate_frame(
         raise ValueError(f"Source {key!r} contains solar values outside {i_min} to {i_max} W/m2.")
 
     _assert_constant(prepared, "scenario", str(spec["scenario"]), key)
+    _assert_constant(prepared, "role", str(spec["role"]), key)
     _assert_constant(prepared, "window", str(spec["window"]), key)
     for field in ("gcm_model", "rcm_model", "ensemble_member"):
         _assert_constant(prepared, field, str(config["model_chain"][field]), key)
@@ -210,17 +236,47 @@ def _validate_frame(
     return prepared
 
 
-def load_cordex_source(config: Mapping[str, Any], key: str) -> CordexSource:
+def _load_processed_manifest(config: Mapping[str, Any]) -> dict[str, Any]:
+    path = resolve_config_path(config, config["cordex_processing"]["manifest"])
+    if not path.is_file():
+        raise FileNotFoundError(
+            f"CORDEX processed manifest does not exist: {path}. "
+            "Run python3 -m climate.src.prepare_cordex first."
+        )
+    with path.open("r", encoding="utf-8") as handle:
+        manifest = json.load(handle)
+    if not isinstance(manifest, dict) or manifest.get("schema_version") != 1:
+        raise ValueError(f"Invalid CORDEX processed manifest: {path}")
+    if manifest.get("dataset") != config["dataset"]:
+        raise ValueError("CORDEX processed manifest dataset does not match config.yaml.")
+    if manifest.get("model_chain") != config["model_chain"]:
+        raise ValueError("CORDEX processed manifest model chain does not match config.yaml.")
+    if set(manifest.get("sources", {})) != set(config["sources"]):
+        raise ValueError("CORDEX processed manifest source set does not match config.yaml.")
+    return manifest
+
+
+def load_cordex_source(
+    config: Mapping[str, Any], key: str, manifest: Mapping[str, Any] | None = None
+) -> CordexSource:
     """Load one configured source after validating bytes, metadata, and daily data."""
 
     if key not in config["sources"]:
         raise KeyError(f"Unknown CORDEX source: {key}")
     spec = config["sources"][key]
+    manifest = manifest or _load_processed_manifest(config)
+    manifest_entry = manifest["sources"][key]
     csv_path = resolve_config_path(config, spec["csv"])
     metadata_path = resolve_config_path(config, spec["metadata"])
-    csv_hash = _assert_hash(csv_path, str(spec["csv_sha256"]), f"CSV for {key}")
+    if manifest_entry.get("csv") != str(spec["csv"]) or manifest_entry.get(
+        "metadata"
+    ) != str(spec["metadata"]):
+        raise ValueError(f"Processed manifest paths for {key!r} do not match config.yaml.")
+    csv_hash = _assert_hash(
+        csv_path, str(manifest_entry["csv_sha256"]), f"CSV for {key}"
+    )
     metadata_hash = _assert_hash(
-        metadata_path, str(spec["metadata_sha256"]), f"metadata for {key}"
+        metadata_path, str(manifest_entry["metadata_sha256"]), f"metadata for {key}"
     )
 
     with metadata_path.open("r", encoding="utf-8") as handle:
@@ -228,6 +284,8 @@ def load_cordex_source(config: Mapping[str, Any], key: str) -> CordexSource:
     if not isinstance(metadata, dict):
         raise ValueError(f"Metadata sidecar is not a JSON object: {metadata_path}")
     _validate_metadata(metadata, config, spec, key)
+    if metadata.get("output", {}).get("csv_sha256") != csv_hash:
+        raise ValueError(f"Source {key!r} metadata does not identify its CSV hash.")
 
     frame = pd.read_csv(csv_path)
     prepared = _validate_frame(frame, config, spec, key)
@@ -245,4 +303,8 @@ def load_cordex_source(config: Mapping[str, Any], key: str) -> CordexSource:
 def load_all_sources(config: Mapping[str, Any]) -> dict[str, CordexSource]:
     """Load every configured source in deterministic configuration order."""
 
-    return {key: load_cordex_source(config, key) for key in config["sources"]}
+    manifest = _load_processed_manifest(config)
+    return {
+        key: load_cordex_source(config, key, manifest=manifest)
+        for key in config["sources"]
+    }

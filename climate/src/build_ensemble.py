@@ -1,4 +1,4 @@
-"""Build the deterministic 57-member hourly 2050 weather ensemble."""
+"""Build the deterministic 54-member hourly 2050 weather ensemble."""
 
 from __future__ import annotations
 
@@ -67,6 +67,34 @@ def _monthly_parameters(parameters: pd.DataFrame) -> list[dict[str, Any]]:
     ]
 
 
+def _remove_stale_member_artifacts(
+    output_root: Path,
+    scenarios: list[str],
+    observed_years: Mapping[int, pd.DataFrame],
+) -> None:
+    """Remove only obsolete generated member files from configured scenario folders."""
+
+    for scenario in scenarios:
+        scenario_dir = output_root / scenario
+        expected_names = {
+            f"weather_2050_{scenario}_pvgis_{year}{suffix}"
+            for year in observed_years
+            for suffix in (".csv", ".metadata.json")
+        }
+        if not scenario_dir.is_dir():
+            continue
+        prefix = f"weather_2050_{scenario}_pvgis_"
+        for path in scenario_dir.iterdir():
+            if (
+                path.is_file()
+                and path.name.startswith(prefix)
+                and (path.name.endswith(".csv") or path.name.endswith(".metadata.json"))
+                and path.name not in expected_names
+            ):
+                LOGGER.info("Removing stale ensemble artifact: %s", path)
+                path.unlink()
+
+
 def validate_morphed_member(
     observed: pd.DataFrame,
     morphed: pd.DataFrame,
@@ -124,6 +152,7 @@ def _member_metadata(
         "member_id": member_id,
         "scenario": scenario,
         "climate_target": str(ensemble["climate_target"]),
+        "climate_target_label": str(ensemble["climate_target_label"]),
         "observed_pvgis_year": int(observed_year),
         "is_leap_year": bool(calendar.isleap(observed_year)),
         "row_count": int(len(member)),
@@ -182,13 +211,14 @@ def _member_metadata(
         "caveats": {
             "single_model_chain": config["provenance"]["single_chain_caveat"],
             "observed_anchor": config["provenance"]["observed_anchor_caveat"],
-            "weather_axis": "One member for each complete observed PVGIS year 2005-2023.",
+            "weather_ensemble": config["provenance"]["weather_ensemble_caveat"],
+            "weather_axis": "One paired member for each complete observed PVGIS year 2006-2023 within each RCP.",
         },
     }
 
 
 def build_ensemble(config: Mapping[str, Any]) -> dict[str, Path]:
-    """Clean PVGIS and build all 3 RCP x 19 observed-year ensemble members."""
+    """Clean PVGIS and build all 3 RCP x 18 observed-year ensemble members."""
 
     clean_paths = build_clean_observed(config)
     observed, clean_metadata = load_clean_observed(config)
@@ -201,6 +231,7 @@ def build_ensemble(config: Mapping[str, Any]) -> dict[str, Path]:
     ]
     ensemble = config["observed_weather"]["ensemble"]
     output_root = resolve_config_path(config, ensemble["directory"])
+    _remove_stale_member_artifacts(output_root, scenarios, observed_years)
     manifest_rows: list[dict[str, Any]] = []
 
     for scenario in scenarios:
@@ -266,10 +297,12 @@ def build_ensemble(config: Mapping[str, Any]) -> dict[str, Path]:
         "schema_version": 1,
         "method_tag": str(ensemble["method_tag"]),
         "climate_target": str(ensemble["climate_target"]),
+        "climate_target_label": str(ensemble["climate_target_label"]),
         "member_count": int(len(manifest)),
         "total_member_hours": int(manifest["row_count"].sum()),
         "scenarios": scenarios,
         "observed_pvgis_years": sorted(int(year) for year in observed_years),
+        "ensemble_design": config["provenance"]["weather_ensemble_caveat"],
         "leap_years": sorted(int(year) for year in observed_years if calendar.isleap(year)),
         "morph_contract": {
             "path": _relative(delta_contract.csv_path, config),
@@ -303,6 +336,7 @@ def build_ensemble(config: Mapping[str, Any]) -> dict[str, Path]:
                 orientation: {
                     "path": spec["csv"],
                     "sha256": spec["csv_sha256"],
+                    "api_request_url": spec["api_request_url"],
                     "slope_deg": int(spec["slope_deg"]),
                     "azimuth_pvgis_deg": int(spec["azimuth_pvgis_deg"]),
                 }
@@ -321,7 +355,7 @@ def build_ensemble(config: Mapping[str, Any]) -> dict[str, Path]:
 
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(
-        description="Build the 57-member hourly PVGIS/CORDEX 2050 ensemble."
+        description="Build the 54-member hourly PVGIS/CORDEX 2050 ensemble."
     )
     parser.add_argument("--config", type=Path, default=DEFAULT_CONFIG)
     parser.add_argument("--verbose", action="store_true")

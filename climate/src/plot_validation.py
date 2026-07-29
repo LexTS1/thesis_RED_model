@@ -238,6 +238,17 @@ def plot_morph_residuals(
         axis.set_xticks(np.arange(12), MONTH_LABELS)
         axis.set_xlabel("Calendar month")
         axis.grid(False)
+        axis.text(
+            0.02,
+            0.015,
+            f"max |residual| = {float(np.nanmax(np.abs(values))):.2e}\nall cells pass",
+            transform=axis.transAxes,
+            ha="left",
+            va="bottom",
+            fontsize=7,
+            color="#222222",
+            bbox={"facecolor": "white", "edgecolor": "#888888", "alpha": 0.88},
+        )
         colorbar = figure.colorbar(image, ax=axis, fraction=0.045, pad=0.03)
         colorbar.set_label(colorbar_label)
         colorbar.formatter.set_powerlimits((-2, 2))
@@ -252,7 +263,7 @@ def plot_morph_residuals(
     labelled_rows = [
         index
         for index, row in row_index.iterrows()
-        if int(row["observed_pvgis_year"]) in {2005, 2008, 2011, 2014, 2017, 2020, 2023}
+        if int(row["observed_pvgis_year"]) in {2006, 2009, 2012, 2015, 2018, 2021, 2023}
     ]
     axes[0].set_yticks(
         labelled_rows,
@@ -300,8 +311,11 @@ def _load_member_temperature_years(
         result[scenario][int(row.observed_pvgis_year)] = pd.read_csv(
             path, usecols=["T_out_C"]
         )
-    if any(len(years) != 19 for years in result.values()):
-        raise ValueError("Temperature-duration curves require 19 years per scenario.")
+    expected_years = int(config["observed_weather"]["expected_years"])
+    if any(len(years) != expected_years for years in result.values()):
+        raise ValueError(
+            f"Temperature-duration curves require {expected_years} years per scenario."
+        )
     return result
 
 
@@ -433,11 +447,11 @@ def build_validation_figures(config: Mapping[str, Any]) -> dict[str, Path]:
                 "Twelve monthly delta_T_C and alpha_solar_applied values per RCP."
             ),
             "morph_residuals": (
-                "All 57 x 12 recovered-minus-expected temperature and GHI ratios."
+                "All 54 x 12 recovered-minus-expected temperature and GHI ratios."
             ),
             "temperature_duration": (
                 "Median annual duration curve with 5th-95th percentile envelope "
-                "across 19 observed weather years; x-axis is hours exceeded."
+                "across 18 observed weather years; x-axis is hours exceeded."
             ),
         },
         "inputs": {

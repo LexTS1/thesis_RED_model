@@ -69,63 +69,65 @@ def test_complete_leap_year_passes_strict_hourly_validation(validation_data) -> 
 
 def test_hourly_validation_rejects_structural_and_physical_faults(validation_data) -> None:
     config, years, _ = validation_data
-    source = years[2005]
+    source = years[2006]
 
     gap = source.drop(index=100).reset_index(drop=True)
     with pytest.raises(ValueError, match="complete hourly UTC year"):
-        validate_hourly_frame(gap, 2005, config, "gap")
+        validate_hourly_frame(gap, 2006, config, "gap")
 
     duplicate = source.copy()
     duplicate.loc[1, "timestamp_utc"] = duplicate.loc[0, "timestamp_utc"]
     with pytest.raises(ValueError, match="duplicate timestamps"):
-        validate_hourly_frame(duplicate, 2005, config, "duplicate")
+        validate_hourly_frame(duplicate, 2006, config, "duplicate")
 
     missing = source.copy()
     missing.loc[10, "T_out_C"] = float("nan")
     with pytest.raises(ValueError, match="missing values"):
-        validate_hourly_frame(missing, 2005, config, "missing")
+        validate_hourly_frame(missing, 2006, config, "missing")
 
     non_finite = source.copy()
     non_finite.loc[10, "T_out_C"] = float("inf")
     with pytest.raises(ValueError, match="non-finite values"):
-        validate_hourly_frame(non_finite, 2005, config, "infinite")
+        validate_hourly_frame(non_finite, 2006, config, "infinite")
 
     hot = source.copy()
     hot.loc[10, "T_out_C"] = 50.1
     with pytest.raises(ValueError, match="temperature lies outside"):
-        validate_hourly_frame(hot, 2005, config, "hot")
+        validate_hourly_frame(hot, 2006, config, "hot")
 
     negative = source.copy()
     negative.loc[10, "I_beam_horizontal_W_m2"] = -0.1
     with pytest.raises(ValueError, match="I_beam_horizontal_W_m2 lies outside"):
-        validate_hourly_frame(negative, 2005, config, "negative solar")
+        validate_hourly_frame(negative, 2006, config, "negative solar")
 
     inconsistent = source.copy()
     daylight_index = inconsistent.index[inconsistent["I_solar_W_m2"] > 0.0][0]
     inconsistent.loc[daylight_index, "I_solar_W_m2"] += 1.0
     with pytest.raises(ValueError, match="GHI is not beam plus diffuse"):
-        validate_hourly_frame(inconsistent, 2005, config, "inconsistent GHI")
+        validate_hourly_frame(inconsistent, 2006, config, "inconsistent GHI")
 
     night = source.copy()
-    night_index = night.index[night["sun_height_deg"] < 0.0][0]
+    night_index = 10
+    night.loc[night_index, "sun_height_deg"] = -1.0
+    night.loc[night_index, "I_beam_horizontal_W_m2"] = 0.0
     night.loc[night_index, "I_diffuse_horizontal_W_m2"] = 1.0
     night.loc[night_index, "I_solar_W_m2"] = 1.0
     with pytest.raises(ValueError, match="non-zero irradiance below the horizon"):
-        validate_hourly_frame(night, 2005, config, "night solar")
+        validate_hourly_frame(night, 2006, config, "night solar")
 
     reconstructed = source.copy()
     reconstructed.loc[10, "pvgis_reconstructed"] = True
     with pytest.raises(ValueError, match="reconstructed PVGIS values"):
-        validate_hourly_frame(reconstructed, 2005, config, "reconstructed")
+        validate_hourly_frame(reconstructed, 2006, config, "reconstructed")
 
 
 def test_member_pair_rejects_changed_fields_and_wrong_monthly_morph(validation_data) -> None:
     config, years, contract = validation_data
-    observed = validate_hourly_frame(years[2005], 2005, config, "observed")
+    observed = validate_hourly_frame(years[2006], 2006, config, "observed")
     canonical = morph_observed_year(
         observed, "rcp_4_5", contract.frame, config=config
     )
-    canonical = validate_hourly_frame(canonical, 2005, config, "canonical member")
+    canonical = validate_hourly_frame(canonical, 2006, config, "canonical member")
     rows = validate_member_pair(
         observed,
         canonical,
@@ -220,13 +222,19 @@ def test_official_be100_snapshot_and_direct_cordex_degree_days() -> None:
     ]["metadata_sha256"]
 
     cordex = calculate_cordex_annual_degree_days(config)
-    assert len(cordex) == 88
-    assert len(cordex.loc[cordex["role"] == "baseline"]) == 25
+    assert len(cordex) == 114
+    assert (
+        cordex.loc[cordex["role"] == "baseline"]
+        .groupby("scenario")
+        .size()
+        .eq(18)
+        .all()
+    )
     assert (
         cordex.loc[cordex["role"] == "future"]
         .groupby("scenario")
         .size()
-        .eq(21)
+        .eq(20)
         .all()
     )
 
@@ -242,48 +250,48 @@ def test_full_validation_reports_and_regeneration_are_deterministic(validation_d
     observed_reference = pd.read_csv(first["observed_reference_comparison"])
     cordex_annual = pd.read_csv(first["cordex_annual_degree_days"])
     cordex_morph = pd.read_csv(first["cordex_morph_comparison"])
-    assert len(members) == 57
-    assert members["row_count"].sum() == 499608
+    assert len(members) == 54
+    assert members["row_count"].sum() == 473328
     assert members["hard_status"].eq("pass").all()
     assert members["warning_count"].sum() == 0
-    assert len(monthly) == 684
+    assert len(monthly) == 648
     assert monthly["hard_status"].eq("pass").all()
     assert report["status"] == "pass"
     assert report["hard_error_count"] == 0
     assert report["plausibility_warning_count"] == 0
-    assert members["HDD_ratio_vs_observed"].min() == pytest.approx(0.7341154614)
-    assert members["HDD_ratio_vs_observed"].max() == pytest.approx(0.9048658493)
+    assert members["HDD_ratio_vs_observed"].min() == pytest.approx(0.8317417249)
+    assert members["HDD_ratio_vs_observed"].max() == pytest.approx(0.9237405441)
     assert members["CDD_change_C_days"].min() == pytest.approx(0.0)
-    assert members["CDD_change_C_days"].max() == pytest.approx(83.5029332036)
-    assert members["annual_solar_ratio_vs_observed"].min() == pytest.approx(1.0611372083)
-    assert members["annual_solar_ratio_vs_observed"].max() == pytest.approx(1.0738745860)
+    assert members["CDD_change_C_days"].max() == pytest.approx(40.1410131302)
+    assert members["annual_solar_ratio_vs_observed"].min() == pytest.approx(1.0062071644)
+    assert members["annual_solar_ratio_vs_observed"].max() == pytest.approx(1.0392240568)
     observed_solar = members.drop_duplicates("observed_pvgis_year")[
         "observed_annual_solar_kWh_m2"
     ]
     assert observed_solar.min() == pytest.approx(1040.57899)
     assert observed_solar.max() == pytest.approx(1231.26255)
-    assert members["morphed_annual_solar_kWh_m2"].min() == pytest.approx(1105.4469844516)
-    assert members["morphed_annual_solar_kWh_m2"].max() == pytest.approx(1317.0392967247)
-    assert len(observed_reference) == 19
+    assert members["morphed_annual_solar_kWh_m2"].min() == pytest.approx(1047.7166113369)
+    assert members["morphed_annual_solar_kWh_m2"].max() == pytest.approx(1276.1835772956)
+    assert len(observed_reference) == 18
     statistics = reference_comparison_statistics(observed_reference)
     assert statistics["HDD"]["pearson_correlation"] == pytest.approx(
-        0.9869287957
+        0.9884348477
     )
     assert statistics["HDD"]["mean_bias_C_days"] == pytest.approx(
-        154.9817763158
+        151.7552083333
     )
     assert statistics["CDD"]["pearson_correlation"] == pytest.approx(
-        0.9377052222
+        0.9379979347
     )
     assert statistics["CDD"]["mean_bias_C_days"] == pytest.approx(
-        -3.7365131579
+        -3.5314814815
     )
-    assert len(cordex_annual) == 88
+    assert len(cordex_annual) == 114
     assert len(cordex_morph) == 3
     expected_changes = {
-        "rcp_2_6": (-327.4595043311, -300.3770070175, 17.3987337525, 18.2413800175),
-        "rcp_4_5": (-503.0879162358, -452.8474429825, 39.8821223243, 30.0309859825),
-        "rcp_8_5": (-624.5217451257, -572.8301938596, 48.1000099401, 38.9224124386),
+        "rcp_2_6": (-269.5239935302, -257.6129652103, 22.0549868435, 16.4297513690),
+        "rcp_4_5": (-264.0022449409, -247.6597015719, 7.7714489068, 11.7369533004),
+        "rcp_8_5": (-352.2434029815, -364.4533907428, 24.8758364190, 11.7911343358),
     }
     for row in cordex_morph.itertuples(index=False):
         expected = expected_changes[row.scenario]

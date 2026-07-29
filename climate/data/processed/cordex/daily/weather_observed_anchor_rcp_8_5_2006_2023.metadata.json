@@ -1,0 +1,157 @@
+{
+  "dataset": "projections-cordex-domains-single-levels",
+  "dataset_identity": {
+    "catalogue_version": "latest",
+    "cds_url": "https://cds.climate.copernicus.eu/datasets/projections-cordex-domains-single-levels",
+    "cordex_file_version": "v2",
+    "doi": "10.24381/cds.bc91edc3",
+    "domain": "europe",
+    "domain_id": "EUR-11",
+    "horizontal_resolution": "0_11_degree_x_0_11_degree",
+    "licence_url": "https://cds.climate.copernicus.eu/datasets/projections-cordex-domains-single-levels?tab=download",
+    "name": "projections-cordex-domains-single-levels",
+    "project": "CORDEX",
+    "provider": "Copernicus Climate Data Store",
+    "temporal_resolution": "daily_mean",
+    "variables": {
+      "solar_radiation": "rsds",
+      "temperature": "tas"
+    }
+  },
+  "model_chain": {
+    "ensemble_member": "r1i1p1",
+    "gcm_model": "cnrm_cerfacs_cm5",
+    "rcm_model": "cnrm_aladin63"
+  },
+  "output": {
+    "csv": "data/processed/cordex/daily/weather_observed_anchor_rcp_8_5_2006_2023.csv",
+    "csv_sha256": "e202ce5ae83fd5dadb69c91c1f558d8fecd744461be9efa4e65761d09789979d"
+  },
+  "period_end": "2023-12-31",
+  "period_start": "2006-01-01",
+  "processing": {
+    "netCDF4": "1.7.2",
+    "numpy": "2.0.2",
+    "pandas": "2.3.3",
+    "python": "3.9.6",
+    "script": "climate.src.prepare_cordex"
+  },
+  "radiation": {
+    "conversion": "none",
+    "input_units": "W m-2",
+    "output_units": "W m-2",
+    "raw": {
+      "cds_provenance": {
+        "apply_fixes": false,
+        "catalogue_entity": "roocs:c3s-cordex.output.EUR-11.CNRM.CNRM-CERFACS-CNRM-CM5.rcp85.r1i1p1.CNRM-ALADIN63.v2.day.rsds.v20190419",
+        "software_agents": [
+          "Rook",
+          "clisops"
+        ],
+        "subset_area": "2.4,49.4,6.5,51.6",
+        "subset_time": "2006/2023",
+        "subset_time_components": "year:2006,2007,2008,2009,2010,2011,2012,2013,2014,2015,2016,2017,2018,2019,2020,2021,2022,2023",
+        "workflow_end": "2026-07-27T14:25:03",
+        "workflow_start": "2026-07-27T14:20:04"
+      },
+      "netcdf": {
+        "path": "data/raw/cordex/cds/rcp_8_5/baseline_2006_2023/rsds_EUR-11_CNRM-CERFACS-CNRM-CM5_rcp85_r1i1p1_CNRM-ALADIN63_v2_day_20060101-20231231.nc",
+        "sha256": "e1fd4742f1b8d9f4abb9e509690e9a06f4577685111d73bd0d83c857de3f5a98",
+        "size_bytes": 236090737
+      },
+      "netcdf_global_attributes": {
+        "contact": "contact.aladin-cordex@meteo.fr",
+        "creation_date": "2018-11-19T14:35:34Z",
+        "driving_experiment": "CNRM-CERFACS-CNRM-CM5, rcp85, r1i1p1",
+        "experiment": "RCP8.5 run with GCM forcing",
+        "institution": "CNRM (Centre National de Recherches Meteorologiques, Toulouse 31057, France)",
+        "tracking_id": "hdl:21.14103/770083d6-c3ce-4c4c-9730-080e7bc72a64"
+      },
+      "provenance_image": {
+        "path": "data/raw/cordex/cds/rcp_8_5/baseline_2006_2023/rsds_EUR-11_CNRM-CERFACS-CNRM-CM5_rcp85_r1i1p1_CNRM-ALADIN63_v2_day_20060101-20231231.provenance.png",
+        "sha256": "3dc397d14396c8a43cfec1e8e86da0fc7940e5e3080e36e66a754bc24bbfc931"
+      },
+      "provenance_json": {
+        "path": "data/raw/cordex/cds/rcp_8_5/baseline_2006_2023/rsds_EUR-11_CNRM-CERFACS-CNRM-CM5_rcp85_r1i1p1_CNRM-ALADIN63_v2_day_20060101-20231231.provenance.json",
+        "sha256": "86dd82aea4ec5dcb4d7a56f5a23e8a35c68898a8c5e06570b3651b7475b61877"
+      }
+    },
+    "variable": "rsds"
+  },
+  "role": "baseline",
+  "row_count": 6574,
+  "scenario": "rcp_8_5",
+  "schema_version": 2,
+  "source_files": [
+    "data/raw/cordex/cds/rcp_8_5/baseline_2006_2023/tas_EUR-11_CNRM-CERFACS-CNRM-CM5_rcp85_r1i1p1_CNRM-ALADIN63_v2_day_20060101-20231231.nc",
+    "data/raw/cordex/cds/rcp_8_5/baseline_2006_2023/rsds_EUR-11_CNRM-CERFACS-CNRM-CM5_rcp85_r1i1p1_CNRM-ALADIN63_v2_day_20060101-20231231.nc"
+  ],
+  "source_key": "rcp_8_5_baseline",
+  "spatial_extraction": {
+    "cds_area_subset": {
+      "east": 6.5,
+      "north": 51.6,
+      "south": 49.4,
+      "west": 2.4
+    },
+    "full_domain_indices": {
+      "x": 191,
+      "y": 239
+    },
+    "method": "nearest_point",
+    "selected_indices": {
+      "x": 11,
+      "y": 13
+    },
+    "selected_lat": 50.79848111186651,
+    "selected_lon": 4.269705300227394,
+    "target_lat": 50.85,
+    "target_lon": 4.35
+  },
+  "temperature": {
+    "conversion": "T_out_C = tas_K - 273.15",
+    "input_units": "K",
+    "output_units": "degC",
+    "raw": {
+      "cds_provenance": {
+        "apply_fixes": false,
+        "catalogue_entity": "roocs:c3s-cordex.output.EUR-11.CNRM.CNRM-CERFACS-CNRM-CM5.rcp85.r1i1p1.CNRM-ALADIN63.v2.day.tas.v20190419",
+        "software_agents": [
+          "Rook",
+          "clisops"
+        ],
+        "subset_area": "2.4,49.4,6.5,51.6",
+        "subset_time": "2006/2023",
+        "subset_time_components": "year:2006,2007,2008,2009,2010,2011,2012,2013,2014,2015,2016,2017,2018,2019,2020,2021,2022,2023",
+        "workflow_end": "2026-07-27T14:23:03",
+        "workflow_start": "2026-07-27T14:18:21"
+      },
+      "netcdf": {
+        "path": "data/raw/cordex/cds/rcp_8_5/baseline_2006_2023/tas_EUR-11_CNRM-CERFACS-CNRM-CM5_rcp85_r1i1p1_CNRM-ALADIN63_v2_day_20060101-20231231.nc",
+        "sha256": "8b4aeb5527c8860ebfc1108b97be88abd8fb8a05087350cc22dc5bd40ac79f70",
+        "size_bytes": 236090791
+      },
+      "netcdf_global_attributes": {
+        "contact": "contact.aladin-cordex@meteo.fr",
+        "creation_date": "2018-11-19T14:35:23Z",
+        "driving_experiment": "CNRM-CERFACS-CNRM-CM5, rcp85, r1i1p1",
+        "experiment": "RCP8.5 run with GCM forcing",
+        "institution": "CNRM (Centre National de Recherches Meteorologiques, Toulouse 31057, France)",
+        "tracking_id": "hdl:21.14103/6403374a-0745-4467-bfc6-7cc1a9670ff5"
+      },
+      "provenance_image": {
+        "path": "data/raw/cordex/cds/rcp_8_5/baseline_2006_2023/tas_EUR-11_CNRM-CERFACS-CNRM-CM5_rcp85_r1i1p1_CNRM-ALADIN63_v2_day_20060101-20231231.provenance.png",
+        "sha256": "803fa812c1fdfacb8969f1f7903d600e55bb5d7b2a7eceea8cdbb89cdbc8f806"
+      },
+      "provenance_json": {
+        "path": "data/raw/cordex/cds/rcp_8_5/baseline_2006_2023/tas_EUR-11_CNRM-CERFACS-CNRM-CM5_rcp85_r1i1p1_CNRM-ALADIN63_v2_day_20060101-20231231.provenance.json",
+        "sha256": "c6252e0ada3824277a065d33cb6f3b23f4507b5ab9d068683d358365127fdd47"
+      }
+    },
+    "variable": "tas"
+  },
+  "time_calendar": "gregorian",
+  "timestamp_convention": "daily mean stamped at 12:00:00",
+  "window": "observed_anchor",
+  "year_count": 18
+}
