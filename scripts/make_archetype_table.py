@@ -16,7 +16,15 @@ SRC = (ROOT / "BE_building_stock" / "data" / "matrices" / "national"
 OUT = ROOT / "tables"
 OUT.mkdir(exist_ok=True)
 
-DROP = {"archetype_id", "TABULA_type_number"}
+DROP = {
+    "archetype_id",
+    "TABULA_type_number",
+    "q50_m3_h",
+    "n50_h_1",
+    "infiltration_n_factor",
+    "transmission_heat_loss_H_tr_W_K",
+    "infiltration_heat_loss_H_inf_W_K",
+}
 
 # CSV column -> (short header code, legend description)
 CODES = {
@@ -42,11 +50,63 @@ CODES = {
     "U_window_W_m2K": (r"$U_\text{win}$", r"Window U-value (W/m$^2$K)"),
     "U_door_W_m2K": (r"$U_\text{door}$", r"Door U-value (W/m$^2$K)"),
     "v50_m3_h_m2": (r"$v_{50}$", r"Air permeability at 50\,Pa (m$^3$/(h$\cdot$m$^2$))"),
+    "infiltration_airflow_normal_m3_h": (
+        r"$\dot V_\text{inf}$",
+        r"Annual-average infiltration airflow from $q_{50}/20$ (m$^3$/h)",
+    ),
+    "infiltration_ach_normal_h_1": (
+        r"$n_\text{inf}$",
+        r"Annual-average infiltration air-change proxy ($\mathrm{h}^{-1}$)",
+    ),
+    "specific_heat_loss_z_W_m2K": (
+        r"$z$",
+        r"Specific transmission-plus-infiltration heat-loss index (W/(m$^2$K))",
+    ),
+}
+
+ONE_DECIMAL = {
+    "floor_surface_area_m2",
+    "protected_volume_m3",
+    "total_building_envelope_area_m2",
+    "roof_area_m2",
+    "exterior_wall_area_m2",
+    "exterior_wall_bordering_unheated_neighboring_spaces_m2",
+    "floor_on_soil_m2",
+    "floor_bordering_unheated_neighboring_spaces_m2",
+    "doors_area_m2",
+    "windows_north_m2",
+    "windows_east_m2",
+    "windows_south_m2",
+    "windows_west_m2",
+    "windows_total_m2",
+}
+TWO_DECIMALS = {
+    "U_facade_W_m2K",
+    "U_roof_W_m2K",
+    "U_floor_W_m2K",
+    "U_window_W_m2K",
+    "U_door_W_m2K",
+    "v50_m3_h_m2",
+    "infiltration_airflow_normal_m3_h",
+}
+THREE_DECIMALS = {
+    "infiltration_ach_normal_h_1",
+    "specific_heat_loss_z_W_m2K",
 }
 
 
 def esc(s: str) -> str:
     return s.replace("&", r"\&").replace("%", r"\%")
+
+
+def format_cell(column: str, value: str) -> str:
+    if column in ONE_DECIMAL:
+        return f"{float(value):.1f}"
+    if column in TWO_DECIMALS:
+        return f"{float(value):.2f}"
+    if column in THREE_DECIMALS:
+        return f"{float(value):.3f}"
+    return esc(value)
 
 
 with open(SRC, newline="") as f:
@@ -66,7 +126,8 @@ lines.append(r"\footnotesize")
 lines.append(r"\setlength{\tabcolsep}{3pt}")
 lines.append(r"\begin{longtable}{" + align + "}")
 lines.append(r"\caption{Base (unweighted) physical archetype matrix: representative "
-             r"geometry, envelope U-values and air-permeability for the 25 Belgian "
+             r"geometry, envelope U-values, air-permeability, converted infiltration "
+             r"and specific heat loss for the 25 Belgian "
              r"TABULA/VITO dwelling-unit types~\cite{tabula_be_vito}. "
              r"Column codes are defined below the table.}"
              r"\label{tab:base_physical_archetype_matrix}\\")
@@ -85,7 +146,7 @@ lines.append(r"\bottomrule")
 lines.append(r"\endlastfoot")
 
 for row in rows:
-    cells = [esc(row[c]) for c in cols]
+    cells = [format_cell(c, row[c]) for c in cols]
     lines.append(" & ".join(cells) + r" \\")
 
 lines.append(r"\end{longtable}")

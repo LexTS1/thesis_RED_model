@@ -1,0 +1,7 @@
+scenario_id,axis,description,mass_capacitance_J_m2K,mass_area_ratio_m2_m2,vertical_shading_factor,infiltration_multiplier
+central,central,Authoritative thermal_assumptions.csv values.,,,,1
+infiltration_half,infiltration,Normal-pressure infiltration airflow multiplied by 0.5.,,,,0.5
+infiltration_one_and_half,infiltration,Normal-pressure infiltration airflow multiplied by 1.5.,,,,1.5
+mass_heavy,thermal_mass,ISO heavy mass-class sensitivity.,260000,3,,1
+mass_light,thermal_mass,ISO light mass-class sensitivity.,110000,2.5,,1
+shading_unshaded,fixed_shading,Upper fixed-shading bound with F_sh=1.0.,,,1,1

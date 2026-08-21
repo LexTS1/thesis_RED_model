@@ -1,0 +1,22 @@
+{
+  "base_design_sha256": "88bd350bf0fb228f8170f1d3bd69337a08d9aa02bf2b6e16e6e7ed6512760637",
+  "checkpoint_protocol_version": "alternating_diagnostics_slots_v1",
+  "climate_scenario_id": "rcp_2_6",
+  "convergence_extension_partition_version": "gate5_convergence_n160_extension_partition_v1",
+  "design_sha256": "57c5a6e60744f004591b2bf416ca6872047d1422fd430e82ef5fbb52bc8ae005",
+  "expected_full_run_id_sha256": "64a70a8b43d0b3d4b483180b44a64af1742f212d70e5d7ff02d63498a85a1705",
+  "expected_imported_run_count": 240,
+  "expected_imported_run_id_sha256": "c503b40af941bd439ef29428b156c157b029276fa9adc4554488d72a303387a1",
+  "expected_run_count_at_n160": 480,
+  "imported_seed_count": 80,
+  "maximum_seed_count": 160,
+  "run_manifest_sha256": "9e7716ecf53cd1e62c9ab34d99cf2b96ba05f9be4b139f5c68f284166ba7117b",
+  "source_active_diagnostics_sha256": "e5694128cb74892062c6bc0da03d1e082afa22ed027d57ee6f3ef3b298d67dfc",
+  "source_active_diagnostics_slot": "run_diagnostics.slot_b.csv",
+  "source_partition_contract_sha256": "194f9da570337f9d69bc2a4dfb21a08ec3b37a77b1fd639b6e18297d2084c978",
+  "source_progress_sha256": "c23a1f105fb8f7bd89410df8641ec7e0618ff3812780746b32ec01cc71b0854e",
+  "source_run_manifest_sha256": "d7ffe38f39d39786ed4241a62c4de87f8df2d785e81b72fd6f451b55ccd3c203",
+  "weather_contract_sha256": "fb59b12e82b041c59cc8a3933745a40e92c5e89aa7df64846e5855fbd3acb00e",
+  "weather_forcing_sha256": "38669e3f0e715d12f919bbd64ba6e09fbb431145f819869ebd01d20e8fde4ed0",
+  "weather_member_id": "weather_2050_rcp_2_6_pvgis_2006"
+}

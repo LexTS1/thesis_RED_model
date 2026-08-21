@@ -1,0 +1,12 @@
+{
+  "climate_scenario_id": "rcp_2_6",
+  "convergence_execution_contract_version": "gate5_convergence_execution_v2",
+  "design_sha256": "88bd350bf0fb228f8170f1d3bd69337a08d9aa02bf2b6e16e6e7ed6512760637",
+  "expected_run_count_at_n80": 240,
+  "expected_run_id_sha256": "c503b40af941bd439ef29428b156c157b029276fa9adc4554488d72a303387a1",
+  "partition_checkpoint_protocol_version": "alternating_diagnostics_slots_v1",
+  "run_manifest_sha256": "d7ffe38f39d39786ed4241a62c4de87f8df2d785e81b72fd6f451b55ccd3c203",
+  "weather_contract_sha256": "fb59b12e82b041c59cc8a3933745a40e92c5e89aa7df64846e5855fbd3acb00e",
+  "weather_forcing_sha256": "38669e3f0e715d12f919bbd64ba6e09fbb431145f819869ebd01d20e8fde4ed0",
+  "weather_member_id": "weather_2050_rcp_2_6_pvgis_2006"
+}

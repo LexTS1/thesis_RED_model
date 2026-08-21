@@ -1,11 +1,9 @@
-metadata_version: 1.2
+metadata_version: 1.3
 observation_year: 2024
 target_year: 2050
 scope: isolated optional stock-only heating, cooling, and PV assignment layer
 core_pipeline_dependency: false
-input_renovation_scenarios:
-  - central
-  - high
+input_renovation_projection: central
 evidence_vintage_note: The evidence snapshot is intentionally versioned to 2024 and requires a dedicated refresh before use as current technology-stock evidence.
 physical_state_interface:
   current_regional_carrier_mix:

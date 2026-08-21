@@ -273,4 +273,7 @@ validation:
     monthly_parameters: monthly_climate_change_parameters
     morph_residuals: morph_invariant_residual_heatmaps
     temperature_duration: temperature_duration_curves
+    observed_reference_degree_days: observed_pvgis_vs_eurostat_be100_degree_days
+    cordex_morph_degree_day_changes: direct_cordex_vs_morphed_degree_day_changes
+    weather_morphing_worked_example: weather_morphing_worked_example
     provenance: validation_figures.provenance.json

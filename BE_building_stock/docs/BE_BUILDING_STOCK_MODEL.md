@@ -9,11 +9,12 @@ R1–R4 on 1 January 2025. The 290,438 dwellings in R5–R6 are retained as an
 excluded residual. The modeled share equals 95.0% of the 5,827,823 Statbel
 dwellings.
 
-The 2050 files describe renovation-state scenarios of this fixed 2025 stock.
+The 2050 files describe one renovation-state projection of this fixed 2025
+stock.
 Demolition, new construction and changes in household numbers can be added as a
 separate stock-evolution module after the thesis scope is confirmed.
 
-The core building-stock pipeline ends with the renovation-state scenarios. The
+The core building-stock pipeline ends with the renovation-state projection. The
 heating, cooling and PV assignment layer is isolated as an optional,
 2024-vintage module in `docs/OPTIONAL_TECHNOLOGY_LAYER.md`. Energy demand,
 system efficiency, COP, SEER, emissions and electricity generation belong to
@@ -30,8 +31,8 @@ the downstream thermal-demand model.
 | [Flemish Housing and Energy Policy Note 2024–2029](https://publicaties.vlaanderen.be/view-file/70827) | Flemish 2025 state calibration | Page 21 of the PDF reports 9% EPC A and 22% EPC B at the beginning of 2024; footnote 3 describes a weighted pre/post-2006 distribution with reference date 1 January 2024. |
 | [Brussels residential PEB statistics 2024](https://document.environnement.brussels/opac_css/elecfile/Statistiques_certificatsPEB_residentiel_donnees_2024.pdf) | Brussels 2025 state calibration | Page 8 reports 1.55% in the A family and 5.62% in the B family among 406,785 certificates established through 1 January 2025. The set includes existing and new dwellings and expired certificates. |
 | [Walloon environmental indicator MEN 10](https://etat.environnement.wallonie.be/contents/indicatorsheets/MEN%2010.html) | Walloon 2025 state calibration | The indicator reports 1.2% A/A+/A++ and 11.0% B among 790,073 cumulative certificates for pre-May-2010 dwellings at 20 August 2024. |
-| [European Commission renovation study](https://energy.ec.europa.eu/document/download/2b58c118-89c1-46b5-a450-0f2d5d215e2c_en?filename=1.final_report.pdf) | Historical literature context | Table 2 on PDF page 16 / printed page 15 reports a 0.2% Belgian residential deep-renovation rate for 2012–2016, based on floor area and primary-energy savings above 60%. The observation is excluded from the future scenario set. |
-| [Scenarios for a Climate Neutral Belgium by 2050](https://climat.be/doc/climate-neutral-belgium-by-2050-report.pdf) | Central policy-scenario ARR and depth calibration | Appendix 1, Table 1 on PDF and printed page 49 reports 2.8% annual residential renovation by 2025 and a 40% shallow, 50% medium and 10% deep mix in CORE-95, Behaviour and Technology. |
+| [European Commission renovation study](https://energy.ec.europa.eu/document/download/2b58c118-89c1-46b5-a450-0f2d5d215e2c_en?filename=1.final_report.pdf) | Historical literature context | Table 2 on PDF page 16 / printed page 15 reports a 0.2% Belgian residential deep-renovation rate for 2012–2016, based on floor area and primary-energy savings above 60%. The observation does not parameterise the 2050 projection. |
+| [Scenarios for a Climate Neutral Belgium by 2050](https://climat.be/doc/climate-neutral-belgium-by-2050-report.pdf) | National ARR and renovation-depth calibration | Appendix 1, Table 1 on PDF and printed page 49 reports 2.8% annual residential renovation by 2025 and a 40% shallow, 50% medium and 10% deep mix in CORE-95, Behaviour and Technology. |
 | [European Commission NBRP register](https://energy.ec.europa.eu/topics/energy-efficiency/energy-performance-buildings/national-building-renovation-plans_en) | Current Walloon policy context | The draft Walloon NBRP was submitted on 23 December 2025, Commission feedback was published on 14 July 2026, and the final plan is due by 31 December 2026. |
 | [Meier, “Infiltration: Just ACH50 Divided by 20?”](https://www.aivc.org/sites/default/files/airbase_7556.pdf) | Conversion from blower-door airflow to annual-average infiltration | The paper explains the Kronvall–Persily `ACH50/20` rule and its climate, height, shielding and leakage-distribution limitations. |
 
@@ -228,66 +229,51 @@ TABULA type number resolves ties. Medium transitions rank `TABULA_existing`
 cells. Advanced transitions rank `TABULA_existing` and
 `TABULA_standard_B_proxy` cells.
 
-## Annual renovation rate (`ARR`)
+## National renovation projection
 
-`ARR` denotes annual renovation activity as a share of the fixed regional 2025
-R1–R4 stock. A scenario-specific depth mix divides this activity:
+`ARR` denotes annual renovation activity as a share of the fixed Belgian 2025
+R1–R4 stock. The projection uses `ARR = 0.028/year` and a 40/50/10
+shallow–medium–advanced depth distribution. Both parameters come from Appendix
+1, Table 1 of *Scenarios for a Climate Neutral Belgium by 2050*, which reports
+these settings for the CORE-95, Behaviour and Technology pathways by 2025. The
+model holds them constant over the 25 annual steps from 2026 through 2050. This
+post-2025 continuation is a model calibration because the source does not
+provide a harmonised Belgian depth trajectory for those years.
 
-| Scenario | `ARR` | Shallow | Medium | Advanced | Evidence status |
-| --- | ---: | ---: | ---: | ---: | --- |
-| central (policy) | 0.028/year | 40% | 50% | 10% | Official Belgian climate-neutral pathway calibration |
-| high (ambitious) | 0.056/year | 40% | 50% | 10% | Controlled ARR sensitivity with depth held constant |
+The same federal table associates shallow, medium and deep renovation with
+approximately 85, 64 and 25 kWh/(m²·year). These whole-building
+energy-intensity categories are represented through TABULA envelope packages:
 
-### Defence of the depth shares
+| Federal renovation depth | Share | TABULA representation | Physical effect |
+| --- | ---: | --- | --- |
+| Shallow | 40% | Existing/as-is | No envelope-state change |
+| Medium | 50% | Standard refurbishment | Intermediate envelope improvement; eligible pre-2006 Existing cells move to Standard |
+| Advanced (federal deep category) | 10% | Low-energy refurbishment | Deep envelope improvement; eligible Existing or Standard cells move to Advanced |
 
-The central rate and 40/50/10 split come from the same federal scenario table.
-Appendix 1, Table 1 of *Scenarios for a Climate Neutral Belgium by 2050*
-specifies 2.8% residential renovation per year by 2025 and 40% shallow, 50%
-medium and 10% deep renovation for CORE-95, Behaviour and Technology. The table
-associates these depths with approximately 85, 64 and 25 kWh/(m²·year). The
-values are official scenario-lever settings and serve as an internally
-consistent central calibration. The model holds the mix constant from 2025
-through 2050 because a harmonised Belgian post-2025 depth trajectory is
-unavailable.
+The terms *medium* and *advanced* identify the transition depths in the model.
+The federal report names the 10% category *deep*, while the VITO package used
+for its physical representation is called *Low Energy*.
 
 The European Commission renovation study reports 0.2% deep renovation of
 Belgian residential floor area during 2012–2016 for work achieving more than
 60% primary-energy savings. This historical observation is retained in the
-literature review and provenance register as context for past activity. It does
-not define a future scenario.
+literature review and provenance register as context for past activity.
 
-The high case doubles the central ARR and retains the 40/50/10 mix. Holding
-depth constant isolates the response to renovation activity. This is a
-controlled calibration. The federal report's High Demand pathway—2% ARR with a
-60/32.5/7.5 mix—remains in the provenance table as a contextual alternative
-policy narrative.
-
-The federal depth categories use whole-building energy-intensity targets. The
-model expresses their envelope effect through explicit proxies:
+The national activity quota for depth `d` is proportionally disaggregated over
+the regions using their modeled R1–R4 dwelling counts. Consequently, every
+region receives the same ARR and depth distribution while retaining its own
+2025 state calibration, archetype composition and within-region priority
+ranking:
 
 ```text
-shallow activity: recorded activity; physical state unchanged
-medium transition: pre-2006 TABULA_existing
-                   -> TABULA_standard_B_proxy
-advanced transition: TABULA_existing or TABULA_standard_B_proxy
-                     -> TABULA_advanced_A_proxy
-```
-
-One harmonised ARR definition is used across the regions. Regional strategy
-documents report quantities with different units, populations and renovation
-depths: percentage points of label growth, houses per year, apartment units per
-year, permits, premiums, audits and policy endpoints. A common ARR isolates the
-effect of the different 2025 starting shares and stock compositions. Regional
-policy targets remain in the cross-check output.
-
-For region `r`, scenario `c` and depth `d`:
-
-```text
-annualRenovations(r,c,d)
-    = ARR(c) × depthShare(c,d) × N(r,2025)
-nominalRenovationsTo2050(r,c,d)
-    = annualRenovations(r,c,d) × 25
-appliedRenovationsTo2050(r,c,d)
+annualRenovations(BE,d)
+    = ARR × depthShare(d) × N(BE,2025)
+annualRenovations(r,d)
+    = N(r,2025) / N(BE,2025) × annualRenovations(BE,d)
+    = ARR × depthShare(d) × N(r,2025)
+nominalRenovationsTo2050(r,d)
+    = annualRenovations(r,d) × 25
+appliedRenovationsTo2050(r,d)
     = sum of annual transitions after eligibility limits
 ```
 
@@ -298,7 +284,7 @@ Existing cells already represent the VITO EPB2010 standard package and can move
 to Advanced. This ordering gives each dwelling at most one modeled transition
 per year and allows a standard dwelling to reach advanced in a later year.
 Unused medium and advanced quotas remain separated. Shallow activity appears in
-the scenario-policy context output and leaves the three physical state counts
+the activity-accounting output and leaves the three physical state counts
 unchanged.
 
 Allocation totals count state-transition events. One dwelling can contribute a
@@ -322,14 +308,12 @@ higher-loss cohorts. Post-2005 Existing cells remain eligible for Advanced.
 
 The resulting physical-state shares in 2050 are:
 
-| Region | Scenario | Existing | Standard | Advanced |
-| --- | --- | ---: | ---: | ---: |
-| Flanders | central | 27.00% | 57.00% | 16.00% |
-| Flanders | high | 11.16% | 65.84% | 23.00% |
-| Wallonia | central | 45.80% | 46.00% | 8.20% |
-| Wallonia | high | 8.92% | 75.88% | 15.20% |
-| Brussels | central | 50.83% | 40.62% | 8.55% |
-| Brussels | high | 8.83% | 75.62% | 15.55% |
+| Region | Existing | Standard | Advanced |
+| --- | ---: | ---: | ---: |
+| Belgium | 35.30% | 51.89% | 12.81% |
+| Flanders | 27.00% | 57.00% | 16.00% |
+| Wallonia | 45.80% | 46.00% | 8.20% |
+| Brussels | 50.83% | 40.62% | 8.55% |
 
 ## Reproducible pipeline
 
@@ -372,9 +356,15 @@ has its own execution instructions in `docs/OPTIONAL_TECHNOLOGY_LAYER.md`.
 | `data/matrices/regional/regional_stock_weighted_archetype_matrix.csv` | 75 | Three regions × 25 archetypes. |
 | `data/scenarios/renovation/renovation_state_layer.csv` | 225 | Calibrated 2025 region × archetype × state matrix with source-precision bounds. |
 | `data/scenarios/renovation/renovation_state_layer_with_allocation.csv` | 150 | Advanced-eligible source-state cells; 20 pre-2006 Existing cells per region also receive medium ranks. |
-| `data/scenarios/renovation/archetype_matrix_2050_renovation_scenarios.csv` | 450 | Two scenarios × three regions × 25 archetypes × three states. |
-| `data/scenarios/renovation/renovation_priority_allocation_2050.csv` | 420 | Scenario- and depth-specific cumulative transition-event audit trail. |
-| `data/scenarios/renovation/renovation_scenario_policy_context_2050.csv` | 6 | Regional scenario summaries, transition-event accounting and current policy context. |
+| `data/scenarios/renovation/archetype_matrix_2050_renovation_scenarios.csv` | 225 | One projection × three regions × 25 archetypes × three states. The plural filename is retained for interface compatibility. |
+| `data/scenarios/renovation/renovation_priority_allocation_2050.csv` | 210 | Depth-specific cumulative transition-event audit trail for the national projection. |
+| `data/scenarios/renovation/renovation_scenario_policy_context_2050.csv` | 3 | Regional activity summaries, transition-event accounting and current policy context. The compatibility filename is retained. |
+| `data/scenarios/renovation/renovation_projection_national_summary_2050.csv` | 1 | National inputs, activity balance, applied transitions and 2025/2050 state shares. |
+| `data/scenarios/renovation/renovation_state_trajectory_2025_2050.csv` | 78 | Annual 2025–2050 physical-state counts and shares for the three regions. |
+| `figures/fig_renovation_state_projection_2050.{png,pdf}` | — | National and regional 2025/2050 physical-state shares. |
+| `figures/fig_renovation_state_composition_be_2025_2050.{png,pdf}` | — | Belgian renovation-state composition in 2025 and 2050. |
+| `figures/fig_renovation_improved_share_by_region_2025_2050.{png,pdf}` | — | Annual regional Standard plus Low Energy share. |
+| `figures/fig_renovation_priority_by_period.{png,pdf}` | — | Medium and advanced transition events by construction period. |
 
 ## Validation
 
@@ -392,7 +382,11 @@ The scripts enforce:
 - source-precision bounds and correlated residual identities;
 - ARR and depth-share quota identities;
 - annual eligibility, transition ordering and separated unused quotas;
-- state and regional stock preservation through every 2050 scenario;
+- annual trajectory conservation, endpoint agreement and non-decreasing
+  Standard-plus-Advanced shares;
+- national, regional and archetype stock preservation through the 2050 projection;
+- agreement between the national summary and the three regional activity
+  records;
 - temporary output validation before atomic file replacement.
 
 The optional technology module separately validates its variant shares and
@@ -400,7 +394,7 @@ reconstruction identities.
 
 ## Main caveats
 
-- The fixed 2025 denominator represents a renovation-state scenario. A full 2050
+- The fixed 2025 denominator represents a renovation-state projection. A full 2050
   stock projection requires demolition, new construction and new cohort
   archetypes.
 - R1–R3 building-age profiles are applied to dwelling totals, and every
@@ -415,8 +409,8 @@ reconstruction identities.
 - The heat-loss ranking is a simplified archetype-level metric; the thermal
   model adds thermal bridges, boundary factors, climate, gains and controls.
 - Shallow activity has no separate TABULA physical state.
-- The central 40/50/10 depth mix is an official pathway calibration held
-  constant through 2050. The high case is a controlled rate sensitivity.
+- The 2.8% ARR and 40/50/10 depth mix are official pathway settings reported by
+  2025 and are held constant through 2050 as a model calibration.
 - Fractional dwelling counts are expected values. A Monte Carlo implementation
   can sample integer buildings or dwellings later.
 - Heating, cooling and PV allocations are isolated optional stock assumptions

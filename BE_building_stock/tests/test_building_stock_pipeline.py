@@ -44,6 +44,18 @@ class BuildingStockPipelineTest(unittest.TestCase):
             / "renovation"
             / "renovation_priority_allocation_2050.csv"
         )
+        cls.national_summary = pd.read_csv(
+            DATA
+            / "scenarios"
+            / "renovation"
+            / "renovation_projection_national_summary_2050.csv"
+        )
+        cls.trajectory = pd.read_csv(
+            DATA
+            / "scenarios"
+            / "renovation"
+            / "renovation_state_trajectory_2025_2050.csv"
+        )
 
     def test_infiltration_conversion(self) -> None:
         self.assertEqual(len(self.base), 25)
@@ -206,7 +218,7 @@ class BuildingStockPipelineTest(unittest.TestCase):
             )
 
     def test_depth_allocation_audit(self) -> None:
-        self.assertEqual(len(self.allocation), 420)
+        self.assertEqual(len(self.allocation), 210)
         for (scenario, region, depth), group in self.allocation.groupby(
             ["scenario", "region", "renovation_depth"], sort=False
         ):
@@ -243,31 +255,29 @@ class BuildingStockPipelineTest(unittest.TestCase):
                 )
 
     def test_2050_stock_identities_and_arr(self) -> None:
-        self.assertEqual(len(self.scenarios), 450)
-        self.assertEqual(len(self.crosscheck), 6)
-        expected_arr = {"central": 0.028, "high": 0.056}
-        expected_depths = {
-            "central": (0.4, 0.5, 0.1),
-            "high": (0.4, 0.5, 0.1),
-        }
-        self.assertEqual(set(self.scenarios["scenario"]), {"central", "high"})
+        self.assertEqual(len(self.scenarios), 225)
+        self.assertEqual(len(self.crosscheck), 3)
+        self.assertEqual(len(self.allocation), 210)
+        self.assertEqual(set(self.scenarios["scenario"]), {"central"})
         self.assertTrue(
             self.scenarios["stock_geometry_mapping_assumption"]
             .str.contains("conditional on this mapping", regex=False)
             .all()
         )
+
         for (scenario, region), group in self.scenarios.groupby(
             ["scenario", "region"], sort=False
         ):
-            self.assertTrue(
-                math.isclose(group["ARR"].iloc[0], expected_arr[scenario])
+            self.assertEqual(scenario, "central")
+            self.assertTrue(math.isclose(group["ARR"].iloc[0], 0.028))
+            self.assertEqual(
+                (
+                    group["shallow_share"].iloc[0],
+                    group["medium_share"].iloc[0],
+                    group["advanced_share"].iloc[0],
+                ),
+                (0.4, 0.5, 0.1),
             )
-            observed_depths = (
-                group["shallow_share"].iloc[0],
-                group["medium_share"].iloc[0],
-                group["advanced_share"].iloc[0],
-            )
-            self.assertEqual(observed_depths, expected_depths[scenario])
             regional_stock = group["regional_modelled_stock_dwellings"].iloc[0]
             self.assertTrue(
                 math.isclose(
@@ -348,6 +358,89 @@ class BuildingStockPipelineTest(unittest.TestCase):
                     - row.minimum_repeat_transition_events_to_2050,
                     abs_tol=1e-5,
                 )
+            )
+
+        self.assertEqual(len(self.national_summary), 1)
+        summary = self.national_summary.iloc[0]
+        self.assertEqual(summary["projection"], "central")
+        self.assertTrue(math.isclose(summary["ARR"], 0.028, abs_tol=1e-12))
+        self.assertEqual(
+            (
+                summary["shallow_share"],
+                summary["medium_share"],
+                summary["advanced_share"],
+            ),
+            (0.4, 0.5, 0.1),
+        )
+        self.assertTrue(
+            math.isclose(
+                summary["annual_total_renovation_activity_dwellings"],
+                summary["ARR"] * summary["national_modelled_stock_dwellings"],
+                abs_tol=1e-5,
+            )
+        )
+        self.assertTrue(
+            math.isclose(
+                summary["existing_share_2025"]
+                + summary["standard_B_proxy_share_2025"]
+                + summary["advanced_A_proxy_share_2025"],
+                1.0,
+                abs_tol=1e-9,
+            )
+        )
+        self.assertTrue(
+            math.isclose(
+                summary["existing_share_2050"]
+                + summary["standard_B_proxy_share_2050"]
+                + summary["advanced_A_proxy_share_2050"],
+                1.0,
+                abs_tol=1e-9,
+            )
+        )
+        self.assertEqual(
+            summary["shallow_TABULA_representation"], "TABULA_existing_as_is"
+        )
+        self.assertEqual(
+            summary["medium_TABULA_representation"], "TABULA_standard_B_proxy"
+        )
+        self.assertEqual(
+            summary["advanced_TABULA_representation"],
+            "TABULA_advanced_A_proxy_low_energy",
+        )
+
+    def test_annual_state_trajectory(self) -> None:
+        self.assertEqual(len(self.trajectory), 78)
+        self.assertEqual(set(self.trajectory["projection"]), {"central"})
+        for region, group in self.trajectory.groupby("region", sort=False):
+            ordered = group.sort_values("year")
+            self.assertEqual(ordered["year"].tolist(), list(range(2025, 2051)))
+            stock_error = (
+                ordered[
+                    [
+                        "existing_dwellings",
+                        "standard_B_proxy_dwellings",
+                        "advanced_A_proxy_dwellings",
+                    ]
+                ].sum(axis=1)
+                - ordered["regional_modelled_stock_dwellings"]
+            ).abs().max()
+            self.assertLess(stock_error, 1e-5)
+            self.assertTrue(
+                (
+                    ordered[
+                        [
+                            "existing_share",
+                            "standard_B_proxy_share",
+                            "advanced_A_proxy_share",
+                        ]
+                    ].sum(axis=1)
+                    - 1.0
+                ).abs().max()
+                < 1e-9
+            )
+            self.assertTrue(
+                (ordered["improved_envelope_share"].diff().dropna() >= -1e-9).all(),
+                msg=f"{region} improved-envelope share is not non-decreasing",
             )
 
 

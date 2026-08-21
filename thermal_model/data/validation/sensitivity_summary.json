@@ -1,0 +1,81 @@
+{
+  "case_count": 19,
+  "directional_checks": {
+    "higher_cooling_setpoint_reduces_cooling": true,
+    "higher_heating_setpoint_increases_heating": true,
+    "hrv_reduces_heating": true,
+    "more_solar_does_not_increase_heating": true,
+    "more_solar_does_not_reduce_cooling": true
+  },
+  "largest_absolute_heating_changes": [
+    {
+      "axis": "heating_setpoint",
+      "case_id": "heating_setpoint_22",
+      "delta_heating_kWh_m2": 47.773329201383376
+    },
+    {
+      "axis": "heating_setpoint",
+      "case_id": "heating_setpoint_18",
+      "delta_heating_kWh_m2": -44.21107413584468
+    },
+    {
+      "axis": "infiltration",
+      "case_id": "infiltration_one_and_half",
+      "delta_heating_kWh_m2": 26.638309728775
+    },
+    {
+      "axis": "infiltration",
+      "case_id": "infiltration_half",
+      "delta_heating_kWh_m2": -26.561926804921313
+    },
+    {
+      "axis": "solar_gain_check",
+      "case_id": "solar_disabled",
+      "delta_heating_kWh_m2": 21.86148152214227
+    },
+    {
+      "axis": "hrv",
+      "case_id": "advanced_hrv_disabled",
+      "delta_heating_kWh_m2": 21.055995949982464
+    },
+    {
+      "axis": "boundary_treatment",
+      "case_id": "all_opaque_boundaries_exterior",
+      "delta_heating_kWh_m2": 19.81689976488144
+    },
+    {
+      "axis": "ventilation_rate",
+      "case_id": "ventilation_ach_0_6",
+      "delta_heating_kWh_m2": 14.882302429464914
+    }
+  ],
+  "method": "deterministic one-at-a-time screening; ranges are not probability distributions",
+  "reference_weather": {
+    "distance_to_median_C_days": 65.59958333329996,
+    "facade_annual_kWh_m2": {
+      "east": 709.42022,
+      "north": 303.84355,
+      "south": 976.0541600000001,
+      "west": 689.6799500000001
+    },
+    "facade_source_sha256": {
+      "east": "b1a28b883b4633c7b55388b5b43f571e79efcd391bc0ce6bc07019b5e25d8065",
+      "north": "002ee4e68ba2ff1e9da7eb8f1e16c441bba47a8ad5ed36d81dc169204a2cb66d",
+      "south": "c667e440b35d715226d38302c0104b35b5d5764fed6125e5bcc80d08fabf1f41",
+      "west": "2767619730916a7bca7fe58275301af35dc43db33040cad9a975264954dbabb5"
+    },
+    "horizontal_annual_kWh_m2": 1142.14809,
+    "median_hdd_C_days": 2570.98,
+    "observed_dataset_sha256": "a9bebd7b44da6abd349c1a695fa5e47552439e1ee1772a4339efa0bfacec1ede",
+    "row_count": 8760,
+    "selected_hdd_C_days": 2636.5795833333,
+    "selected_year": 2015,
+    "selection_method": "complete PVGIS year nearest 2006-2023 median HDD; earlier year breaks exact ties",
+    "source_path": "climate/data/processed/validation/observed_be100_degree_day_comparison.csv",
+    "source_sha256": "58c7cdc9764d7409415827e41feb07fdbac55029ee97a661da896986e7479755",
+    "temperature_mean_C": 10.978037671232876,
+    "weather_member_id": "pvgis_sarah3_observed_2015_reference"
+  },
+  "representative_scope": "BE_TABULA_11 detached 1971-1990 existing; HRV pair uses its advanced state",
+  "schema_version": 1
+}

@@ -1,0 +1,18 @@
+{
+  "schema_version": 1,
+  "metric": "Net energy demand for space heating",
+  "unit": "kWh/m2/year",
+  "source_title": "Belgian Building Typologies - National Scientific Report",
+  "source_organization": "VITO / TABULA",
+  "source_url": "https://episcope.eu/fileadmin/tabula/public/docs/scientific/BE_TABULA_ScientificReport_VITO.pdf",
+  "source_path": "BE_building_stock/data/inputs/physical/BE_TABULA_ScientificReport_VITO.pdf",
+  "source_sha256": "01b83a30941a6a1a000710c2bd6f27b101d5aecf0da674537e8d72ca1d35b88e",
+  "source_locator": "Annex 2, Table 20, printed pages 87-88 / PDF pages 98-99",
+  "state_mapping": {
+    "TABULA_existing": "Current",
+    "TABULA_standard_B_proxy": "EPB2010",
+    "TABULA_advanced_A_proxy": "LE"
+  },
+  "transcription_method": "Values extracted with pdfplumber and independently checked against rendered 160 dpi page images.",
+  "transcribed_on": "2026-08-04"
+}

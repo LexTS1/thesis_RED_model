@@ -1,0 +1,12 @@
+{
+  "design_sha256": "57c5a6e60744f004591b2bf416ca6872047d1422fd430e82ef5fbb52bc8ae005",
+  "imported_diagnostics_sha256": "e5694128cb74892062c6bc0da03d1e082afa22ed027d57ee6f3ef3b298d67dfc",
+  "imported_run_count": 240,
+  "imported_seed_count": 80,
+  "source_partition_contract_sha256": "194f9da570337f9d69bc2a4dfb21a08ec3b37a77b1fd639b6e18297d2084c978",
+  "source_progress_sha256": "c23a1f105fb8f7bd89410df8641ec7e0618ff3812780746b32ec01cc71b0854e",
+  "source_run_manifest_sha256": "d7ffe38f39d39786ed4241a62c4de87f8df2d785e81b72fd6f451b55ccd3c203",
+  "status": "IMPORTED_AND_VERIFIED",
+  "verified_at_utc": "2026-08-09T11:35:39.572969+00:00",
+  "weather_member_id": "weather_2050_rcp_2_6_pvgis_2006"
+}

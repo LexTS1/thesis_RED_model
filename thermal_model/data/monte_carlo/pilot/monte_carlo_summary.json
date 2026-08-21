@@ -1,0 +1,67 @@
+{
+  "archetype_id": "BE_TABULA_11",
+  "artifact_sha256": {
+    "distribution_summary.csv": "fadbde9fe5fb7a7de77c96a081af0695aab6bb321377fa7437cea260f2370f21",
+    "model_scenario_catalog.csv": "57ef832377306cf90366efb60e9747bbbd82faa83afb6d82d6f7a47a93887200",
+    "paired_model_scenario_deltas.csv": "7549ebc2661098e007aed4dac084d10c6bbe4f4bfb553382c7c52d10f0ed3e37",
+    "paired_renovation_deltas.csv": "c110fd416a47ce4366e9c526be64667126cdc484e94b90ad35319deb9fc107e8",
+    "representative_hourly.csv": "7841aa3960cdf1aab05a97923439d30a1f1e3c5d7192076e82b0c1e3532f0bf2",
+    "run_diagnostics.csv": "7bbf935bed3d377e0325e4888115e507f69eefa5dfcdc1003b9845a2c8ccbc1f",
+    "run_manifest.csv": "92ca3ed1520d6f50a047035d05e0a1803b1bef26c14004419c7868d4b8f4b5be",
+    "variance_contributions.csv": "c4f7d1b49864cec14d7959a73fb7d766c0ea2822c676ea08b50daa561cdaa675",
+    "weather_selection.csv": "33aae7e3c0beee6cc03ced2d0bfbf7f4ccf29518c312860cb50ccbf330b03c0c"
+  },
+  "behaviour_profile_cache_entries": 6,
+  "climate_scenario_ids": [
+    "rcp_4_5"
+  ],
+  "interval_interpretation": "pilot summaries are workflow checks, not confidence or prediction intervals",
+  "model_scenario_ids": [
+    "central",
+    "mass_heavy"
+  ],
+  "occupant_seeds_in_nested_order": [
+    1203443498,
+    2404203277,
+    556301278
+  ],
+  "output_files": [
+    "distribution_summary.csv",
+    "model_scenario_catalog.csv",
+    "monte_carlo_summary.json",
+    "paired_model_scenario_deltas.csv",
+    "paired_renovation_deltas.csv",
+    "representative_hourly.csv",
+    "run_diagnostics.csv",
+    "run_manifest.csv",
+    "variance_contributions.csv",
+    "weather_selection.csv"
+  ],
+  "representative_run_id": "mc_7f6a7c1cf69201de885344e02564ea01bacd2436d8ec6d58f5de9dab31876149",
+  "run_count": 24,
+  "scope": "bounded Gate-5 workflow pilot; not the final Monte Carlo experiment",
+  "seed_convergence": {
+    "production_checkpoints": [
+      5,
+      10,
+      20,
+      40,
+      80
+    ],
+    "reason": "pilot has 3 seeds; first predeclared production checkpoint is 5",
+    "status": "NOT_EVALUATED"
+  },
+  "state_ids": [
+    "TABULA_existing",
+    "TABULA_advanced_A_proxy"
+  ],
+  "status": "PASS",
+  "stock_aggregation": {
+    "reason": "pilot covers 2 of 75 physics cells",
+    "status": "NOT_EVALUATED"
+  },
+  "weather_member_ids": [
+    "weather_2050_rcp_4_5_pvgis_2010",
+    "weather_2050_rcp_4_5_pvgis_2015"
+  ]
+}
