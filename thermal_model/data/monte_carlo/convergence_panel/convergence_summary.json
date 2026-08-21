@@ -1,0 +1,32 @@
+{
+  "artifact_sha256": {
+    "convergence_results.csv": "a969a75a8943454373d7a95ab908b76ed9aab42ba15405fa55ff6b3eaf491e00",
+    "run_diagnostics.csv": "107be8c118d3160faed427e8e1e3bd6f66340041925c7ac00f8ffa91e01c3eb4",
+    "run_manifest.csv": "fa0d6ceca0c5ac5084d628ec5fb54dfd16b93d17bbbe874cac2aa46d62fc8a6f"
+  },
+  "completed_at_utc": "2026-08-09T09:05:43.366905+00:00",
+  "design_sha256": "88bd350bf0fb228f8170f1d3bd69337a08d9aa02bf2b6e16e6e7ed6512760637",
+  "evaluated_seed_count": 80,
+  "first_panel_converged_checkpoint": null,
+  "latest_checkpoint": {
+    "artifact_sha256": {
+      "convergence_results.csv": "a969a75a8943454373d7a95ab908b76ed9aab42ba15405fa55ff6b3eaf491e00",
+      "run_diagnostics.csv": "107be8c118d3160faed427e8e1e3bd6f66340041925c7ac00f8ffa91e01c3eb4",
+      "run_manifest.csv": "fa0d6ceca0c5ac5084d628ec5fb54dfd16b93d17bbbe874cac2aa46d62fc8a6f"
+    },
+    "completed_at_utc": "2026-08-09T09:05:43.356980+00:00",
+    "panel_converged_at_checkpoint": false,
+    "run_count": 12960,
+    "seed_count": 80,
+    "status": "NOT_YET_CONVERGED"
+  },
+  "panel_cell_count": 3,
+  "production_interpretation": "No production seed count was selected; extend or revise the predeclared experiment before running the stock.",
+  "run_count": 12960,
+  "scope": "production occupant-seed convergence panel",
+  "selected_occupant_seeds": null,
+  "selected_seed_count": null,
+  "started_at_utc": "2026-08-08T21:16:39.909786+00:00",
+  "status": "NOT_CONVERGED_AT_N80",
+  "weather_member_count": 54
+}

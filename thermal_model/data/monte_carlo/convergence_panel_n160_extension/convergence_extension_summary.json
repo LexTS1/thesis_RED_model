@@ -1,0 +1,70 @@
+{
+  "artifact_sha256": {
+    "convergence_results.csv": "6614a2c894d96036ef8ed231bba3b84f8ae53c07397d12b0463752d9764e18b9",
+    "run_diagnostics.csv": "6140abb5bd62bde00b1546ebcc055ad464f6f7987c623d31db1d684ce1d0baeb",
+    "run_manifest.csv": "8e772b80fc234201fb6daef8de99dd06e74d66cac1cba94749727532d57108dd"
+  },
+  "base_design_sha256": "88bd350bf0fb228f8170f1d3bd69337a08d9aa02bf2b6e16e6e7ed6512760637",
+  "completed_at_utc": "2026-08-10T03:19:03.522759+00:00",
+  "convergence_rule": {
+    "checkpoints": [
+      5,
+      10,
+      20,
+      40,
+      80,
+      160
+    ],
+    "metrics_and_absolute_floors": [
+      {
+        "absolute_floor": 1.0,
+        "metric": "heating_intensity_kWh_m2"
+      },
+      {
+        "absolute_floor": 1.0,
+        "metric": "cooling_intensity_kWh_m2"
+      },
+      {
+        "absolute_floor": 100.0,
+        "metric": "peak_heating_W"
+      },
+      {
+        "absolute_floor": 100.0,
+        "metric": "peak_cooling_W"
+      }
+    ],
+    "relative_tolerance": 0.02,
+    "required_consecutive_expansions": 2,
+    "statistics": [
+      "mean",
+      "median",
+      "p95"
+    ]
+  },
+  "design_sha256": "57c5a6e60744f004591b2bf416ca6872047d1422fd430e82ef5fbb52bc8ae005",
+  "evaluated_seed_count": 160,
+  "first_panel_converged_checkpoint": null,
+  "imported_seed_count": 80,
+  "latest_checkpoint": {
+    "artifact_sha256": {
+      "convergence_results.csv": "6614a2c894d96036ef8ed231bba3b84f8ae53c07397d12b0463752d9764e18b9",
+      "run_diagnostics.csv": "6140abb5bd62bde00b1546ebcc055ad464f6f7987c623d31db1d684ce1d0baeb",
+      "run_manifest.csv": "8e772b80fc234201fb6daef8de99dd06e74d66cac1cba94749727532d57108dd"
+    },
+    "completed_at_utc": "2026-08-10T03:19:03.506725+00:00",
+    "panel_converged_at_checkpoint": false,
+    "run_count": 25920,
+    "seed_count": 160,
+    "status": "NOT_YET_CONVERGED"
+  },
+  "new_seed_count": 80,
+  "panel_cell_count": 3,
+  "production_interpretation": "No seed count was selected. A further protocol must be declared before any authoritative stock run.",
+  "run_count": 25920,
+  "scope": "prospective n=160 occupant-seed confirmation",
+  "selected_occupant_seeds": null,
+  "selected_seed_count": null,
+  "started_at_utc": "2026-08-09T11:35:38.270930+00:00",
+  "status": "NOT_CONVERGED_AT_N160",
+  "weather_member_count": 54
+}

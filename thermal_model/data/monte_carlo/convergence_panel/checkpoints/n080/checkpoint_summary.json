@@ -1,0 +1,12 @@
+{
+  "artifact_sha256": {
+    "convergence_results.csv": "a969a75a8943454373d7a95ab908b76ed9aab42ba15405fa55ff6b3eaf491e00",
+    "run_diagnostics.csv": "107be8c118d3160faed427e8e1e3bd6f66340041925c7ac00f8ffa91e01c3eb4",
+    "run_manifest.csv": "fa0d6ceca0c5ac5084d628ec5fb54dfd16b93d17bbbe874cac2aa46d62fc8a6f"
+  },
+  "completed_at_utc": "2026-08-09T09:05:43.356980+00:00",
+  "panel_converged_at_checkpoint": false,
+  "run_count": 12960,
+  "seed_count": 80,
+  "status": "NOT_YET_CONVERGED"
+}

@@ -1,0 +1,19 @@
+archetype_id,dwelling_type,dwelling_class,state_id,occupant_count,scenario,heating_kWh_m2,cooling_kWh_m2,heating_effect_vs_preceding_kWh_m2,cooling_effect_vs_preceding_kWh_m2,interpretation
+BE_TABULA_11,Detached house,SFH,TABULA_existing,2,A_constant_3_W_m2_20_26,202.67801254799429,1.1321766272641833,,,scenario total
+BE_TABULA_11,Detached house,SFH,TABULA_existing,2,B_mean_behavioural_gain_20_26,210.425120421618,0.9540417336920687,,,scenario total
+BE_TABULA_11,Detached house,SFH,TABULA_existing,2,C_dynamic_behavioural_gain_20_26,210.53738771122505,0.9527379056512442,,,scenario total
+BE_TABULA_11,Detached house,SFH,TABULA_existing,2,D_full_behavioural,191.15944799594877,0.9404647198887688,,,scenario total
+BE_TABULA_11,Detached house,SFH,TABULA_existing,2,E_full_flat_lighting,191.18215826900249,0.9372355441368233,,,scenario total
+BE_TABULA_11,Detached house,SFH,TABULA_existing,2,effect_gain_magnitude,,,7.747107873623719,-0.17813489357211465,mean behavioural gain minus constant 3 W/m2
+BE_TABULA_11,Detached house,SFH,TABULA_existing,2,effect_gain_timing,,,0.1122672896070469,-0.0013038280408245173,dynamic minus time-constant gains at equal annual gain
+BE_TABULA_11,Detached house,SFH,TABULA_existing,2,effect_setpoint_setback,,,-19.377939715276284,-0.01227318576247538,18/20 C occupancy schedule minus constant 20 C
+BE_TABULA_11,Detached house,SFH,TABULA_existing,2,effect_lighting_weather_timing,,,-0.02271027305371831,0.003229175751945479,weather-driven lighting minus equal-energy flat lighting
+BE_TABULA_14,"Apartment, enclosed",MFH,TABULA_existing,1,A_constant_3_W_m2_20_26,72.86760959732298,3.055519418972449,,,scenario total
+BE_TABULA_14,"Apartment, enclosed",MFH,TABULA_existing,1,B_mean_behavioural_gain_20_26,65.40645431574173,4.07520843539586,,,scenario total
+BE_TABULA_14,"Apartment, enclosed",MFH,TABULA_existing,1,C_dynamic_behavioural_gain_20_26,66.02840941625415,4.4428731130203225,,,scenario total
+BE_TABULA_14,"Apartment, enclosed",MFH,TABULA_existing,1,D_full_behavioural,56.9561673495675,4.415966871773858,,,scenario total
+BE_TABULA_14,"Apartment, enclosed",MFH,TABULA_existing,1,E_full_flat_lighting,56.96895403722862,4.365313059513471,,,scenario total
+BE_TABULA_14,"Apartment, enclosed",MFH,TABULA_existing,1,effect_gain_magnitude,,,-7.461155281581256,1.0196890164234107,mean behavioural gain minus constant 3 W/m2
+BE_TABULA_14,"Apartment, enclosed",MFH,TABULA_existing,1,effect_gain_timing,,,0.6219551005124231,0.36766467762446275,dynamic minus time-constant gains at equal annual gain
+BE_TABULA_14,"Apartment, enclosed",MFH,TABULA_existing,1,effect_setpoint_setback,,,-9.072242066686648,-0.0269062412464649,18/20 C occupancy schedule minus constant 20 C
+BE_TABULA_14,"Apartment, enclosed",MFH,TABULA_existing,1,effect_lighting_weather_timing,,,-0.012786687661119345,0.050653812260386566,weather-driven lighting minus equal-energy flat lighting

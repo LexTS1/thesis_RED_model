@@ -21,7 +21,10 @@ from climate.src.validate import (
     validate_hourly_frame,
     validate_member_pair,
 )
-from climate.src.plot_validation import build_validation_figures
+from climate.src.plot_validation import (
+    build_validation_figures,
+    select_weather_morphing_worked_example_day,
+)
 
 
 CONFIG_PATH = Path(__file__).resolve().parents[1] / "config.yaml"
@@ -316,6 +319,12 @@ def test_validation_figures_are_complete_and_deterministic(validation_data) -> N
         "morph_residuals_pdf",
         "temperature_duration_png",
         "temperature_duration_pdf",
+        "observed_reference_degree_days_png",
+        "observed_reference_degree_days_pdf",
+        "cordex_morph_degree_day_changes_png",
+        "cordex_morph_degree_day_changes_pdf",
+        "weather_morphing_worked_example_png",
+        "weather_morphing_worked_example_pdf",
         "provenance",
     }
     assert all(path.stat().st_size > 0 for path in first.values())
@@ -323,3 +332,15 @@ def test_validation_figures_are_complete_and_deterministic(validation_data) -> N
     second = build_validation_figures(config)
     second_hashes = {name: sha256_file(path) for name, path in second.items()}
     assert first_hashes == second_hashes
+
+
+def test_worked_example_day_selection_is_reproducible(validation_data) -> None:
+    config, _, _ = validation_data
+    observed, _ = load_clean_observed(config)
+    selected, metadata = select_weather_morphing_worked_example_day(observed)
+    assert metadata["date_utc"] == "2008-07-01"
+    assert metadata["candidate_day_count"] == 558
+    assert len(selected) == 24
+    noon = selected.loc[selected["timestamp_utc"].dt.hour == 12].iloc[0]
+    assert noon["T_out_C"] == pytest.approx(24.21)
+    assert noon["I_solar_W_m2"] == pytest.approx(932.01)

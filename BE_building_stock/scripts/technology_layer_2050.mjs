@@ -57,7 +57,6 @@ const REGIONS = [
   "Walloon Region",
   "Brussels-Capital Region",
 ];
-const SCENARIOS = ["central", "high"];
 const RENOVATION_STATES = [
   "TABULA_existing",
   "TABULA_standard_B_proxy",
@@ -352,18 +351,20 @@ function validateInputs(tables) {
   for (const [name, table] of Object.entries(tables)) {
     requireColumns(table.headers, REQUIRED_COLUMNS[name], name);
   }
-  assert(!tables.states.headers.includes("heat_recovery_efficiency"), "obsolete heat_recovery_efficiency remains in renovation scenarios");
-  assert(tables.states.headers.includes("hrv_eta"), "renovation scenarios are missing hrv_eta");
-  assert(tables.states.headers.includes("summer_bypass"), "renovation scenarios are missing summer_bypass");
+  assert(!tables.states.headers.includes("heat_recovery_efficiency"), "obsolete heat_recovery_efficiency remains in the renovation projection");
+  assert(tables.states.headers.includes("hrv_eta"), "renovation projection is missing hrv_eta");
+  assert(tables.states.headers.includes("summer_bypass"), "renovation projection is missing summer_bypass");
 
   const states = tables.states.rows;
-  assert(states.length === 450, `renovation state input must contain 450 rows; found ${states.length}`);
+  const scenarios = [...new Set(states.map((row) => String(row.scenario)))];
+  assert(scenarios.length === 1, `renovation state input must contain one projection; found ${scenarios.length}`);
+  assert(states.length === scenarios.length * 225, `renovation state input must contain ${scenarios.length * 225} rows; found ${states.length}`);
   requireUnique(states, ["scenario", "region", "archetype_id", "renovation_state"], "renovation states");
 
   const regionalStock = new Map();
   const stateGroups = new Map();
   for (const row of states) {
-    assert(SCENARIOS.includes(String(row.scenario)), `unknown scenario ${row.scenario}`);
+    assert(scenarios.includes(String(row.scenario)), `unknown projection ${row.scenario}`);
     assert(REGIONS.includes(String(row.region)), `unknown region ${row.region}`);
     assert(RENOVATION_STATES.includes(String(row.renovation_state)), `unknown renovation state ${row.renovation_state}`);
     assert(Number(row.target_year) === TARGET_YEAR, `${stateKey(row)} has target year ${row.target_year}`);
@@ -374,12 +375,12 @@ function validateInputs(tables) {
     assert(nearlyEqual(regionalStock.get(rKey), stock), `${rKey} has inconsistent regional stock`);
     addToGroup(stateGroups, `${row.scenario}\u0000${row.region}\u0000${row.archetype_id}`, row);
   }
-  assert(stateGroups.size === 150, `expected 150 scenario-region-archetype groups; found ${stateGroups.size}`);
+  assert(stateGroups.size === scenarios.length * 75, `expected ${scenarios.length * 75} projection-region-archetype groups; found ${stateGroups.size}`);
   for (const [key, group] of stateGroups) {
     assert(group.length === 3, `${key} must contain three renovation states`);
     assert(RENOVATION_STATES.every((state) => group.some((row) => row.renovation_state === state)), `${key} is missing a renovation state`);
   }
-  for (const scenario of SCENARIOS) {
+  for (const scenario of scenarios) {
     for (const region of REGIONS) {
       const rows = states.filter((row) => row.scenario === scenario && row.region === region);
       assert(rows.length === 75, `${scenario}/${region} must contain 75 state rows`);
@@ -486,7 +487,7 @@ function validateInputs(tables) {
   const modeledByRegion = new Map();
   for (const region of REGIONS) {
     const stockValues = [...new Set(states.filter((row) => row.region === region).map((row) => Number(row.regional_modelled_stock_dwellings)))];
-    assert(stockValues.length === 1, `${region} has inconsistent modeled stock across scenarios`);
+    assert(stockValues.length === 1, `${region} has inconsistent modeled stock in the projection input`);
     const pvRow = pvByRegion.get(region);
     const pvModeled = Number(pvRow.modeled_house_dwellings) + Number(pvRow.modeled_apartment_dwellings);
     assert(Math.abs(pvModeled - stockValues[0]) <= DWELLING_TOLERANCE, `${region} PV eligible stock differs from modeled R1-R4 stock`);
@@ -495,6 +496,7 @@ function validateInputs(tables) {
 
   return {
     states,
+    scenarios,
     heatingSharesByRegion,
     packagesById,
     coolingByKey,
@@ -745,10 +747,11 @@ function validateVariantGroups(rows, extraKeyColumns, tableName) {
 
 
 function validateHeatingRows(rows, context) {
-  assert(rows.length === 1350, `heating output must contain 1350 rows; found ${rows.length}`);
+  const expectedRows = context.scenarios.length * 675;
+  assert(rows.length === expectedRows, `heating output must contain ${expectedRows} rows; found ${rows.length}`);
   requireUnique(rows, ["scenario", "region", "archetype_id", "renovation_state", "heating_variant_id"], "heating output");
   const groups = validateVariantGroups(rows, [], "heating output");
-  assert(groups.size === 450, `heating output must contain 450 state groups; found ${groups.size}`);
+  assert(groups.size === context.states.length, `heating output must contain ${context.states.length} state groups; found ${groups.size}`);
   for (const [key, group] of groups) {
     const currentProxy = group[0].renovation_state !== "TABULA_advanced_A_proxy";
     assert(group.length === (currentProxy ? 4 : 1), `${key} must contain ${currentProxy ? 4 : 1} heating variants`);
@@ -758,7 +761,7 @@ function validateHeatingRows(rows, context) {
       assert(!Object.hasOwn(row, "heat_recovery_efficiency"), `${key} contains obsolete heat_recovery_efficiency`);
     }
   }
-  for (const scenario of SCENARIOS) {
+  for (const scenario of context.scenarios) {
     for (const region of REGIONS) {
       const sum = rows.filter((row) => row.scenario === scenario && row.region === region)
         .reduce((total, row) => total + Number(row.variant_dwellings), 0);
@@ -769,10 +772,12 @@ function validateHeatingRows(rows, context) {
 
 
 function validateCoolingRows(rows, context) {
-  assert(rows.length === 2700, `cooling output must contain 2700 rows; found ${rows.length}`);
+  const expectedRows = context.states.length * COOLING_CASES.length * 2;
+  assert(rows.length === expectedRows, `cooling output must contain ${expectedRows} rows; found ${rows.length}`);
   requireUnique(rows, ["scenario", "region", "archetype_id", "renovation_state", "cooling_case", "cooling_variant_id"], "cooling output");
   const groups = validateVariantGroups(rows, ["cooling_case"], "cooling output");
-  assert(groups.size === 1350, `cooling output must contain 1350 state/case groups; found ${groups.size}`);
+  const expectedGroups = context.states.length * COOLING_CASES.length;
+  assert(groups.size === expectedGroups, `cooling output must contain ${expectedGroups} state/case groups; found ${groups.size}`);
   for (const [key, group] of groups) {
     assert(group.length === 2, `${key} must contain active and inactive variants`);
     const active = group.find((row) => booleanValue(row.active_cooling, `${key} active_cooling`));
@@ -783,7 +788,7 @@ function validateCoolingRows(rows, context) {
       assert(capable === (row.renovation_state === "TABULA_advanced_A_proxy"), `${key} has inconsistent heat-pump capability`);
     }
   }
-  for (const scenario of SCENARIOS) {
+  for (const scenario of context.scenarios) {
     for (const region of REGIONS) {
       for (const coolingCase of COOLING_CASES) {
         const sum = rows.filter((row) => row.scenario === scenario && row.region === region && row.cooling_case === coolingCase)
@@ -823,10 +828,11 @@ function validatePvAssignmentRows(rows, context) {
 
 
 function validatePvRows(rows, context) {
-  assert(rows.length === 900, `PV output must contain 900 rows; found ${rows.length}`);
+  const expectedRows = context.states.length * 2;
+  assert(rows.length === expectedRows, `PV output must contain ${expectedRows} rows; found ${rows.length}`);
   requireUnique(rows, ["scenario", "region", "archetype_id", "renovation_state", "pv_variant_id"], "PV output");
   const groups = validateVariantGroups(rows, [], "PV output");
-  assert(groups.size === 450, `PV output must contain 450 state groups; found ${groups.size}`);
+  assert(groups.size === context.states.length, `PV output must contain ${context.states.length} state groups; found ${groups.size}`);
   for (const [key, group] of groups) {
     assert(group.length === 2, `${key} must contain PV and no-PV variants`);
     const installed = group.find((row) => booleanValue(row.pv_installed, `${key} pv_installed`));
@@ -846,7 +852,7 @@ function validatePvRows(rows, context) {
     const expectedCapacity = Number(installed.variant_dwellings) * Number(installed.assigned_capacity_kwp_per_participating_dwelling) / 1000;
     assert(Math.abs(expectedCapacity - Number(installed.allocated_capacity_mw)) <= CAPACITY_TOLERANCE_MW, `${key} allocated PV capacity is inconsistent`);
   }
-  for (const scenario of SCENARIOS) {
+  for (const scenario of context.scenarios) {
     for (const region of REGIONS) {
       const group = rows.filter((row) => row.scenario === scenario && row.region === region);
       const dwellingSum = group.reduce((sum, row) => sum + Number(row.variant_dwellings), 0);

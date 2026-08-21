@@ -1,0 +1,151 @@
+{
+  "cell_count": 75,
+  "external_context": {
+    "climate_neutral_belgium_2050_scenario_levels": {
+      "comparison_role": "context only; scenario levers are not archetype-specific validation targets",
+      "deep_kWh_m2_year": 25.0,
+      "medium_kWh_m2_year": 64.0,
+      "metric_description": "Residential renovation-depth energy-intensity scenario levels",
+      "model_advanced_state_median_kWh_m2": 23.71788726376123,
+      "model_standard_state_median_kWh_m2": 76.60666744542131,
+      "shallow_kWh_m2_year": 85.0,
+      "source_locator": "PDF page 49",
+      "source_path": "tmp/pdfs/climate-neutral-belgium-by-2050-report.pdf",
+      "source_url": "https://climat.be/doc/climate-neutral-belgium-by-2050-report.pdf"
+    },
+    "nbb_2024_sold_dwelling_epc_scores": {
+      "apartments_regional_mean_range_kWh_m2": [
+        198.0,
+        245.0
+      ],
+      "comparison_role": "context only: EPC is primary energy under regional methods, while the model output is useful space-heating demand",
+      "houses_regional_mean_range_kWh_m2": [
+        363.0,
+        390.0
+      ],
+      "model_existing_apartments_median_useful_heat_kWh_m2": 108.67330594106951,
+      "model_existing_houses_median_useful_heat_kWh_m2": 191.23236903860786,
+      "source_key": "nbb_epc_houseprices_2025",
+      "source_url": "https://www.nbb.be/doc/ts/publications/economicreview/2025/ecorevi2025_h01.pdf"
+    }
+  },
+  "numerical_checks": {
+    "energy_balance_all_timesteps_pass": true,
+    "energy_balance_tolerance_W": 1e-06,
+    "maximum_energy_balance_residual_W": 1.425632945029065e-10,
+    "maximum_setpoint_error_K": 5.3290705182007514e-14,
+    "no_simultaneous_heating_cooling": true,
+    "setpoint_tracking_all_controlled_hours_pass": true,
+    "setpoint_tracking_tolerance_K": 1e-08
+  },
+  "operating_conditions": {
+    "cooling_setpoint_C": 26.0,
+    "heating_setpoint_C": 20.0,
+    "internal_gains_W_m2": 3.0
+  },
+  "physical_states": [
+    "TABULA_existing",
+    "TABULA_standard_B_proxy",
+    "TABULA_advanced_A_proxy"
+  ],
+  "predeclared_acceptance": {
+    "qualitative_minimum_rate": 0.8,
+    "tabula_absolute_warning_floor_kWh_m2": 15.0,
+    "tabula_gate_minimum_cell_pass_rate": 0.8,
+    "tabula_relative_warning_fraction": 0.3
+  },
+  "provenance": {
+    "base_matrix_sha256": "1593ab3e4c3a9426acfbd6f3179950a1eaee8e30b5c0aed06d47205bc7a8836f",
+    "state_matrix_sha256": "710a8d6d9d250bb487349638f7e14dff681a9856a083d6f66ac1f239f9475594",
+    "tabula_target_path": "thermal_model/data/reference/tabula_net_heating_demand.csv",
+    "tabula_target_provenance_path": "thermal_model/data/reference/tabula_net_heating_demand.provenance.json",
+    "tabula_target_sha256": "6fc04de2393e97e843687222ad136ef5f913edb0e30dd4054699dc4b7145528c",
+    "thermal_assumptions_path": "thermal_model/thermal_assumptions.csv",
+    "thermal_assumptions_sha256": "4b5b7791539478f9b2562d1b176e235ac7b641e1afdc40c3d5242661d9dbed3d"
+  },
+  "qualitative_patterns": {
+    "detached_above_semi_above_terraced": {
+      "passed": 15,
+      "rate": 1.0,
+      "total": 15
+    },
+    "exposed_apartment_above_enclosed": {
+      "passed": 15,
+      "rate": 1.0,
+      "total": 15
+    },
+    "newer_period_nonincreasing_adjacent_pairs": {
+      "maximum_newer_minus_older_kWh_m2": 4.295122577689327,
+      "minimum_newer_minus_older_kWh_m2": -107.94618114316629,
+      "passed": 48,
+      "rate": 0.8,
+      "total": 60
+    },
+    "renovation_order": {
+      "failed_archetypes": [],
+      "passed": 25,
+      "rate": 1.0,
+      "total": 25
+    }
+  },
+  "reference_weather": {
+    "distance_to_median_C_days": 65.59958333329996,
+    "facade_annual_kWh_m2": {
+      "east": 709.42022,
+      "north": 303.84355,
+      "south": 976.0541600000001,
+      "west": 689.6799500000001
+    },
+    "facade_source_sha256": {
+      "east": "b1a28b883b4633c7b55388b5b43f571e79efcd391bc0ce6bc07019b5e25d8065",
+      "north": "002ee4e68ba2ff1e9da7eb8f1e16c441bba47a8ad5ed36d81dc169204a2cb66d",
+      "south": "c667e440b35d715226d38302c0104b35b5d5764fed6125e5bcc80d08fabf1f41",
+      "west": "2767619730916a7bca7fe58275301af35dc43db33040cad9a975264954dbabb5"
+    },
+    "horizontal_annual_kWh_m2": 1142.14809,
+    "median_hdd_C_days": 2570.98,
+    "observed_dataset_sha256": "a9bebd7b44da6abd349c1a695fa5e47552439e1ee1772a4339efa0bfacec1ede",
+    "row_count": 8760,
+    "selected_hdd_C_days": 2636.5795833333,
+    "selected_year": 2015,
+    "selection_method": "complete PVGIS year nearest 2006-2023 median HDD; earlier year breaks exact ties",
+    "source_path": "climate/data/processed/validation/observed_be100_degree_day_comparison.csv",
+    "source_sha256": "58c7cdc9764d7409415827e41feb07fdbac55029ee97a661da896986e7479755",
+    "temperature_mean_C": 10.978037671232876,
+    "weather_member_id": "pvgis_sarah3_observed_2015_reference"
+  },
+  "schema_version": 1,
+  "tabula_comparison": {
+    "by_state": {
+      "TABULA_advanced_A_proxy": {
+        "mean_signed_deviation_kWh_m2": -11.466840177008317,
+        "model_median_kWh_m2": 23.71788726376123,
+        "pass_rate": 0.96,
+        "target_median_kWh_m2": 36.0
+      },
+      "TABULA_existing": {
+        "mean_signed_deviation_kWh_m2": -26.57086820612213,
+        "model_median_kWh_m2": 144.29728451537073,
+        "pass_rate": 0.96,
+        "target_median_kWh_m2": 165.0
+      },
+      "TABULA_standard_B_proxy": {
+        "mean_signed_deviation_kWh_m2": -17.80100109832874,
+        "model_median_kWh_m2": 76.60666744542131,
+        "pass_rate": 0.8,
+        "target_median_kWh_m2": 92.0
+      }
+    },
+    "gate_pass": true,
+    "mean_absolute_deviation_kWh_m2": 18.6129031604864,
+    "mean_signed_deviation_kWh_m2": -18.6129031604864,
+    "median_absolute_relative_deviation_percent": 21.097407074825753,
+    "outside_band_cells": 7,
+    "pass_rate": 0.9066666666666666,
+    "root_mean_square_deviation_kWh_m2": 20.472821465773652,
+    "within_band_cells": 68
+  },
+  "unique_archetypes": 25,
+  "validation_status": "PASS",
+  "verification_status": "PASS"
+}

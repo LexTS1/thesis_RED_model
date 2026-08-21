@@ -1,0 +1,109 @@
+{
+  "cell_count": 75,
+  "comparison": {
+    "maximum_heating_change_kWh_m2": 4.825274438791173,
+    "median_cooling_change_kWh_m2": -0.16291104402609213,
+    "median_heating_change_kWh_m2": -4.675714117003309,
+    "minimum_heating_change_kWh_m2": -41.219086791808195
+  },
+  "fixed_seed": 20250805,
+  "gate": "Gate 4 deterministic occupant-behaviour coupling",
+  "numerical_checks": {
+    "energy_balance_tolerance_W": 1e-06,
+    "maximum_energy_balance_residual_W": 1.4279066817834973e-10,
+    "maximum_setpoint_error_K": 6.394884621840902e-14,
+    "setpoint_tracking_tolerance_K": 1e-08,
+    "simultaneous_heating_cooling_cells": 0
+  },
+  "profile_policy": "one fixed realization per SFH/MFH class, reused across all 75 cells",
+  "profiles": {
+    "MFH": {
+      "active_occupancy_hours": 4183,
+      "active_occupant_hours": 3329.3333333333335,
+      "annual_appliance_electricity_kWh": 3098.2202256050077,
+      "annual_electricity_target_kWh": 3500.0,
+      "annual_lighting_electricity_kWh": 401.7797743951184,
+      "annual_total_electricity_kWh": 3500.0000000001264,
+      "behaviour_assumptions_sha256": "2ad0e9f7bbdfe12695c931891fd0e8132d060fd7bcbca23623db43d4c7393a5c",
+      "daytime_mean_electricity_W": 539.8373716223753,
+      "dwelling_class": "MFH",
+      "dwelling_type": "Apartment, enclosed",
+      "mean_electricity_W": 399.5433789954482,
+      "mean_internal_gain_W": 426.14764079149086,
+      "nighttime_mean_electricity_W": 118.95539374159408,
+      "occupant_count": 1,
+      "occupant_count_bin": "1",
+      "occupant_distribution_sha256": "561839806dcdb8279ac4e42025bc5a82751f2588a2b2066fa84637918d8e4896",
+      "peak_electricity_W": 3149.3717139110818,
+      "peak_internal_gain_W": 3219.3717139110818,
+      "prev_heat_dev": true,
+      "richardson_seed": 1180736557,
+      "richardsonpy_version": "0.2.2",
+      "seed": 20250805,
+      "weather_forcing_sha256": "87c8f479871bbba9643acc6783e8d96e15f3e7330cc99bdbac343d24ee04ad9a",
+      "weather_member_id": "pvgis_sarah3_observed_2015_reference",
+      "weekday_mean_electricity_W": 398.4248740966671,
+      "weekend_mean_electricity_W": 402.35039609719695
+    },
+    "SFH": {
+      "active_occupancy_hours": 4963,
+      "active_occupant_hours": 6169.666666666667,
+      "annual_appliance_electricity_kWh": 2989.3811684153357,
+      "annual_electricity_target_kWh": 3500.0,
+      "annual_lighting_electricity_kWh": 510.6188315851799,
+      "annual_total_electricity_kWh": 3500.000000000516,
+      "behaviour_assumptions_sha256": "2ad0e9f7bbdfe12695c931891fd0e8132d060fd7bcbca23623db43d4c7393a5c",
+      "daytime_mean_electricity_W": 536.0301157748772,
+      "dwelling_class": "SFH",
+      "dwelling_type": "Detached house",
+      "mean_electricity_W": 399.5433789954927,
+      "mean_internal_gain_W": 448.84436834100256,
+      "nighttime_mean_electricity_W": 126.56990543672354,
+      "occupant_count": 2,
+      "occupant_count_bin": "2",
+      "occupant_distribution_sha256": "561839806dcdb8279ac4e42025bc5a82751f2588a2b2066fa84637918d8e4896",
+      "peak_electricity_W": 3172.6214451261762,
+      "peak_internal_gain_W": 3242.6214451261762,
+      "prev_heat_dev": true,
+      "richardson_seed": 1180736557,
+      "richardsonpy_version": "0.2.2",
+      "seed": 20250805,
+      "weather_forcing_sha256": "87c8f479871bbba9643acc6783e8d96e15f3e7330cc99bdbac343d24ee04ad9a",
+      "weather_member_id": "pvgis_sarah3_observed_2015_reference",
+      "weekday_mean_electricity_W": 395.24701758765127,
+      "weekend_mean_electricity_W": 410.32559368247917
+    }
+  },
+  "provenance": {
+    "behaviour_assumptions_sha256": "2ad0e9f7bbdfe12695c931891fd0e8132d060fd7bcbca23623db43d4c7393a5c",
+    "thermal_assumptions_sha256": "4b5b7791539478f9b2562d1b176e235ac7b641e1afdc40c3d5242661d9dbed3d"
+  },
+  "reference_weather": {
+    "distance_to_median_C_days": 65.59958333329996,
+    "facade_annual_kWh_m2": {
+      "east": 709.42022,
+      "north": 303.84355,
+      "south": 976.0541600000001,
+      "west": 689.6799500000001
+    },
+    "facade_source_sha256": {
+      "east": "b1a28b883b4633c7b55388b5b43f571e79efcd391bc0ce6bc07019b5e25d8065",
+      "north": "002ee4e68ba2ff1e9da7eb8f1e16c441bba47a8ad5ed36d81dc169204a2cb66d",
+      "south": "c667e440b35d715226d38302c0104b35b5d5764fed6125e5bcc80d08fabf1f41",
+      "west": "2767619730916a7bca7fe58275301af35dc43db33040cad9a975264954dbabb5"
+    },
+    "horizontal_annual_kWh_m2": 1142.14809,
+    "median_hdd_C_days": 2570.98,
+    "observed_dataset_sha256": "a9bebd7b44da6abd349c1a695fa5e47552439e1ee1772a4339efa0bfacec1ede",
+    "row_count": 8760,
+    "selected_hdd_C_days": 2636.5795833333,
+    "selected_year": 2015,
+    "selection_method": "complete PVGIS year nearest 2006-2023 median HDD; earlier year breaks exact ties",
+    "source_path": "climate/data/processed/validation/observed_be100_degree_day_comparison.csv",
+    "source_sha256": "58c7cdc9764d7409415827e41feb07fdbac55029ee97a661da896986e7479755",
+    "temperature_mean_C": 10.978037671232876,
+    "weather_member_id": "pvgis_sarah3_observed_2015_reference"
+  },
+  "schema_version": 1,
+  "verification_status": "PASS"
+}

@@ -91,7 +91,7 @@
     },
     "config": {
       "path": "config.yaml",
-      "sha256": "34042d26f6da701c720f5fd0787b06b6b6bdfb2d44f713856e2d129eca4c79b1"
+      "sha256": "6a70172ffffb4e1c2fa7658c07bb0dc5d2f489c534064fbf1a8d9c99568781f0"
     },
     "ensemble_manifest_csv": {
       "path": "data/processed/ensemble_2050/ensemble_2050_manifest.csv",

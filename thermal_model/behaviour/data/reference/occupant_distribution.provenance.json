@@ -1,0 +1,41 @@
+{
+  "dataset": "Eurostat Census 2021: Dwellings by type of building, number of occupants and NUTS 3 region",
+  "dataset_code": "cens_21dwbno_r3",
+  "doi": "10.2908/CENS_21DWBNO_R3",
+  "source_institution": "Eurostat; Belgian observations supplied through the harmonised Census 2021 programme",
+  "source_url": "https://ec.europa.eu/eurostat/api/dissemination/statistics/1.0/data/cens_21dwbno_r3?geo=BE&lang=en",
+  "source_updated": "2025-05-21T23:00:00+0200",
+  "reference_year": 2021,
+  "retrieved_on": "2026-08-04",
+  "geography": "Belgium",
+  "unit": "occupied dwellings",
+  "transformations": [
+    "SFH equals one-dwelling residential buildings (RES1).",
+    "MFH equals two-dwelling plus three-or-more-dwelling residential buildings (RES2 + RES_GE3).",
+    "Exact 1, 2, 3, 4 and 5-person dwelling counts are retained.",
+    "The GE6 count is added to the five-person count because RichardsonPy supports at most five occupants; the resulting simulation category is labelled five-or-more.",
+    "Probabilities are dwelling counts divided by the corresponding SFH or MFH total."
+  ],
+  "source_counts": {
+    "SFH": {
+      "1": 808614,
+      "2": 1134629,
+      "3": 539062,
+      "4": 516969,
+      "5": 185073,
+      "GE6": 85311,
+      "total": 3269658
+    },
+    "MFH": {
+      "1": 856086,
+      "2": 443587,
+      "3": 158925,
+      "4": 99999,
+      "5": 45796,
+      "GE6": 30597,
+      "total": 1634990
+    }
+  },
+  "license": "Eurostat reuse policy; source dataset available through the official dissemination API",
+  "limitation": "Building type is conditioned at the SFH/MFH level. Detached, semi-detached and terraced houses share the RES1 distribution; enclosed and exposed apartments share the combined RES2+RES_GE3 distribution."
+}

@@ -31,6 +31,8 @@ const OUTPUT_PATHS = {
   scenarios: path.join(PROJECT_ROOT, "data/scenarios/renovation/archetype_matrix_2050_renovation_scenarios.csv"),
   allocation: path.join(PROJECT_ROOT, "data/scenarios/renovation/renovation_priority_allocation_2050.csv"),
   policyContext: path.join(PROJECT_ROOT, "data/scenarios/renovation/renovation_scenario_policy_context_2050.csv"),
+  nationalSummary: path.join(PROJECT_ROOT, "data/scenarios/renovation/renovation_projection_national_summary_2050.csv"),
+  trajectory: path.join(PROJECT_ROOT, "data/scenarios/renovation/renovation_state_trajectory_2025_2050.csv"),
 };
 
 const STATE_COLUMNS = [
@@ -93,6 +95,37 @@ const CROSSCHECK_COLUMNS = [
   "target_label_2050", "target_energy_score_2050_kWh_m2_year",
   "ARR_evidence_classification", "policy_status", "policy_source", "current_policy_context_url",
   "current_policy_context_locator", "allocation_status", "event_counting_note",
+];
+
+const NATIONAL_SUMMARY_COLUMNS = [
+  "projection", "base_year", "target_year", "ARR", "ARR_percent_per_year",
+  "shallow_share", "medium_share", "advanced_share",
+  "national_modelled_stock_dwellings",
+  "annual_total_renovation_activity_dwellings", "annual_shallow_activity_dwellings",
+  "annual_medium_renovations_dwellings", "annual_advanced_renovations_dwellings",
+  "nominal_renovations_to_2050_dwellings", "nominal_shallow_activity_to_2050_dwellings",
+  "nominal_medium_renovations_to_2050_dwellings", "nominal_advanced_renovations_to_2050_dwellings",
+  "applied_medium_renovations_to_2050_dwellings", "applied_advanced_renovations_to_2050_dwellings",
+  "applied_physical_renovations_to_2050_dwellings", "unused_medium_quota_to_2050_dwellings",
+  "unused_advanced_quota_to_2050_dwellings",
+  "existing_to_standard_transition_events_to_2050", "existing_to_advanced_transition_events_to_2050",
+  "standard_to_advanced_transition_events_to_2050", "physical_transition_events_to_2050",
+  "minimum_repeat_transition_events_to_2050", "maximum_unique_dwellings_with_physical_transition",
+  "existing_share_2025", "standard_B_proxy_share_2025", "advanced_A_proxy_share_2025",
+  "existing_share_2050", "standard_B_proxy_share_2050", "advanced_A_proxy_share_2050",
+  "shallow_TABULA_representation", "shallow_physical_effect",
+  "medium_TABULA_representation", "medium_physical_effect",
+  "advanced_TABULA_representation", "advanced_physical_effect",
+  "projection_scope", "regional_allocation_method", "ARR_evidence_classification",
+  "ARR_source_url", "ARR_source_locator", "ARR_caveat", "event_counting_note",
+];
+
+const TRAJECTORY_COLUMNS = [
+  "projection", "year", "region", "regional_modelled_stock_dwellings",
+  "existing_dwellings", "standard_B_proxy_dwellings", "advanced_A_proxy_dwellings",
+  "existing_share", "standard_B_proxy_share", "advanced_A_proxy_share",
+  "improved_envelope_dwellings", "improved_envelope_share",
+  "improved_envelope_definition",
 ];
 
 const REQUIRED_COLUMNS = {
@@ -258,7 +291,7 @@ function validateInputs(tables) {
   const policyRows = tables.policy.rows;
   assert(stateRows.length === 225, `states must contain 225 rows; found ${stateRows.length}`);
   assert(allocationRows.length === 150, `allocation must contain 150 rows; found ${allocationRows.length}`);
-  assert(arrRows.length === 2, `ARR input must contain 2 rows; found ${arrRows.length}`);
+  assert(arrRows.length === 1, `ARR input must contain one canonical projection row; found ${arrRows.length}`);
   assert(policyRows.length === 3, `policy input must contain 3 rows; found ${policyRows.length}`);
   requireUnique(stateRows, ["region", "archetype_id", "state_id"], "states");
   requireUnique(allocationRows, ["region", "archetype_id", "state_id"], "allocation");
@@ -268,8 +301,8 @@ function validateInputs(tables) {
   const regions = [...new Set(stateRows.map((row) => row.region))];
   const scenarios = arrRows.map((row) => row.scenario);
   assert(regions.length === 3, `states must contain three regions; found ${regions.length}`);
-  assert(new Set(scenarios).size === 2, "ARR scenarios must be unique");
-  assert(scenarios.includes("central") && scenarios.includes("high"), "ARR scenarios must be central and high");
+  assert(new Set(scenarios).size === 1, "ARR projection identifier must be unique");
+  assert(scenarios[0] === "central", `canonical projection identifier must be central; found ${scenarios[0]}`);
   const policyByRegion = new Map(policyRows.map((row) => [row.region, row]));
   assert(regions.every((region) => policyByRegion.has(region)), "policy regions differ from state regions");
 
@@ -364,6 +397,32 @@ function simulateScenario(arrRow, region, regionStates, regionAllocation, region
   const counts = new Map(
     regionStates.map((row) => [rowStateKey(row), Number(row.regional_state_dwellings_2025)]),
   );
+  const trajectoryRows = [];
+  const captureTrajectory = (year) => {
+    const stateDwellings = Object.fromEntries(STATES.map((state) => [
+      state,
+      regionStates
+        .filter((row) => row.state_id === state)
+        .reduce((sum, row) => sum + (counts.get(rowStateKey(row)) ?? 0), 0),
+    ]));
+    const improvedEnvelopeDwellings = stateDwellings[STANDARD] + stateDwellings[ADVANCED];
+    trajectoryRows.push({
+      projection: arrRow.scenario,
+      year,
+      region,
+      regional_modelled_stock_dwellings: regionalStock,
+      existing_dwellings: stateDwellings[EXISTING],
+      standard_B_proxy_dwellings: stateDwellings[STANDARD],
+      advanced_A_proxy_dwellings: stateDwellings[ADVANCED],
+      existing_share: stateDwellings[EXISTING] / regionalStock,
+      standard_B_proxy_share: stateDwellings[STANDARD] / regionalStock,
+      advanced_A_proxy_share: stateDwellings[ADVANCED] / regionalStock,
+      improved_envelope_dwellings: improvedEnvelopeDwellings,
+      improved_envelope_share: improvedEnvelopeDwellings / regionalStock,
+      improved_envelope_definition: "TABULA_standard_B_proxy plus TABULA_advanced_A_proxy",
+    });
+  };
+  captureTrajectory(BASE_YEAR);
   const outflowToStandard = new Map();
   const outflowToAdvanced = new Map();
   const inflowFromMedium = new Map();
@@ -430,6 +489,7 @@ function simulateScenario(arrRow, region, regionStates, regionAllocation, region
     const yearTotal = [...counts.values()].reduce((sum, value) => sum + value, 0);
     assert(Math.abs(yearTotal - regionalStock) <= DWELLING_TOLERANCE, `${region}/${arrRow.scenario}/${year} stock identity failed`);
     assert([...counts.values()].every((value) => value >= -DWELLING_TOLERANCE), `${region}/${arrRow.scenario}/${year} has negative stock`);
+    captureTrajectory(year);
   }
 
   const allocationRows = [];
@@ -483,6 +543,7 @@ function simulateScenario(arrRow, region, regionStates, regionAllocation, region
     appliedRenovationsTo2050,
     trackedShallowActivityTo2050: nominalRenovationsTo2050.shallow,
     allocationRows,
+    trajectoryRows,
   };
 }
 
@@ -491,6 +552,7 @@ function buildOutputs(tables, context) {
   const scenarioRows = [];
   const allocationOutputRows = [];
   const crosscheckRows = [];
+  const trajectoryRows = [];
 
   for (const arrRow of tables.arr.rows) {
     for (const region of context.regions) {
@@ -499,6 +561,7 @@ function buildOutputs(tables, context) {
       const regionalStock = context.regionalStock.get(region);
       const simulation = simulateScenario(arrRow, region, regionStates, regionAllocation, regionalStock);
       allocationOutputRows.push(...simulation.allocationRows);
+      trajectoryRows.push(...simulation.trajectoryRows);
       const policy = context.policyByRegion.get(region);
       const ARR = Number(arrRow.ARR);
       const annualTotal = ARR * regionalStock;
@@ -657,22 +720,91 @@ function buildOutputs(tables, context) {
         current_policy_context_url: policy.current_policy_context_url,
         current_policy_context_locator: policy.current_policy_context_locator,
         allocation_status: unusedMedium + unusedAdvanced > DWELLING_TOLERANCE ? "eligible_stock_limited" : "depth_quotas_allocated",
-        event_counting_note: "Physical totals count state-transition events. A dwelling can contribute a medium event and a later advanced event. The reported repeat count is a guaranteed lower bound because cohort identity inside the aggregated standard state is unavailable.",
+        event_counting_note: "Physical totals count state-transition events. By archetype, Standard-to-Advanced events exceeding the initial Standard stock form a guaranteed lower bound on repeated Medium-then-Advanced renovations; zero means the aggregate flows do not require a repeat.",
       });
     }
   }
-  return { scenarioRows, allocationOutputRows, crosscheckRows };
+  const nationalSummaryRows = tables.arr.rows.map((arrRow) => {
+    const regionalRows = crosscheckRows.filter((row) => row.scenario === arrRow.scenario);
+    const projectionStates = scenarioRows.filter((row) => row.scenario === arrRow.scenario);
+    const nationalStock = regionalRows.reduce(
+      (sum, row) => sum + Number(row.regional_modelled_stock_dwellings),
+      0,
+    );
+    const sumField = (field) => regionalRows.reduce((sum, row) => sum + Number(row[field]), 0);
+    const stateShare = (stateId, field) => projectionStates
+      .filter((row) => row.state_id === stateId)
+      .reduce((sum, row) => sum + Number(row[field]), 0) / nationalStock;
+    return {
+      projection: arrRow.scenario,
+      base_year: BASE_YEAR,
+      target_year: TARGET_YEAR,
+      ARR: Number(arrRow.ARR),
+      ARR_percent_per_year: Number(arrRow.ARR_percent_per_year),
+      shallow_share: Number(arrRow.shallow_share),
+      medium_share: Number(arrRow.medium_share),
+      advanced_share: Number(arrRow.advanced_share),
+      national_modelled_stock_dwellings: nationalStock,
+      annual_total_renovation_activity_dwellings: sumField("annual_total_renovation_activity_dwellings"),
+      annual_shallow_activity_dwellings: sumField("annual_shallow_activity_dwellings"),
+      annual_medium_renovations_dwellings: sumField("annual_medium_renovations_dwellings"),
+      annual_advanced_renovations_dwellings: sumField("annual_advanced_renovations_dwellings"),
+      nominal_renovations_to_2050_dwellings: sumField("nominal_renovations_to_2050_dwellings"),
+      nominal_shallow_activity_to_2050_dwellings: sumField("nominal_shallow_activity_to_2050_dwellings"),
+      nominal_medium_renovations_to_2050_dwellings: sumField("nominal_medium_renovations_to_2050_dwellings"),
+      nominal_advanced_renovations_to_2050_dwellings: sumField("nominal_advanced_renovations_to_2050_dwellings"),
+      applied_medium_renovations_to_2050_dwellings: sumField("applied_medium_renovations_to_2050_dwellings"),
+      applied_advanced_renovations_to_2050_dwellings: sumField("applied_advanced_renovations_to_2050_dwellings"),
+      applied_physical_renovations_to_2050_dwellings: sumField("applied_physical_renovations_to_2050_dwellings"),
+      unused_medium_quota_to_2050_dwellings: sumField("unused_medium_quota_to_2050_dwellings"),
+      unused_advanced_quota_to_2050_dwellings: sumField("unused_advanced_quota_to_2050_dwellings"),
+      existing_to_standard_transition_events_to_2050: sumField("existing_to_standard_transition_events_to_2050"),
+      existing_to_advanced_transition_events_to_2050: sumField("existing_to_advanced_transition_events_to_2050"),
+      standard_to_advanced_transition_events_to_2050: sumField("standard_to_advanced_transition_events_to_2050"),
+      physical_transition_events_to_2050: sumField("physical_transition_events_to_2050"),
+      minimum_repeat_transition_events_to_2050: sumField("minimum_repeat_transition_events_to_2050"),
+      maximum_unique_dwellings_with_physical_transition: sumField("maximum_unique_dwellings_with_physical_transition"),
+      existing_share_2025: stateShare(EXISTING, "initial_state_dwellings_2025"),
+      standard_B_proxy_share_2025: stateShare(STANDARD, "initial_state_dwellings_2025"),
+      advanced_A_proxy_share_2025: stateShare(ADVANCED, "initial_state_dwellings_2025"),
+      existing_share_2050: stateShare(EXISTING, "state_dwellings_2050"),
+      standard_B_proxy_share_2050: stateShare(STANDARD, "state_dwellings_2050"),
+      advanced_A_proxy_share_2050: stateShare(ADVANCED, "state_dwellings_2050"),
+      shallow_TABULA_representation: "TABULA_existing_as_is",
+      shallow_physical_effect: "No envelope-state change",
+      medium_TABULA_representation: "TABULA_standard_B_proxy",
+      medium_physical_effect: "Pre-2006 TABULA_existing to TABULA_standard_B_proxy",
+      advanced_TABULA_representation: "TABULA_advanced_A_proxy_low_energy",
+      advanced_physical_effect: "TABULA_existing or TABULA_standard_B_proxy to TABULA_advanced_A_proxy",
+      projection_scope: "Renovation-state projection of the fixed 2025 Belgian R1-R4 dwelling stock",
+      regional_allocation_method: "National ARR and depth shares disaggregated in proportion to regional 2025 R1-R4 stock before within-region z ranking",
+      ARR_evidence_classification: arrRow.evidence_classification,
+      ARR_source_url: arrRow.source_url,
+      ARR_source_locator: arrRow.source_locator,
+      ARR_caveat: arrRow.caveat,
+      event_counting_note: "Physical totals count state-transition events. The repeated-transition field sums, by archetype, Standard-to-Advanced events exceeding the initial Standard stock and is therefore a guaranteed lower bound.",
+    };
+  });
+  return { scenarioRows, allocationOutputRows, crosscheckRows, nationalSummaryRows, trajectoryRows };
 }
 
 
 function validateOutputs(outputs, context) {
-  const { scenarioRows, allocationOutputRows, crosscheckRows } = outputs;
-  assert(scenarioRows.length === 450, `scenario output must contain 450 rows; found ${scenarioRows.length}`);
-  assert(allocationOutputRows.length === 420, `allocation output must contain 420 rows; found ${allocationOutputRows.length}`);
-  assert(crosscheckRows.length === 6, `policy-context output must contain 6 rows; found ${crosscheckRows.length}`);
+  const {
+    scenarioRows, allocationOutputRows, crosscheckRows, nationalSummaryRows,
+    trajectoryRows,
+  } = outputs;
+  const projectionCount = context.scenarios.length;
+  assert(scenarioRows.length === projectionCount * 225, `projection output must contain ${projectionCount * 225} rows; found ${scenarioRows.length}`);
+  assert(allocationOutputRows.length === projectionCount * 210, `allocation output must contain ${projectionCount * 210} rows; found ${allocationOutputRows.length}`);
+  assert(crosscheckRows.length === projectionCount * 3, `policy-context output must contain ${projectionCount * 3} rows; found ${crosscheckRows.length}`);
+  assert(nationalSummaryRows.length === projectionCount, `national summary must contain ${projectionCount} row; found ${nationalSummaryRows.length}`);
+  assert(trajectoryRows.length === projectionCount * context.regions.length * (YEARS_ELAPSED + 1), `trajectory output must contain ${projectionCount * context.regions.length * (YEARS_ELAPSED + 1)} rows; found ${trajectoryRows.length}`);
   requireUnique(scenarioRows, ["scenario", "region", "archetype_id", "state_id"], "scenario output");
   requireUnique(allocationOutputRows, ["scenario", "region", "renovation_depth", "archetype_id", "source_state_id"], "allocation output");
   requireUnique(crosscheckRows, ["scenario", "region"], "cross-check output");
+  requireUnique(nationalSummaryRows, ["projection"], "national summary");
+  requireUnique(trajectoryRows, ["projection", "region", "year"], "annual state trajectory");
 
   for (const scenario of context.scenarios) {
     for (const region of context.regions) {
@@ -694,7 +826,28 @@ function validateOutputs(outputs, context) {
       assert(Number(check.applied_advanced_renovations_to_2050_dwellings) <= Number(check.nominal_advanced_renovations_to_2050_dwellings) + DWELLING_TOLERANCE, `${region}/${scenario} advanced quota exceeded`);
       assert(nearlyEqual(Number(check.physical_transition_events_to_2050), Number(check.applied_physical_renovations_to_2050_dwellings), DWELLING_TOLERANCE), `${region}/${scenario} transition-event identity failed`);
       assert(Number(check.minimum_repeat_transition_events_to_2050) <= Number(check.physical_transition_events_to_2050) + DWELLING_TOLERANCE, `${region}/${scenario} repeat-event lower bound is invalid`);
+      const trajectory = trajectoryRows
+        .filter((row) => row.projection === scenario && row.region === region)
+        .sort((left, right) => Number(left.year) - Number(right.year));
+      assert(trajectory.length === YEARS_ELAPSED + 1, `${region}/${scenario} trajectory must contain ${YEARS_ELAPSED + 1} annual rows`);
+      assert(trajectory[0].year === BASE_YEAR && trajectory.at(-1).year === TARGET_YEAR, `${region}/${scenario} trajectory endpoints are invalid`);
+      for (const row of trajectory) {
+        const stateTotal = Number(row.existing_dwellings) + Number(row.standard_B_proxy_dwellings) + Number(row.advanced_A_proxy_dwellings);
+        const shareTotal = Number(row.existing_share) + Number(row.standard_B_proxy_share) + Number(row.advanced_A_proxy_share);
+        assert(nearlyEqual(stateTotal, stock, DWELLING_TOLERANCE), `${region}/${scenario}/${row.year} trajectory stock identity failed`);
+        assert(nearlyEqual(shareTotal, 1), `${region}/${scenario}/${row.year} trajectory shares do not sum to one`);
+        assert(nearlyEqual(Number(row.improved_envelope_share), Number(row.standard_B_proxy_share) + Number(row.advanced_A_proxy_share)), `${region}/${scenario}/${row.year} improved-envelope identity failed`);
+      }
+      assert(trajectory.every((row, index) => index === 0 || Number(row.improved_envelope_share) >= Number(trajectory[index - 1].improved_envelope_share) - SHARE_TOLERANCE), `${region}/${scenario} improved-envelope trajectory is not non-decreasing`);
+      assert(nearlyEqual(Number(trajectory[0].existing_share), Number(check.existing_share_2025)), `${region}/${scenario} 2025 trajectory does not match calibration`);
+      assert(nearlyEqual(Number(trajectory.at(-1).existing_share), Number(check.existing_share_2050)), `${region}/${scenario} 2050 trajectory does not match final matrix`);
     }
+    const summary = nationalSummaryRows.find((row) => row.projection === scenario);
+    const nationalStock = [...context.regionalStock.values()].reduce((sum, value) => sum + value, 0);
+    assert(nearlyEqual(Number(summary.national_modelled_stock_dwellings), nationalStock, DWELLING_TOLERANCE), `${scenario} national stock identity failed`);
+    assert(nearlyEqual(Number(summary.annual_total_renovation_activity_dwellings), Number(summary.ARR) * nationalStock, DWELLING_TOLERANCE), `${scenario} national ARR identity failed`);
+    assert(nearlyEqual(Number(summary.existing_share_2025) + Number(summary.standard_B_proxy_share_2025) + Number(summary.advanced_A_proxy_share_2025), 1), `${scenario} national 2025 shares do not sum to one`);
+    assert(nearlyEqual(Number(summary.existing_share_2050) + Number(summary.standard_B_proxy_share_2050) + Number(summary.advanced_A_proxy_share_2050), 1), `${scenario} national 2050 shares do not sum to one`);
   }
 }
 
@@ -743,11 +896,15 @@ async function main() {
   await writeAtomic(OUTPUT_PATHS.scenarios, STATE_COLUMNS, outputs.scenarioRows);
   await writeAtomic(OUTPUT_PATHS.allocation, ALLOCATION_COLUMNS, outputs.allocationOutputRows);
   await writeAtomic(OUTPUT_PATHS.policyContext, CROSSCHECK_COLUMNS, outputs.crosscheckRows);
+  await writeAtomic(OUTPUT_PATHS.nationalSummary, NATIONAL_SUMMARY_COLUMNS, outputs.nationalSummaryRows);
+  await writeAtomic(OUTPUT_PATHS.trajectory, TRAJECTORY_COLUMNS, outputs.trajectoryRows);
 
-  console.log("Renovation scenario validation passed");
-  console.log(`- scenario-state rows: ${outputs.scenarioRows.length}`);
+  console.log("National renovation-projection validation passed");
+  console.log(`- projection-state rows: ${outputs.scenarioRows.length}`);
   console.log(`- depth-allocation rows: ${outputs.allocationOutputRows.length}`);
-  console.log(`- scenario-policy context rows: ${outputs.crosscheckRows.length}`);
+  console.log(`- regional policy-context rows: ${outputs.crosscheckRows.length}`);
+  console.log(`- national summary rows: ${outputs.nationalSummaryRows.length}`);
+  console.log(`- annual state-trajectory rows: ${outputs.trajectoryRows.length}`);
   console.log("- ARR uses the fixed 2025 regional R1-R4 stock over 25 annual steps");
   console.log("- advanced transitions precede medium transitions within each year");
   for (const row of outputs.crosscheckRows) {
