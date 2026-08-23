@@ -34,7 +34,7 @@ the downstream thermal-demand model.
 | [European Commission renovation study](https://energy.ec.europa.eu/document/download/2b58c118-89c1-46b5-a450-0f2d5d215e2c_en?filename=1.final_report.pdf) | Historical literature context | Table 2 on PDF page 16 / printed page 15 reports a 0.2% Belgian residential deep-renovation rate for 2012–2016, based on floor area and primary-energy savings above 60%. The observation does not parameterise the 2050 projection. |
 | [Scenarios for a Climate Neutral Belgium by 2050](https://climat.be/doc/climate-neutral-belgium-by-2050-report.pdf) | National ARR and renovation-depth calibration | Appendix 1, Table 1 on PDF and printed page 49 reports 2.8% annual residential renovation by 2025 and a 40% shallow, 50% medium and 10% deep mix in CORE-95, Behaviour and Technology. |
 | [European Commission NBRP register](https://energy.ec.europa.eu/topics/energy-efficiency/energy-performance-buildings/national-building-renovation-plans_en) | Current Walloon policy context | The draft Walloon NBRP was submitted on 23 December 2025, Commission feedback was published on 14 July 2026, and the final plan is due by 31 December 2026. |
-| [Meier, “Infiltration: Just ACH50 Divided by 20?”](https://www.aivc.org/sites/default/files/airbase_7556.pdf) | Conversion from blower-door airflow to annual-average infiltration | The paper explains the Kronvall–Persily `ACH50/20` rule and its climate, height, shielding and leakage-distribution limitations. |
+| [Meier, “Infiltration: Just ACH50 Divided by 20?”](https://www.aivc.org/sites/default/files/airbase_7556.pdf) | Conversion from blower-door airflow to annual-average infiltration | The paper reviews the rule-of-20 and its climate, height, shielding and leakage-distribution limitations; the rule's original attribution is uncertain. |
 
 Access dates and precise page locators are recorded in the assumption and
 verification CSV files. Immutable downloaded documents are identified by their
@@ -192,15 +192,13 @@ rho_air = 1.2 kg/m³
 cp_air = 1005 J/(kg K)
 ```
 
-The factor 20 converts the blower-door result to an annual-average natural
-infiltration proxy under normal pressure conditions. Meier’s review traces the
-rule to the Kronvall–Persily comparison of 50 Pa blower-door tests with
-tracer-gas measurements. The paper reports possible adjustment factors ranging
-from roughly 6 to 40 in extreme combinations of climate, height, shielding and
-leakage. The fixed factor supplies a simple and consistent national screening
-conversion. Weather-driven airflow, building height, wind exposure, leakage
-distribution and occupant window opening remain uncertainty dimensions for the
-thermal simulation.
+The factor 20 is a rule-of-thumb conversion from blower-door leakage to an
+annual-average natural-infiltration proxy under normal pressure conditions.
+Published reviews caution that the appropriate divisor depends on climate,
+height, shielding and leakage distribution, so the fixed factor supplies only a
+simple and consistent national screening conversion. Weather-driven airflow,
+building height, wind exposure, leakage distribution and occupant window
+opening remain uncertainty dimensions for the thermal simulation.
 
 ## Specific heat-loss priority
 
@@ -220,9 +218,10 @@ z = (H_tr + H_inf) / A_floor           [W/(m² K)]
 `z`, written as `z_a` when the archetype index is emphasised, is a simplified
 archetype-level ranking metric. A larger value represents more transmission and
 screening infiltration loss per square metre for the same indoor–outdoor
-temperature difference. The later thermal-demand model adds thermal bridges,
-ground and unheated-space boundary factors, climate, solar and internal gains,
-controls, thermal mass and detailed ventilation.
+temperature difference. The later thermal-demand model adds ground and
+unheated-space boundary factors, climate, solar and internal gains, controls,
+thermal mass and detailed ventilation; thermal bridges remain omitted because
+the TABULA source provides no archetype-level junction data.
 
 Within each region, eligible current-state cells are sorted by descending `z`.
 TABULA type number resolves ties. Medium transitions rank `TABULA_existing`
@@ -407,7 +406,8 @@ reconstruction identities.
   uncertainty dimension in the 2025 calibration.
 - The fixed infiltration n-factor represents an annual-average screening value.
 - The heat-loss ranking is a simplified archetype-level metric; the thermal
-  model adds thermal bridges, boundary factors, climate, gains and controls.
+  model adds boundary factors, climate, gains and controls but continues to
+  omit thermal bridges.
 - Shallow activity has no separate TABULA physical state.
 - The 2.8% ARR and 40/50/10 depth mix are official pathway settings reported by
   2025 and are held constant through 2050 as a model calibration.

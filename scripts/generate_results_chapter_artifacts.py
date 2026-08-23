@@ -1,6 +1,6 @@
 """Generate figures and the cell-level appendix table for the Results chapter.
 
-The script reads only authenticated model outputs already present in the
+The script reads only verified model outputs already present in the
 repository.  It does not rerun the stock, climate, behavioural, or thermal
 models.
 """
@@ -185,7 +185,7 @@ def plot_hourly_temperature() -> None:
         ax.set_ylim(-6, 36)
         ax.grid(axis="x", visible=False)
     fig.supylabel("Outdoor temperature ($^\circ$C)")
-    fig.supxlabel("Month (2050)")
+    fig.supxlabel("Month in the retained 2015 chronology")
     fig.legend(
         handles=[
             Line2D([0], [0], color="#a9a9a9", linewidth=1.1, label="Historical reference"),
@@ -263,7 +263,7 @@ def plot_hourly_solar_irradiance() -> None:
         ax.set_ylim(0, upper_limit)
         ax.grid(axis="x", visible=False)
     fig.supylabel("Global horizontal irradiance (W/m$^2$)")
-    fig.supxlabel("Month (2050)")
+    fig.supxlabel("Month in the retained 2015 chronology")
     fig.legend(
         handles=[
             Line2D([0], [0], color="#a9a9a9", linewidth=1.1, label="Historical reference"),
@@ -364,12 +364,12 @@ def plot_hourly_stock_demand() -> None:
         ax.set_xticklabels(MONTH_LABELS[::2])
         ax.grid(axis="x", visible=False)
     heating_axis.set_title("(a) Useful heating | RCP4.5", loc="left")
-    cooling_axis.set_title("(b) Potential sensible cooling | RCP4.5", loc="left")
+    cooling_axis.set_title("(b) Potential cooling | RCP4.5", loc="left")
     heating_axis.set_ylabel("National heating power (GW)", color="#a64f37")
     cooling_axis.set_ylabel("National cooling power (GW)", color="#216797")
     heating_axis.tick_params(axis="y", colors="#a64f37")
     cooling_axis.tick_params(axis="y", colors="#216797")
-    fig.supxlabel("Month (2050)")
+    fig.supxlabel("Month in the retained 2015 chronology")
     fig.subplots_adjust(hspace=0.32, top=0.95, bottom=0.13, left=0.11, right=0.98)
     save_figure(fig, "fig_results_hourly_stock_demand")
 
@@ -415,7 +415,7 @@ def plot_stock_summary() -> None:
             axes[0, 1],
             "coincident_peak_potential_cooling_MW",
             "sum_individual_peak_potential_cooling_MW",
-            "(b) Potential-cooling peaks",
+            "(b) Cooling peaks",
             "#2778b4",
             "#91bddc",
         ),
