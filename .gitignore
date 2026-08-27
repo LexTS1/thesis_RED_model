@@ -64,3 +64,7 @@ thermal_model/data/monte_carlo/convergence_panel_n160_extension/checkpoints/*
 thermal_model/data/monte_carlo/convergence_panel_n160_extension/partitions/*
 !thermal_model/data/monte_carlo/convergence_panel_n160_extension/partitions/weather_2050_rcp_2_6_pvgis_2006/
 !thermal_model/data/monte_carlo/convergence_panel_n160_extension/partitions/weather_2050_rcp_2_6_pvgis_2006/**
+
+# Keep the README hero image
+!assets/
+!assets/readme_hero_carpet.png
