@@ -96,10 +96,8 @@ These are conditional model results, not probabilistic forecasts. Within-RCP wea
 ├── BE_building_stock/    # Archetypes, regional weights and renovation states
 ├── climate/              # PVGIS observations and CORDEX-based climate morphing
 ├── thermal_model/        # 5R1C core, behaviour and Monte Carlo aggregation
-├── scripts/              # Figure, table and thesis-artifact generation
-├── figures/              # Generated figures
-├── tables/               # Generated LaTeX tables
-└── chapters/             # Thesis chapters
+├── scripts/              # Figure, table and thesis-artefact generation
+└── figures/              # Generated figures
 ```
 
 Detailed documentation is available for each modelling layer:
