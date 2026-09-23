@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="assets/readme_hero.png"
+  <img src="assets/readme_hero_carpet.png"
        alt="Weather and climate forcing entering a Belgian dwelling and emerging as an hourly thermal-demand profile"
        width="1200">
 </p>
